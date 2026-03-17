@@ -156,7 +156,7 @@ h1, h2, h3, h4, h5, h6, .font-primary {
 
 #header .logo img {
   margin-top: 5px;
-  max-height: 100px;
+  max-height: 70px;
   height: auto;
 }
 #header .login h1 {
@@ -399,7 +399,7 @@ body.mobile-nav-active .mobile {
 
 .hero .logo-img {
   margin-bottom: 5px;
-  max-height: 70px;
+  max-height: 100px;
   height: auto;
 }
 
