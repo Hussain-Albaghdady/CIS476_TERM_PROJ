@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>DriveShare</title>
+  <meta content="" name="descriptison">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon_io/android-chrome-512x512.png" rel="icon">
+  <link href="assets/img/favicon_io/android-chrome-512x512.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="assets/vendor/fonts/Montserrat-Alt1/webfonts/Montserrat-Alt1.css">
+
+
+  <!-- Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <!-- ======= Top Bar ======= -->
+  <section id="topbar" class="d-none d-lg-block">
+    <div class="container clearfix">
+      <div class="contact-info float-left">
+        <a href="mailto:contact@example.com"><i class="icofont-envelope"></i>contact.admin@DriveShare.com</a>
+        <a href="tel:586-489-9689"><i class="icofont-phone"></i> +1 248-420-6969</a>
+      </div>
+      <div class="social-links float-right">
+        <a href="#" class="facebook"><i class="icofont-facebook"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= Header ======= -->
+  <header id="header">
+    <div class="container">
+    <div class="logo float-left">
+          <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="logo" class="img-fluid"></a>
+    </div>
+    <div class="mobile">
+      <div class="login float-right">
+      <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link-2"><i class="icofont-login"></i>
+      | Login</a></h1>
+      </div>
+    </div>
+    <nav class="nav-menu float-right d-none d-lg-block">
+      <ul id="main-navbar-list">
+        <li class="active"><a href="#header">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#availability">Vehicles</a></li>
+        <li><a href="#location">Locations</a></li>
+        <li><a href="#team">Owner</a></li>
+        <li><a href="#contact">Contact Us</a></li>
+        <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
+        <li id="login-link-li">
+          <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
+            | Login</a>
+        </li>
+      </ul>
+    </nav><!-- .nav-menu -->
+    </div>
+  </header><!-- End Header -->
+
+  <main id="main">
+
+  <!-- ======= Hero Section ======= -->
+    <section id="hero" class="hero section">
+      <div class="hero-bg">
+        <img src="assets/img/slide/hero-bg.png" alt="background">
+      </div>
+      <div class="container text-center">
+        <div class="d-flex flex-column justify-content-center align-items-center">
+          <h1 data-aos="fade-up">Welcome to <img src="assets/img/DriveShare_Full_Logo.png" class="img-fluid logo-img" id="page-image" alt="Logo" data-aos="zoom-out"></h1>
+          <p data-aos="fade-up" data-aos-delay="100">Rent a ride. Share the journey.<br></p>
+          <div class="d-flex" data-aos="fade-up" data-aos-delay="200">
+            <a href="register_form.html" id="login-link-3" class="hero-btn-get-started"><i class="icofont-login"></i> | Register</a>
+      </div>
+    </section>
+   
+    <!-- ======= About Us Section ======= -->
+    <section id="about" class="about">
+      <div class="container">
+        <div class="row">
+
+          <div class="col-lg-6">
+            <div class="image">
+              <img src="assets/img/about-2.jpg" class="img-fluid" />
+            </div>
+          </div>
+
+          <div class="col-lg-6 d-flex flex-column justify-content-center about-content">
+
+            <div class="section-title">
+              <h2>About Us</h2>
+              <p>We are online short-term vehicle rental site that connects car owners and renters through a seamless web and mobile platform, making short-term vehicle sharing simple, secure, and efficient.</p>
+            </div>
+
+            <div class="icon-box" data-aos="fade-up" data-aos-delay="100">
+              <div class="icon"><i class="bx bx-fingerprint"></i></div>
+              <h4 class="title">Our Misson</h4>
+              <p class="description">"At DriveShare, our mission is to simplify mobility by connecting car owners and renters through a secure, efficient, and user-friendly platform that makes vehicle sharing accessible, reliable, and convenient for everyone."</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </section><!-- End About Us Section -->
+    <!-- ======= Avaliablity Section ======= -->
+    <section id="availability" class="availability section-bg">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="section-title">
+          <h2>Vehicle Availability</h2>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <ul id="event-flters">
+              <li data-filter="*" class="filter-active">All</li>
+              <li data-filter=".filter-Available">Available</li>
+              <li data-filter=".filter-Booked">Booked</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+             <ul id="type-flters">
+              <li data-filter=".filter-Action">Action</li>
+              <li data-filter=".filter-Adventure">Adventure</li>
+              <li data-filter=".filter-Anime">Anime</li>
+              <li data-filter=".filter-Comedy">Comedy</li>
+              <li data-filter=".filter-Crime">Crime</li>
+              <li data-filter=".filter-Drama">Drama</li>
+              <li data-filter=".filter-Documentary">Documentary</li>
+              <li data-filter=".filter-Horror">Horror</li>
+              <li data-filter=".filter-Kids">Kids & Family</li>
+              <li data-filter=".filter-Romance">Romance</li>
+              <li data-filter=".filter-Sci-Fi">Sci-Fi</li>
+              <li data-filter=".filter-Sports">Sports</li>
+              <li data-filter=".filter-Thriller">Thriller</li>
+
+
+            </ul>
+          </div>
+        </div>
+        <div class="row event-container">
+          <!-- Dynamic Vehicle cards will be injected here by JS -->
+        </div>
+    </section><!-- End Avaliablity Section -->
+
+    <!-- ======= Location Section ======= -->
+    <section id="location" class="location">
+      <div class="container">
+
+        <div class="section-title">
+          <h2>Pick-Up Locations</h2>
+        </div>
+
+        <div class="row">
+
+          <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="our-location">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/dearborn.png">
+              </div>
+              <div class="location-content">
+                <h3 class="name">Dearborn</h3>
+                <h4 class="title"><a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 Evergreen Rd Dearborn, MI 48128</h4></a>
+              </div>
+              <ul class="maps">
+                <h4 class="name">M-S 7:00am-6:00am</h4>
+                <h4 class="name">248-420-6969</h4>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="our-location">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/warren.png">
+              </div>
+              <div class="location-content">
+                <h3 class="name">Warren</h3>
+                <h4 class="title"><a href="https://maps.app.goo.gl/mBwuM9z5oyZTHVGL7" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 12 Mile Rd Warren, MI 48092</h4></a>
+              </div>
+              <ul class="maps">
+                <h4 class="name">M-S 7:00am-6:00am</h4>
+                <h4 class="name">248-420-6969</h4>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="our-location">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/dearbornHeights.png">
+              </div>
+              <div class="location-content">
+                <h3 class="name">Dearborn Heights</h3>
+                <h4 class="title"><a href="https://maps.app.goo.gl/Q3JxBshHR9ufP1WW7" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 W Warren Ave. Dearborn Heights, MI 48127</h4></a>
+              </div>
+              <ul class="maps">
+                <h4 class="name">M-S 7:00am-6:00am</h4>
+                <h4 class="name">248-420-6969</h4>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="our-location">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/annArobor.png">
+              </div>
+              <div class="location-content">
+                <h3 class="name">Ann Arobor</h3>
+                <h4 class="title"><a href="https://maps.app.goo.gl/2Ddfk6iCPzg5qpxbA" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 State St. Ann Arbor, MI 48109</h4></a>
+              </div>
+              <ul class="maps">
+                <h4 class="name">M-S 7:00am-6:00am</h4>
+                <h4 class="name">248-420-6969</h4>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="our-location">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/grandRapids.png">
+              </div>
+              <div class="location-content">
+                <h3 class="name">Grand Rapids</h3>
+                <h4 class="title"><a href="https://maps.app.goo.gl/5yvBpkADUu7xUxX9A" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 Monroe Ave. NW Grand Rapids, MI 49503</h4></a>
+              </div>
+              <ul class="maps">
+                <h4 class="name">M-S 7:00am-6:00am</h4>
+                <h4 class="name">248-420-6969</h4>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="our-location">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/lansing.png">
+              </div>
+              <div class="location-content">
+                <h3 class="name">Lansing</h3>
+                <h4 class="title"><a href="https://maps.app.goo.gl/r2hV1ZisoCeUWPQ5A" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 S Capital Ave. Lansing, MI 48933</h4></a>
+              </div>
+              <ul class="maps">
+                <h4 class="name">M-S 7:00am-6:00am</h4>
+                <h4 class="name">248-420-6969</h4>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- End Location Section -->
+
+    <!-- ======= Our Team Section ======= -->
+    <section id="team" class="team">
+      <div class="container">
+
+        <div class="section-title">
+          <h2>Owner/Operator</h2>
+        </div>
+
+        <div class="row">
+
+          <div class="col-12 col-sm-6 col-md-5 col-lg-5 mx-auto">
+            <div class="our-team">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/team/team-1.jpg">
+              </div>
+              <div class="team-content">
+                <h3 class="name">Meaad Hassan</h3>
+                <h4 class="title">CEO/Founder</h4>
+              </div>
+              <ul class="social">
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-5 col-lg-5 mx-auto">
+            <div class="our-team">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/team/team-5.jpg">
+              </div>
+              <div class="team-content">
+                <h3 class="name">Hussain Albaghdady</h3>
+                <h4 class="title">President</h4>
+              </div>
+              <ul class="social">
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-5 col-lg-5 mx-auto">
+            <div class="our-team">
+              <div class="picture">
+                <img class="img-fluid" src="assets/img/team/team-5.jpg">
+              </div>
+              <div class="team-content">
+                <h3 class="name">Eman Swaydan</h3>
+                <h4 class="title">COO</h4>
+              </div>
+              <ul class="social">
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- End Our Team Section -->
+
+    <!-- ======= Contact Us Section ======= -->
+    <section id="contact" class="contact">
+      <div class="container">
+
+        <div class="section-title">
+          <h2>Contact Us</h2>
+        </div>
+
+        <div class="row">
+
+          <div class="col-lg-6 d-flex align-items-stretch" data-aos="fade-up">
+            <div class="info-box">
+              <a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+              <h3>Our Headquarter Address</h3>
+              <p>4901 Evergreen Rd Dearborn, MI 48128</p></a>
+            </div>
+          </div>
+
+          <div class="col-lg-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
+            <div class="info-box">
+              <a href="mailto:info@conference.com"><i class="bx bx-envelope"></i>
+              <h3>Email Us</h3>
+              <p>info@DriveShare.com</p></a>
+            </div>
+          </div>
+
+          <div class="col-lg-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
+            <div class="info-box ">
+              <a href="tel:248-420-6969"><i class="bx bx-phone-call"></i>
+              <h3>Call Us</h3>
+              <p>+1 248-420-6969</p></a>
+            </div>
+          </div>
+
+          <div class="col-lg-12" data-aos="fade-up" data-aos-delay="300">
+            <div id="form-message" class="alert" style="display: none;"></div>
+            <form action="http://localhost:3000/contact_us" method="post" class="js-email-form">
+              <div class="row">
+                <div class="col-lg-6 d-flex align-items-stretch">
+                  <input type="text" class="form-control" name="name" required placeholder="Your Name">
+                </div>
+                <div class="col-lg-6 d-flex align-items-stretch">
+                  <input type="email" class="form-control" name="email" required placeholder="Your Email">
+                </div>
+                <div class="col-lg-12">
+                  <input type="text" class="form-control" name="subject" required placeholder="Subject">
+                </div>
+                <div class="col-lg-12">
+                  <textarea name="message" class="form-control" rows="5" cols="40" required placeholder="Message"></textarea>
+                </div>
+              </div>
+              <div class="text-center"><input type="submit" name="submit" value="Send Message" class="form-btn"></div>
+
+            </form>
+            <script>
+              document.getElementById("contact-form").addEventListener("submit", async function (e) {
+                e.preventDefault(); // Prevent normal form submit
+
+                const form = e.target;
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                  const response = await fetch("http://localhost:3000/contact_us", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                  });
+
+                  const result = await response.json(); // Expect JSON response from backend
+
+                  const messageBox = document.getElementById("form-message");
+                  if (result.success) {
+                    messageBox.textContent = result.success;
+                    messageBox.className = "alert alert-success";
+                  } else {
+                    messageBox.textContent = result.error || "Unknown error occurred.";
+                    messageBox.className = "alert alert-danger";
+                  }
+
+                  messageBox.style.display = "block";
+                  form.reset();
+                } catch (err) {
+                  console.error("Form submission error:", err);
+                }
+              });
+            </script>
+          </div>
+
+        </div>
+
+      </div>
+    </section><!-- End Contact Us Section -->
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+    
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+            <div class="col-md-5 d-flex align-items-stretch" data-aos="fade-up">
+              <div class="info-box">
+                <a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                <h3>Our Headquarter Address</h3>
+                <p>4901 Evergreen Rd Dearborn, MI 48128</p></a>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
+              <div class="info-box">
+                <a href="mailto:info@conference.com"><i class="bx bx-envelope"></i>
+                <h3>Email Us</h3>
+                <p>info@DriveShare.com</p></a>
+              </div>
+            </div>
+            <div class="col-md-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
+              <div class="info-box ">
+                <a href="tel:248-420-6969"><i class="bx bx-phone-call"></i>
+                <h3>Call Us</h3>
+                <p>+1 248-420-6969</p></a>
+              </div>
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12 footer-links">            
+            <ul>
+              <li><a href="tos.html">Terms of Services </a></li>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="cookies_settings.html">Cookies Settings</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <div class="container">
+        <div class="copyright">
+          &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+           Designed by <a href="home.html#team">Meaad Hassan</a>
+        </div>
+      </div>
+
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="/assets/vendor/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+  <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="assets/vendor/venobox/venobox.min.js"></script>
+  <script src="assets/vendor/counterup/counterup.min.js"></script>
+  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

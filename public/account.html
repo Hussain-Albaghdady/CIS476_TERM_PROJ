@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>RentFlicks</title>
+  <meta content="" name="descriptison">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon_io/favicon-2.png" rel="icon">
+  <link href="assets/img/favicon_io/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
+  <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+ <header id="header">
+    <div class="container">
+
+      <div class="logo float-left">
+        <a href="home.html"><img src="assets/img/RentFlicks_Full_Logo_3.png" alt="" class="img-fluid"></a>
+      </div>
+      <div class="mobile">
+        <div class="login float-right">
+          <h1><a href="home.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
+              | Logout</a></h1>
+        </div>
+      </div>
+      <nav class="nav-menu float-right d-none d-lg-block">
+        <ul id="main-navbar-list">
+          <li><a href="home.html">Home</a></li>
+          <li><a href="home.html#about">About Us</a></li>
+          <li><a href="home.html#location">Locations</a></li>
+          <li><a href="Home.html#contact">Contact Us</a></li>
+          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+              | Logout</a>
+          </li>
+        </ul>
+      </nav><!-- .nav-menu -->
+
+    </div>
+  </header><!-- End Header -->
+  <div id="page-header" style="background-color: #f9fafb;">
+  <div class="container text-center" id="welcome">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h2 data-aos="fade-up">Welcome, <span>Customer</span></h2>
+      <img id="logo-img" src="assets/img/RentFlicks_Full_Logo_3.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
+      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>RentFlicks</span></h1>
+      <p data-aos="fade-up" data-aos-delay="100">Your Movie. Your Way. Right Away.<br></p>
+    </div>
+  </div>
+  <div class="user-container">
+    <div class="content">
+      <h3 data-aos="fade-up" data-aos-delay="100">
+        <span  class="label">Signed in as</span>
+        <span id="user-welcome-name" class="username">Customer</span>
+      </h3>
+    </div>
+  </div>
+  </div>
+  <main id="main" style="margin-top: 20px;" class="hidden-page">
+
+
+    
+    <section id="account" class="container" style="max-width: 1200px;">
+
+      <button class="collapsible">All Orders</button>
+      <div class="content">
+        <section class="account-section">
+          <h3>Your Latest Orders</h3>
+          <div class="table-wrapper">
+            <table class="responsive-table">
+                <thead>
+                  <tr>
+                    <th>OrderID</th>
+                    <th>Start Date</th>
+                    <th>Return Date</th>
+                    <th>Status</th>
+                    <th>Movies</th>
+                    <th>Pick-Up Location</th>
+                    <th>Download <i class="icofont-download"></i></th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-body">
+                </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      
+      <button class="collapsible">Address Saved</button>
+      <div class="content">
+        <section class="address-section">
+          <h3>Address</h3>
+            <div class="row" id="address-card-container">
+            </div>
+        </section>
+      </div>
+      
+      <button class="collapsible" >Payment Saved</button>
+      <div class="content">
+        <section class="payment-section">
+          <h3>Payments</h3>
+            <table class="responsive-table">
+                <thead>
+                  <tr>
+                    <th>Last 4 Digits</th>
+                    <th>Name</th>
+                    <th>Expiration</th>
+                    <th>Status</th>
+                    <th>Card Type</th>
+                    <th>Payment Nickname</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="payment-body">
+                </tbody>
+            </table>
+        </section>
+      </div>
+
+    </section>
+    <section id="return" class="container" style="max-width: 800px;">
+      <div class="section-title" id="section-subtext">
+        <h2 style="font-weight: bold;">Return Your Rented Movie</h2>
+        <p>Please select the item you wish to return from your active rentals</p>
+      </div>
+      <div id="return-success" class="alert alert-success" style="display:none;"></div>
+      <div id="return-error" class="alert alert-danger" style="display:none;"></div>
+      <form id="return-form">
+        <div class="form-group">
+          <label id="form-header" for="movieSelect">Your Rented Movie</label>
+          <select class="form-control" id="movieSelect" name="movieId" required>
+            <option value="">Loading...</option>
+          </select>
+          <small id="movieHelp" class="form-text text-muted">Movie IDs are shown for reference.</small>
+        </div>
+        <button id="submit" type="submit" class="btn btn-primary">Return Movie</button>
+      </form>
+      <div id="no-movie-message" class="alert alert-info" style="display:none; text-align: center;">You have no movies avaliable to return.</div>
+    </section>
+    
+    <div id="delete-address-modal">
+      <div class="modal-content">
+        <h3>Delete Address</h3>
+        <p>Are you sure you want to delete this address? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button id="confirm-delete-btn">Delete</button>
+          <button id="cancel-delete-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Delete Confirmation Modal -->
+    <div id="delete-payment-modal">
+      <div class="modal-content">
+        <h3>Delete Payment Method</h3>
+        <p>Are you sure you want to delete this payment method? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button id="confirm-delete-payment-btn">Delete</button>
+          <button id="cancel-delete-payment-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer id="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 footer-links">            
+            <ul>
+              <li><a href="tos.html">Terms of Services </a></li>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="cookies_settings.html">Cookies Settings</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>RentFlicks Corporation</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        Designed by <a href="Home.html/#team">Meaad Hassan</a>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+  <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="assets/vendor/venobox/venobox.min.js"></script>
+  <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+  <script src="assets/vendor/counterup/counterup.min.js"></script>
+  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        } 
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownLink = document.getElementById('account-dropdown');
+      if (dropdownLink && window.location.pathname.endsWith('account.html')) {
+        dropdownLink.addEventListener('click', function(e) {
+          e.preventDefault();
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/userdetail')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.name) {
+            document.getElementById('user-welcome-name').textContent = data.name;
+          }
+        })
+        .catch(() => {
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+
+
+          if (data.user_type !== "customer") {
+            fetch("/logout", { credentials: "include" })
+              .then(() => window.location.href = "/loginform.html");
+          } else {
+            document.getElementById("main").classList.remove("hidden-page");
+          } 
+        })
+        .catch(err => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const logoImg = document.getElementById("logo-img");
+      const fallbackText = document.getElementById("logo-fallback");
+
+      logoImg.addEventListener("error", function () {
+        logoImg.style.display = "none";
+        fallbackText.style.display = "block";
+      });
+
+      logoImg.addEventListener("load", function () {
+        fallbackText.style.display = "none";
+      });
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/myreservations')
+      .then(res => res.json())
+      .then(reservations => {
+        const tbody = document.getElementById('orders-body');
+        tbody.innerHTML = '';
+        reservations.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="OrderID">${r.order_id}</td>
+            <td data-label="Start Date">${new Date(r.order_date).toLocaleDateString()}</td>
+            <td data-label="Return Date">${new Date(r.end_date).toLocaleDateString()}</td>
+            <td data-label="Status">${r.status}</td>
+            <td data-label="Items">${r.items.join(', ')}</td>
+            <td data-label="Pick-Up Location">${r.location}</td>
+            <td data-label="Download">
+              ${r.status === "Complete" || !r.location || r.location !== "Digital"
+                ? `<i class="icofont-download" style="color:gray;opacity:0.4;cursor:not-allowed;"></i>`
+                : `<a href="/download/${r.order_id}">
+                    <i class="icofont-download" style="color:red;font-size:20px;"></i>
+                  </a>`
+              }
+            </td>
+            <td data-label="Total">${"$",r.total_cost}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+     })
+        .catch(err => {
+          console.error('Error loading reservations:', err);
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/mypayments')
+      .then(res => res.json())
+      .then(mypayment => {
+        const tbody = document.getElementById('payment-body');
+        tbody.innerHTML = '';
+        mypayment.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="last4">${p.last4}</td>
+            <td data-label="Name">${p.customer_name}</td>
+            <td data-label="Expiration">${p.expiration}</td>
+            <td data-label="Status">${p.status}</td>
+            <td data-label="card_type">${p.card_type}</td>
+            <td data-label="Payment Nickname">${p.payment_nickname}</td>
+            <td data-label="Actions"><button id="delete" class="delete-btn" data-last4="${p.last4}" data-expiration="${p.expiration}">Delete</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+     })
+        .catch(err => {
+          console.error('Error loading payments:', err);
+        });
+    });
+    document.addEventListener('click', (e) => {
+      if(e.target.classList.contains('delete-btn'))
+      {
+        const last4=e.target.dataset.last4;
+        const expiration=e.target.dataset.expiration;
+        const paymentElement = e.target;
+        
+        const modal = document.getElementById('delete-payment-modal');
+        modal.style.display = 'flex';
+        
+        document.getElementById('confirm-delete-payment-btn').onclick = function() {
+          fetch('/api/delete-payment',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({last4,expiration})})
+          .then(res => res.json())
+          .then(data => {
+            if(data.success)
+            {
+              paymentElement.closest('tr').remove();
+              modal.style.display = 'none';
+            }
+            else
+            {
+              alert('Failed to delete payment');
+              modal.style.display = 'none';
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting payment:', err);
+            modal.style.display = 'none';
+          });
+        };
+        
+        document.getElementById('cancel-delete-payment-btn').onclick = function() {
+          modal.style.display = 'none';
+        };
+      }
+      
+      if(e.target.classList.contains('delete-address-btn'))
+      {
+        const address_nickname=e.target.dataset.nickname;
+        const address_line1=e.target.dataset.address;
+        const addressElement = e.target;
+        const modal = document.getElementById('delete-address-modal');
+        modal.style.display = 'flex';
+        
+        document.getElementById('confirm-delete-btn').onclick = function() {
+          modal.style.display = 'none';
+          fetch('/api/delete-address',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({address_nickname,address_line1})})
+          .then(res => res.json())
+          .then(data => {
+            if(data.success)
+            {
+              addressElement.closest('.col-md-6').remove();
+            }
+            else
+            {
+              alert('Failed to delete address');
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting address:', err);
+            alert('Error deleting address');
+          });
+        };
+        
+        document.getElementById('cancel-delete-btn').onclick = function() {
+          modal.style.display = 'none';
+        };
+        
+        modal.onclick = function(event) {
+          if (event.target === modal) {
+            modal.style.display = 'none';
+          }
+        };
+      }
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/myaddress')
+      .then(res => res.json())
+      .then(myaddress => {
+        const container=document.getElementById('address-card-container');
+        container.innerHTML='';
+          myaddress.forEach(addr=>{
+            const card=document.createElement('div');
+            card.className= 'col-md-6 d-flex align-items-stretch';
+            card.innerHTML=`
+              <div class="info-box w-100">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3>${addr.address_nickname||'Saved Address'}</h3>
+                  <button class="delete-address-btn" 
+                          data-nickname="${addr.address_nickname}" 
+                          data-address="${addr.address_line1}"
+                          style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer;">
+                    Delete
+                  </button>
+                </div>
+                <div class="info-line">
+                  <i class="bx bx-user"></i>
+                  ${addr.customer_name}
+                </div>
+                <div class="info-line">
+                  <i class="bx bx-map"></i>
+                  ${addr.address_line1} ${addr.city}, ${addr.state} ${addr.zip_code}
+                </div>
+                <div class="info-line">
+                  <i class="bx bx-phone-call"></i>
+                  ${addr.phone_number}
+                </div>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading address:', err);
+        });
+    });
+
+    function loadUserMovie() {
+      fetch('/api/myrentals')
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          const select = document.getElementById('movieSelect');
+          const noMsg = document.getElementById('no-movie-message');
+          const msg = document.getElementById('form-header');
+          const movieHelp = document.getElementById('movieHelp');
+          const submit=document.getElementById('submit');
+          const subtext=document.getElementById('section-subtext');
+
+          select.innerHTML = '';
+          if (Array.isArray(data) && data.length > 0) {
+            data.forEach(item => {
+              const option = document.createElement('option');
+              option.value = item.id;
+              option.textContent = (item.name ? item.name + ' - ' : '') + item.id + (item.quantity_available !== undefined ? ` (Available: ${item.quantity_available})` : '');
+              select.appendChild(option);
+            });
+            select.required = true;
+            select.style.display = '';
+            movieHelp.style.display='';
+            submit.style.display = '';
+            msg.style.display = '';
+            subtext.style.display = '';
+            noMsg.style.display = 'none';
+          } else {
+            select.style.display = 'none';
+            movieHelp.style.display='none';
+            submit.style.display = 'none';
+            noMsg.textContent = 'You have no movies to return.';
+            msg.style.display = 'none';
+            subtext.style.display = 'none';
+            noMsg.style.display = '';
+          }
+        })
+        .catch(() => {
+          const select = document.getElementById('movieSelect');
+          const noMsg = document.getElementById('no-movie-message');
+          const msg = document.getElementById('form-header');
+          const movieHelp = document.getElementById('movieHelp');
+          const subtext=document.getElementById('section-subtext');
+
+
+          select.style.display = 'none';
+          movieHelp.style.display='none';
+          submit.style.display = 'none';
+          msg.style.display = 'none';
+          subtext.style.display = 'none';
+          noMsg.textContent = 'Unable to load your rentals. Please make sure you are logged in and have active rentals.';
+          noMsg.style.display = '';
+        });
+    }
+    loadUserMovie();
+
+    document.getElementById('return-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const select = document.getElementById('movieSelect');
+      const movieId = select.value;
+      document.getElementById('return-success').style.display = 'none';
+      document.getElementById('return-error').style.display = 'none';
+      if (!movieId) {
+        document.getElementById('return-error').textContent = 'Please select movie to return.';
+        document.getElementById('return-error').style.display = 'block';
+        return;
+      }
+      fetch('/api/return', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ movieId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('return-success').textContent = 'Movie returned successfully!';
+          document.getElementById('return-success').style.display = 'block';
+          document.getElementById('return-form').reset();
+          window.location.reload();
+          loadUserMovie();
+        } else {
+          document.getElementById('return-error').textContent = data.error || 'Failed to return movie.';
+          document.getElementById('return-error').style.display = 'block';
+        }
+      })
+      .catch(() => {
+        document.getElementById('return-error').textContent = 'Server error. Please try again.';
+        document.getElementById('return-error').style.display = 'block';
+      });
+    });
+  </script>
+</body>
+
+</html>
