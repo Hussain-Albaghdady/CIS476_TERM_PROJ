@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>RentFlicks</title>
+  <title>DriveShare</title>
   <meta content="" name="descriptison">
   <meta content="" name="keywords">
 
@@ -36,7 +36,7 @@
   <section id="topbar" class="d-none d-lg-block">
     <div class="container clearfix">
       <div class="contact-info float-left">
-        <i class="icofont-envelope"></i><a href="mailto:contact@example.com">contact.admin@RentFlicks.com</a>
+        <i class="icofont-envelope"></i><a href="mailto:contact@example.com">contact.admin@DriveShare.com</a>
         <i class="icofont-phone"></i><a href="tel:586-489-9689"> +1 248-420-6969</a>
       </div>
       <div class="social-links float-right">
@@ -50,7 +50,7 @@
     <div class="container">
 
    <div class="logo float-left">
-        <a href="Home.html"><img src="assets/img/RentFlicks_Full_Logo_3.png" alt="" class="img-fluid"></a>
+        <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="" class="img-fluid"></a>
       </div>
       <div class="mobile">
         <div class="login float-right">
@@ -78,8 +78,8 @@
   <div class="container text-center" id="welcome">
     <div class="d-flex flex-column justify-content-center align-items-center">
       <h2 data-aos="fade-up">Welcome, <span>Management Team</span></h2>
-      <img id="logo-img" src="assets/img/RentFlicks_Full_Logo_3.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
-      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>RentFlicks</span></h1>
+      <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
+      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>DriveShare</span></h1>
       <p data-aos="fade-up" data-aos-delay="100">Your Movie. Your Way. Right Away.<br></p>
     </div>
   </div>
@@ -98,19 +98,19 @@
 
         <div class="management-header-box">
           <div class="section-title">
-            <h2>Movie Management</h2>
-            <p>Add new movie or manage existing movie inventory</p>
+            <h2>Vehicle Management</h2>
+            <p>Add new vehicles or manage existing vehicle inventory</p>
           </div>
 
           <div class="row mb-4 justify-content-center">
             <div class="col-lg-4 col-md-5 text-center">
               <button id="add-movie-btn" class="btn btn-success btn-lg me-2">
-                <i class="icofont-plus"></i> Add New Movie
+                <i class="icofont-plus"></i> Add New Vehicle
               </button>
             </div>
             <div class="col-lg-4 col-md-5 text-center">
               <button id="manage-movie-btn" class="btn btn-primary btn-lg ms-2">
-                <i class="icofont-gear"></i> Manage Existing Movie
+                <i class="icofont-gear"></i> Manage Existing Vehicle
               </button>
             </div>
           </div>
@@ -121,18 +121,18 @@
           <div class="row">
             <div class="col-lg-8 mx-auto">
               <form id="movie-form">
-                <h3>Add New Movie</h3>
+                <h3>Add New Vehicle</h3>
                 
                 <div class="form-group">
-                  <label for="movie-name">Movie Name *</label>
+                  <label for="movie-name">Vehicle Model *</label>
                   <input type="text" id="movie-name" name="name" class="form-control" required 
                          placeholder="e.g., Zootopia">
                 </div>
 
                 <div class="form-group">
-                  <label for="movie-category">Category *</label>
+                  <label for="movie-category">Vehicle Type *</label>
                   <select id="movie-category" name="category" class="form-control" required>
-                    <option value="">-- Select Category --</option>
+                    <option value="">-- Vehicle Type --</option>
                     <option value="Action">Action</option>
                     <option value="Adventure">Adventure</option>
                     <option value="Anime">Anime</option>
@@ -173,7 +173,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="movie-image">Movie Cover</label>
+                  <label for="movie-image">Vehicle Image</label>
                   <input type="file" id="movie-image" name="image" class="form-control" 
                          accept="image/*" placeholder="Choose an image file">
                   <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
@@ -181,7 +181,7 @@
 
                 <div class="form-buttons">
                   <button type="submit" class="btn btn-success">
-                    <i class="icofont-check"></i> Add Movie
+                    <i class="icofont-check"></i> Add Vehicle
                   </button>
                   <button type="button" id="cancel-add" class="btn btn-secondary">
                     <i class="icofont-close"></i> Cancel
@@ -197,7 +197,7 @@
 
         <!-- Manage Movie Section -->
         <div id="manage-movie-section" class="management-form" style="display: none;">
-          <h3>Manage Existing Movie</h3>
+          <h3>Manage Existing Vehicle Inventory</h3>
           <div class="table-responsive">
             <table class="table table-striped" id="movie-management-table">
               <thead>
@@ -225,8 +225,8 @@
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
         <div class="section-title">
-          <h2>Movie Inventory</h2>
-          <p>Browse and view current movie inventory</p>
+          <h2>Vehicle Inventory</h2>
+          <p>Browse and view current Vehicle inventory</p>
         </div>
 
         <div class="row">
@@ -273,7 +273,7 @@
           <input type="hidden" id="edit-movie-id">
           
           <div class="form-group">
-            <label for="edit-movie-name">Movie Name *</label>
+            <label for="edit-movie-name">Vehicle Name *</label>
             <input type="text" id="edit-movie-name" class="form-control" required>
           </div>
 
@@ -326,7 +326,7 @@
 
           <div class="form-buttons">
             <button type="submit" class="btn btn-primary">
-              <i class="icofont-check"></i> Update Movie
+              <i class="icofont-check"></i> Update Vehicle Info
             </button>
             <button type="button" id="cancel-edit" class="btn btn-secondary">
               <i class="icofont-close"></i> Cancel
@@ -378,7 +378,7 @@
               <div class="info-box">
                 <a href="mailto:info@conference.com"><i class="bx bx-envelope"></i>
                 <h3>Email Us</h3>
-                <p>info@RentFlicks.com</p></a>
+                <p>info@DriveShare.com</p></a>
               </div>
             </div>
             <div class="col-md-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
@@ -403,7 +403,7 @@
 
       <div class="container">
         <div class="copyright">
-          &copy; Copyright <strong><span>RentFlicks Corporation</span></strong>. All Rights Reserved
+          &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
         </div>
         <div class="credits">
            Designed by <a href="home.html#team">Meaad Hassan</a>
