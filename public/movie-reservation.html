@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>RentFlicks</title>
+  <title>DriveShare</title>
   <meta content="" name="descriptison">
   <meta content="" name="keywords">
 
@@ -64,8 +64,8 @@
     <div class="d-flex flex-column justify-content-center align-items-center">
       <h2 data-aos="fade-up">Welcome, <span>Customer</span></h2>
       <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt="logo" data-aos="zoom-out">
-      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>RentFlicks</span></h1>
-      <p data-aos="fade-up" data-aos-delay="100">Your Movie. Your Way. Right Away.<br></p>
+      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>DriveShare</span></h1>
+      <p data-aos="fade-up" data-aos-delay="100">Rent a ride. Share the journey.Rent a ride. Share the journey.<br></p>
     </div>
   </div>
   <div class="user-container">
@@ -81,7 +81,7 @@
     <!-- Movie List Section -->
     <section id="movie"class="movie-section py-4">
       <div class="container">
-        <h3 class="mb-4">Available Vehicles</h3>
+        Sedan
         <div class="mb-3">
           <label for="movie-category" class="form-label">Select Vehicle Type:</label>
           <select id="movie-category" class="form-control" style="max-width:350px;">
@@ -118,7 +118,6 @@
           <input type="date" name="end_date" id="end_date" required>
           <select id="location" name="location" required>
             <option value=""disabled selected>-- Choose Pickup Location --</option>
-            <option value="Digital">Digital Delivery</option>
             <option value="Dearborn">Dearborn</option>
             <option value="Warren">Warren</option>
             <option value="DearbornHeights">Dearborn Heights</option>
@@ -138,10 +137,10 @@
           <div style="margin-top: 5px;">
             <button type="button" id="add-payment-btn" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Payment Method</button>
           </div>
-          <!-- Hidden input for selected movie -->
-          <input type="hidden" name="movie_ids" id="selected-movie">
+          <!-- Hidden input for selected vehicle -->
+          <input type="hidden" name="vehicle_ids" id="selected-vehicle">
           <input type="hidden" name="total_cost" id="total-cost">
-          <input type="submit" name="submit" value="Reserve Selected Movies" class="form-btn">
+          <input type="submit" name="submit" value="Reserve Selected Vehicles" class="form-btn">
           <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
           <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
         </form>
