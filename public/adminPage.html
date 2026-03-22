@@ -5,13 +5,13 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>RentFlicks</title>
+  <title>DriveShare</title>
   <meta content="" name="descriptison">
   <meta content="" name="keywords">
 
   <!-- Favicons -->
   <link href="assets/img/favicon_io/favicon-2.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="assets/img/favicon_io/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
@@ -36,7 +36,7 @@
   <section id="topbar" class="d-none d-lg-block">
     <div class="container clearfix">
       <div class="contact-info float-left">
-        <i class="icofont-envelope"></i><a href="mailto:contact@example.com">contact.admin@RentFlicks.com</a>
+        <i class="icofont-envelope"></i><a href="mailto:contact@example.com">contact.admin@DriveShare.com</a>
         <i class="icofont-phone"></i><a href="tel:586-489-9689"> +1 248-420-6969</a>
       </div>
       <div class="social-links float-right">
@@ -50,7 +50,7 @@
     <div class="container">
 
    <div class="logo float-left">
-        <a href="Home.html"><img src="assets/img/RentFlicks_Full_Logo_3.png" alt="" class="img-fluid"></a>
+        <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="" class="img-fluid"></a>
       </div>
       <div class="mobile">
         <div class="login float-right">
@@ -74,13 +74,12 @@
 
     </div>
   </header><!-- End Header -->
-  
   <div id="page-header" style="background-color: #f9fafb;">
   <div class="container text-center" id="welcome">
     <div class="d-flex flex-column justify-content-center align-items-center">
-      <h2 data-aos="fade-up">Welcome, <span>Board of Directors</span></h2>
-      <img id="logo-img" src="assets/img/RentFlicks_Full_Logo_3.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
-      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>RentFlicks</span></h1>
+      <h2 data-aos="fade-up">Welcome, <span>Management Team</span></h2>
+      <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
+      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>DriveShare</span></h1>
       <p data-aos="fade-up" data-aos-delay="100">Your Movie. Your Way. Right Away.<br></p>
     </div>
   </div>
@@ -92,24 +91,274 @@
       </h3>
     </div>
   </div>
-  </div>
-  
+
   <main id="main"  class="hidden-page">
-    <div class="form-container" >
-      <form action="/managment" method="post">
-        <h3>USER MANAGEMENT</h3>
-          <select name="user_type">
-                      <option value="maintenance">Maintenance</option>
-          </select>
-          <input type="text" name="fname" required placeholder="enter their first name">
-          <input type="text" name="lname" required placeholder="enter their last name">
-          <input type="text" name="username" required placeholder="enter a username">
-          <input type="email" name="email" required placeholder="enter their email">
-          <input type="password" name="password" required placeholder="enter a password">
-          <input type="password" name="cpassword" required placeholder="enter password again">
-        <input type="submit" value="Submit" class="form-btn">
-      </form>
+    <section id="movie-management" class="movie-management">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="management-header-box">
+          <div class="section-title">
+            <h2>Vehicle Management</h2>
+            <p>Add new vehicles or manage existing vehicle inventory</p>
+          </div>
+
+          <div class="row mb-4 justify-content-center">
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="add-movie-btn" class="btn btn-success btn-lg me-2">
+                <i class="icofont-plus"></i> Add New Vehicle
+              </button>
+            </div>
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="manage-movie-btn" class="btn btn-primary btn-lg ms-2">
+                <i class="icofont-gear"></i> Manage Existing Vehicle
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Movie Form -->
+        <div id="add-movie-form" class="management-form" style="display: none;">
+          <div class="row">
+            <div class="col-lg-8 mx-auto">
+              <form id="movie-form">
+                <h3>Add New Vehicle</h3>
+                
+                <div class="form-group">
+                  <label for="movie-name">Vehicle Model *</label>
+                  <input type="text" id="movie-name" name="name" class="form-control" required 
+                         placeholder="e.g., Zootopia">
+                </div>
+
+                <div class="form-group">
+                  <label for="movie-category">Vehicle Type *</label>
+                  <select id="movie-category" name="category" class="form-control" required>
+                    <option value="">-- Vehicle Type --</option>
+                    <option value="Action">Action</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Anime">Anime</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Crime">Crime</option>
+                    <option value="Documentary">Documentary</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Kids">Kids & Family</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Thriller">Thriller</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="movie-description">Description</label>
+                  <textarea id="movie-description" name="description" class="form-control" rows="3"
+                            placeholder="Brief description of the movie"></textarea>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="rental-rate">Rental Rate (per day) *</label>
+                      <input type="number" id="rental-rate" name="rental_rate_per_day" class="form-control" 
+                             step="0.01" min="0" required placeholder="1.50">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="quantity">Quantity Available *</label>
+                      <input type="number" id="quantity" name="quantity_available" class="form-control" 
+                             min="0" required placeholder="5">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="movie-image">Vehicle Image</label>
+                  <input type="file" id="movie-image" name="image" class="form-control" 
+                         accept="image/*" placeholder="Choose an image file">
+                  <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
+                </div>
+
+                <div class="form-buttons">
+                  <button type="submit" class="btn btn-success">
+                    <i class="icofont-check"></i> Add Vehicle
+                  </button>
+                  <button type="button" id="cancel-add" class="btn btn-secondary">
+                    <i class="icofont-close"></i> Cancel
+                  </button>
+                </div>
+
+                <div id="add-movie-success" class="alert alert-success mt-3" style="display: none;"></div>
+                <div id="add-movie-error" class="alert alert-danger mt-3" style="display: none;"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manage Movie Section -->
+        <div id="manage-movie-section" class="management-form" style="display: none;">
+          <h3>Manage Existing Vehicle Inventory</h3>
+          <div class="table-responsive">
+            <table class="table table-striped" id="movie-management-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Rate/Day</th>
+                  <th>Quantity</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="movie-management-body">
+                <!-- Movie rows will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- End Movie Management Section -->
+
+    <!-- ======= Avaliablity Section ======= -->
+    <section id="avaliablity" class="avaliablity section-bg">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="section-title">
+          <h2>Vehicle Inventory</h2>
+          <p>Browse and view current Vehicle inventory</p>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <ul id="event-flters">
+              <li data-filter="*" class="filter-active">All</li>
+              <li data-filter=".filter-Available">Available</li>
+              <li data-filter=".filter-Booked">Booked</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+             <ul id="type-flters">
+              <li data-filter=".filter-Action">Action</li>
+              <li data-filter=".filter-Adventure">Adventure</li>
+              <li data-filter=".filter-Anime">Anime</li>
+              <li data-filter=".filter-Comedy">Comedy</li>
+              <li data-filter=".filter-Crime">Crime</li>
+              <li data-filter=".filter-Documentary">Documentary</li>
+              <li data-filter=".filter-Drama">Drama</li>
+              <li data-filter=".filter-Horror">Horror</li>
+              <li data-filter=".filter-Kids">Kids & Family</li>
+              <li data-filter=".filter-Romance">Romance</li>
+              <li data-filter=".filter-SciFi">Sci-Fi</li>
+              <li data-filter=".filter-Sports">Sports</li>
+              <li data-filter=".filter-Thriller">Thriller</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row event-container">
+          <!-- Dynamic movie cards will be injected here by JS -->
+        </div>
+    </section><!-- End Avaliablity Section -->
+
+  <div id="edit-movie-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Movie</h3>
+        <span class="close" id="close-edit-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="edit-movie-form">
+          <input type="hidden" id="edit-movie-id">
+          
+          <div class="form-group">
+            <label for="edit-movie-name">Vehicle Name *</label>
+            <input type="text" id="edit-movie-name" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-movie-category">Category *</label>
+            <select id="edit-movie-category" class="form-control" required>
+              <option value="">-- Select Category --</option>
+              <option value="Action">Action</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Anime">Anime</option>
+              <option value="Comedy">Comedy</option>
+              <option value="Crime">Crime</option>
+              <option value="Documentary">Documentary</option>
+              <option value="Drama">Drama</option>
+              <option value="Horror">Horror</option>
+              <option value="Kids">Kids & Family</option>
+              <option value="Romance">Romance</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Sports">Sports</option>
+              <option value="Thriller">Thriller</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-movie-description">Description</label>
+            <textarea id="edit-movie-description" class="form-control" rows="3"></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-rental-rate">Rental Rate (per day) *</label>
+                <input type="number" id="edit-rental-rate" class="form-control" step="0.01" min="0" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-quantity">Quantity Available *</label>
+                <input type="number" id="edit-quantity" class="form-control" min="0" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-movie-image">Movie Cover</label>
+            <input type="file" id="edit-movie-image" class="form-control" 
+                   accept="image/*">
+            <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF) - leave empty to keep current cover</small>
+          </div>
+
+          <div class="form-buttons">
+            <button type="submit" class="btn btn-primary">
+              <i class="icofont-check"></i> Update Vehicle Info
+            </button>
+            <button type="button" id="cancel-edit" class="btn btn-secondary">
+              <i class="icofont-close"></i> Cancel
+            </button>
+          </div>
+
+          <div id="edit-movie-success" class="alert alert-success mt-3" style="display: none;"></div>
+          <div id="edit-movie-error" class="alert alert-danger mt-3" style="display: none;"></div>
+        </form>
+      </div>
     </div>
+  </div>
+
+  <div id="delete-movie-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirm Delete</h3>
+        <span class="close" id="close-delete-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this movie? This action cannot be undone.</p>
+        <div class="form-buttons">
+          <button id="confirm-delete-movie" class="btn btn-danger">
+            <i class="icofont-trash"></i> Delete
+          </button>
+          <button id="cancel-delete-movie" class="btn btn-secondary">
+            <i class="icofont-close"></i> Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -129,7 +378,7 @@
               <div class="info-box">
                 <a href="mailto:info@conference.com"><i class="bx bx-envelope"></i>
                 <h3>Email Us</h3>
-                <p>info@RentFlicks.com</p></a>
+                <p>info@DriveShare.com</p></a>
               </div>
             </div>
             <div class="col-md-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
@@ -154,7 +403,7 @@
 
       <div class="container">
         <div class="copyright">
-          &copy; Copyright <strong><span>ProRigs Rentals Corporation</span></strong>. All Rights Reserved
+          &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
         </div>
         <div class="credits">
            Designed by <a href="home.html#team">Meaad Hassan</a>
@@ -196,7 +445,7 @@
           }
         })
         .catch(() => {
-          window.location.href = "/loginform.html";
+          window.location.href = "/loginform.html"; 
         });
     });
     document.addEventListener("DOMContentLoaded", function () {
@@ -212,6 +461,358 @@
         fallbackText.style.display = "none";
       });
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      let currentMovieToDelete = null;
+
+      const addMovieBtn = document.getElementById('add-movie-btn');
+      const manageMovieBtn = document.getElementById('manage-movie-btn');
+      const addMovieForm = document.getElementById('add-movie-form');
+      const manageMovieSection = document.getElementById('manage-movie-section');
+      const movieForm = document.getElementById('movie-form');
+      const editMovieForm = document.getElementById('edit-movie-form');
+      const editModal = document.getElementById('edit-movie-modal');
+      const deleteModal = document.getElementById('delete-movie-modal');
+
+      addMovieBtn.addEventListener('click', function() {
+        addMovieForm.style.display = addMovieForm.style.display === 'none' ? 'block' : 'none';
+        manageMovieSection.style.display = 'none';
+        if (addMovieForm.style.display === 'block') {
+          loadMovieForManagement();
+        }
+      });
+
+      manageMovieBtn.addEventListener('click', function() {
+        manageMovieSection.style.display = manageMovieSection.style.display === 'none' ? 'block' : 'none';
+        addMovieForm.style.display = 'none';
+        if (manageMovieSection.style.display === 'block') {
+          loadMovieForManagement();
+        }
+      });
+
+      document.getElementById('cancel-add').addEventListener('click', function() {
+        addMovieForm.style.display = 'none';
+        movieForm.reset();
+        clearMessages();
+      });
+
+      movieForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearMessages();
+
+        const formData = new FormData(movieForm);
+        
+        const name = formData.get('name');
+        const category = formData.get('category');
+        const rental_rate_per_day = formData.get('rental_rate_per_day');
+        const quantity_available = formData.get('quantity_available');
+        
+        if (!name || !category || !rental_rate_per_day || !quantity_available) {
+          showMessage('add-movie-error', 'Please fill in all required fields.');
+          return;
+        }
+
+        console.log('Sending movie data with FormData'); 
+        fetch('/api/movie', {
+          method: 'POST',
+          body: formData 
+        })
+        .then(res => {
+          console.log('Response status:', res.status); 
+          return res.json();
+        })
+        .then(data => {
+          console.log('Response data:', data); 
+          if (data.error) {
+            showMessage('add-movie-error', data.error);
+          } else {
+            showMessage('add-movie-success', 'Movie added successfully!');
+            movieForm.reset();
+            setTimeout(() => {
+              location.reload();
+            }, 1500);
+          }
+        })
+        .catch(err => {
+          console.error('Fetch error:', err);
+          showMessage('add-movie-error', 'Failed to add movie. Please check the console for details.');
+        });
+      });
+
+      function loadMovieForManagement() {
+        fetch('/api/movies')
+        .then(res => res.json())
+        .then(movies => {
+          const tbody = document.getElementById('movie-management-body');
+          tbody.innerHTML = '';
+
+          if (!movies || movies.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No movie found</td></tr>';
+            return;
+          }
+
+          movies.forEach(movie => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${movie.name || 'N/A'}</td>
+              <td>${movie.category || 'N/A'}</td>
+              <td>$${movie.rental_rate_per_day ? Number(movie.rental_rate_per_day).toFixed(2) : '0.00'}</td>
+              <td>${movie.quantity_available || 0}</td>
+              <td>
+                <span class="badge ${movie.availability ? 'badge-success' : 'badge-danger'}">
+                  ${movie.availability ? 'Available' : 'Unavailable'}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-primary edit-movie-btn" data-id="${movie._id}">
+                  <i class="icofont-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger delete-movie-btn" data-id="${movie._id}" data-name="${movie.name}">
+                  <i class="icofont-trash"></i> Delete
+                </button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          document.querySelectorAll('.edit-movie-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const movieId = this.getAttribute('data-id');
+              openEditModal(movieId);
+            });
+          });
+
+          document.querySelectorAll('.delete-movie-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const movieId = this.getAttribute('data-id');
+              const movieName = this.getAttribute('data-name');
+              openDeleteModal(movieId, movieName);
+            });
+          });
+        })
+        .catch(err => {
+          console.error('Failed to load movie:', err);
+        });
+      }
+
+      function openEditModal(movieId) {
+        fetch('/api/movies')
+        .then(res => res.json())
+        .then(movies => {
+          const movie = movies.find(eq => eq._id === movieId);
+          if (movie) {
+            document.getElementById('edit-movie-id').value = movie._id;
+            document.getElementById('edit-movie-name').value = movie.name || '';
+            document.getElementById('edit-movie-category').value = movie.category || '';
+            document.getElementById('edit-movie-description').value = movie.description || '';
+            document.getElementById('edit-rental-rate').value = movie.rental_rate_per_day || '';
+            document.getElementById('edit-quantity').value = movie.quantity_available || '';
+            document.getElementById('edit-movie-image').value = '';
+            
+            editModal.style.display = 'block';
+          }
+        });
+      }
+
+      function openDeleteModal(movieId, movieName) {
+        currentMovieToDelete = movieId;
+        deleteModal.querySelector('.modal-body p').textContent = 
+          `Are you sure you want to delete "${movieName}"? This action cannot be undone.`;
+        deleteModal.style.display = 'block';
+      }
+
+      editMovieForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const movieId = document.getElementById('edit-movie-id').value;
+        const formData = new FormData();
+        
+        formData.append('name', document.getElementById('edit-movie-name').value);
+        formData.append('category', document.getElementById('edit-movie-category').value);
+        formData.append('description', document.getElementById('edit-movie-description').value);
+        formData.append('rental_rate_per_day', document.getElementById('edit-rental-rate').value);
+        formData.append('quantity_available', document.getElementById('edit-quantity').value);
+        
+        const imageFile = document.getElementById('edit-movie-image').files[0];
+        if (imageFile) {
+          formData.append('image', imageFile);
+        }
+
+        fetch(`/api/movie/${movieId}`, {
+          method: 'PUT',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            showMessage('edit-movie-error', data.error);
+          } else {
+            showMessage('edit-movie-success', 'Movie updated successfully!');
+            setTimeout(() => {
+              editModal.style.display = 'none';
+              loadMovieForManagement();
+              refreshMainMovieDisplay();
+            }, 1500);
+          }
+        })
+        .catch(err => {
+          showMessage('edit-movie-error', 'Failed to update movie. Please try again.');
+        });
+      });
+
+      document.getElementById('confirm-delete-movie').addEventListener('click', function() {
+        if (currentMovieToDelete) {
+          fetch(`/api/movie/${currentMovieToDelete}`, {
+            method: 'DELETE'
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              deleteModal.style.display = 'none';
+              loadMovieForManagement();
+              refreshMainMovieDisplay();
+            } else {
+              alert('Failed to delete movie: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(err => {
+            alert('Failed to delete movie. Please try again.');
+          });
+        }
+      });
+
+      document.getElementById('close-edit-modal').addEventListener('click', function() {
+        editModal.style.display = 'none';
+      });
+
+      document.getElementById('cancel-edit').addEventListener('click', function() {
+        editModal.style.display = 'none';
+      });
+
+      document.getElementById('close-delete-modal').addEventListener('click', function() {
+        deleteModal.style.display = 'none';
+      });
+
+      document.getElementById('cancel-delete-movie').addEventListener('click', function() {
+        deleteModal.style.display = 'none';
+      });
+
+      window.addEventListener('click', function(e) {
+        if (e.target === editModal) {
+          editModal.style.display = 'none';
+        }
+        if (e.target === deleteModal) {
+          deleteModal.style.display = 'none';
+        }
+      });
+
+      function showMessage(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.textContent = message;
+          element.style.display = 'block';
+          setTimeout(() => {
+            element.style.display = 'none';
+          }, 5000);
+        }
+      }
+
+      function clearMessages() {
+        ['add-movie-success', 'add-movie-error', 'edit-movie-success', 'edit-movie-error'].forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.style.display = 'none';
+          }
+        });
+      }
+
+      function refreshMainMovieDisplay() {
+        if (typeof $ !== 'undefined' && $('.event-container').length) {
+          fetch('/api/movies')
+            .then(res => res.json())
+            .then(data => {
+              console.log("Refreshing movie display:", data);
+              const $container = $('.event-container');
+              $container.empty();
+              if (!Array.isArray(data) || data.length === 0) {
+                $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No movie found. Check your API or database.</p></div>');
+                return;
+              }
+              
+              data.sort((a, b) => {
+                const categoryPriority = {
+                      "Action": 0,
+                      "Adventure": 1,
+                      "Anime": 2,
+                      "Crime": 3,
+                      "Comedy": 4,
+                      "Documentary": 5,
+                      "Drama": 6,
+                      "Horror": 7,
+                      "Kids": 8,
+                      "Romance": 9,
+                      "SciFi": 10,
+                      "Sports": 11,
+                      "Thriller": 12,
+                };
+                
+                if (a.category !== b.category) {
+                  const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+                  const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+                  return priorityA - priorityB;
+                }
+                return a.name.localeCompare(b.name);
+              });
+              
+              data.forEach(item => {
+                let filters = [];
+                if (item.quantity_available > 0) filters.push("filter-Available");
+                else filters.push("filter-Booked");
+                if (item.category === "Action") filters.push("filter-Action");
+                if (item.category === "Adventure") filters.push("filter-Adventure");
+                if (item.category === "Anime") filters.push("filter-Anime");
+                if (item.category === "Comedy") filters.push("filter-Comedy");
+                if (item.category === "Crime") filters.push("filter-Crime");
+                if (item.category === "Drama") filters.push("filter-Drama");
+                if (item.category === "Documentary") filters.push("filter-Documentary");
+                if (item.category === "Horror") filters.push("filter-Horror");
+                if (item.category === "Kids") filters.push("filter-Kids");
+                if (item.category === "Romance") filters.push("filter-Romance");
+                if (item.category === "Sci-Fi") filters.push("filter-SciFi");
+                if (item.category === "Sports") filters.push("filter-Sports");
+                if (item.category === "Thriller") filters.push("filter-Thriller");
+                const imgUrl = (item.image_url && item.image_url.trim() !== "")
+                ? item.image_url
+                : (item.image && item.image.trim() !== "")
+                  ? item.image
+                  : "assets/img/no-image.png";
+                $container.append(`
+                  <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
+                    <div class="card">
+                      <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category}" />
+                      <div class="card-text">
+                        <h2>${item.name || item.category}</h2>
+                        <h3>Available: ${item.quantity_available > 0 ? "Yes" : "No"} (${item.quantity_available || 0} in stock)</h3>
+                        <p>${item.description || ""}</p>
+                        <p>Rate: $${item.rental_rate_per_day} / day</p>
+                      </div>
+                    </div>
+                  </div>
+                `);
+              });
+              if ($container.data('isotope')) {
+                $container.isotope('reloadItems').isotope();
+              } else if (typeof Isotope !== "undefined") {
+                $container.isotope({ itemSelector: '.event-item' });
+              }
+            })
+            .catch(err => {
+              console.error("Error refreshing movies:", err);
+            });
+        }
+      }
+    });
   </script>
 </body>
+
 </html>
