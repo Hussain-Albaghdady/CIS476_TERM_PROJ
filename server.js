@@ -482,6 +482,7 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       payment,
       movie_ids,
       total_cost,
+      host_name,
     } = req.body;
     if (
       !customer_name ||
@@ -526,6 +527,15 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
         user_id = user._id;
       }
     }
+    let hostId = null;
+    if (req.session && req.session.user_name) {
+      const host = await db
+        .collection("hostUsers")
+        .findOne({ username: req.session.user_name });
+      if (host && host._id) {
+        hostId = host._id;
+      }
+    }
     const movieDocs = await db
       .collection("Movies")
       .find({
@@ -548,6 +558,7 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     const data = {
       orderId,
       customer_name,
+      host_name,
       end_date,
       order_date: new Date().toISOString().split("T")[0],
       location,

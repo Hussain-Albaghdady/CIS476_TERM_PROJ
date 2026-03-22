@@ -1,90 +1,142 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>RentFlicks</title>
+    <meta content="" name="descriptison" />
+    <meta content="" name="keywords" />
 
-  <title>RentFlicks</title>
-  <meta content="" name="descriptison">
-  <meta content="" name="keywords">
+    <!-- Favicons -->
+    <link href="assets/img/favicon_io/favicon-2.png" rel="icon" />
+    <link
+      href="assets/img/favicon_io/apple-touch-icon.png"
+      rel="apple-touch-icon"
+    />
 
-  <!-- Favicons -->
-  <link href="assets/img/favicon_io/favicon-2.png" rel="icon">
-  <link href="assets/img/favicon_io/apple-touch-icon.png" rel="apple-touch-icon">
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900"
+      rel="stylesheet"
+    />
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link
+      href="assets/vendor/bootstrap/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet" />
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+    <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet" />
+    <link href="assets/vendor/venobox/venobox.css" rel="stylesheet" />
+    <link
+      href="assets/vendor/owl.carousel/assets/owl.carousel.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet" />
 
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
-  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
-  <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
-  <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <!-- Main CSS File -->
+    <link href="assets/css/style.css" rel="stylesheet" />
+  </head>
 
-  <!-- Main CSS File -->
-  <link href="assets/css/style.css" rel="stylesheet">
-</head>
-
-<body>
-  <!-- ======= Header ======= -->
-  <header id="header">
-    <div class="container">
-
-      <div class="logo float-left">
-        <a href="home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="logo" class="img-fluid"></a>
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header">
+      <div class="container">
+        <div class="logo float-left">
+          <a href="home.html"
+            ><img
+              src="assets/img/DriveShare_Full_Logo.png"
+              alt="logo"
+              class="img-fluid"
+          /></a>
+        </div>
+        <div class="mobile">
+          <div class="login float-right">
+            <h1>
+              <a
+                href="home.html"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                ><i class="icofont-logout"></i> | Logout</a
+              >
+            </h1>
+          </div>
+        </div>
+        <nav class="nav-menu float-right d-none d-lg-block">
+          <ul id="main-navbar-list">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="home.html#about">About Us</a></li>
+            <li><a href="home.html#location">Locations</a></li>
+            <li><a href="Home.html#contact">Contact Us</a></li>
+            <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
+            <li id="login-link-li">
+              <a
+                href="/logout"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                id="login-link"
+                ><i class="icofont-logout"></i> | Logout</a
+              >
+            </li>
+          </ul>
+        </nav>
+        <!-- .nav-menu -->
       </div>
-      <div class="mobile">
-        <div class="login float-right">
-          <h1><a href="home.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-              | Logout</a></h1>
+    </header>
+    <!-- End Header -->
+    <div id="page-header" style="background-color: #f9fafb">
+      <div class="container text-center" id="welcome">
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+        >
+          <h2 data-aos="fade-up">Welcome, <span>Renter</span></h2>
+          <img
+            id="logo-img"
+            src="assets/img/DriveShare_Full_Logo.png"
+            class="img-fluid page-image"
+            alt="logo"
+            data-aos="zoom-out"
+          />
+          <h1
+            id="logo-fallback"
+            class="gradient-text"
+            data-aos="fade-up"
+            style="display: none"
+          >
+            <span>RentFlicks</span>
+          </h1>
+          <p data-aos="fade-up" data-aos-delay="100">
+            Your Movie. Your Way. Right Away.<br />
+          </p>
         </div>
       </div>
-      <nav class="nav-menu float-right d-none d-lg-block">
-        <ul id="main-navbar-list">
-          <li><a href="home.html">Home</a></li>
-          <li><a href="home.html#about">About Us</a></li>
-          <li><a href="home.html#location">Locations</a></li>
-          <li><a href="Home.html#contact">Contact Us</a></li>
-          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
-          <li id="login-link-li">
-            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
-              | Logout</a>
-          </li>
-        </ul>
-      </nav><!-- .nav-menu -->
-
+      <div class="user-container">
+        <div class="content">
+          <h3 data-aos="fade-up" data-aos-delay="100">
+            <span class="label">Signed in as</span>
+            <span id="user-welcome-name" class="username">Renter</span>
+          </h3>
+        </div>
+      </div>
     </div>
-  </header><!-- End Header -->
-  <div id="page-header" style="background-color: #f9fafb;">
-  <div class="container text-center" id="welcome">
-    <div class="d-flex flex-column justify-content-center align-items-center">
-      <h2 data-aos="fade-up">Welcome, <span>Customer</span></h2>
-      <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt="logo" data-aos="zoom-out">
-      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>RentFlicks</span></h1>
-      <p data-aos="fade-up" data-aos-delay="100">Your Movie. Your Way. Right Away.<br></p>
-    </div>
-  </div>
-  <div class="user-container">
-    <div class="content">
-      <h3 data-aos="fade-up" data-aos-delay="100">
-        <span  class="label">Signed in as</span>
-        <span id="user-welcome-name" class="username">Customer</span>
-      </h3>
-    </div>
-  </div>
-  </div>
-  <main id="main" class="hidden-page">
-    <!-- Movie List Section -->
-    <section id="movie"class="movie-section py-4">
-      <div class="container">
-        <h3 class="mb-4">Available Vehicles</h3>
-        <div class="mb-3">
-          <label for="movie-category" class="form-label">Select Vehicle Type:</label>
-          <select id="movie-category" class="form-control" style="max-width:350px;">
+    <main id="main" class="hidden-page">
+      <!-- Movie List Section -->
+      <section id="movie" class="movie-section py-4">
+        <div class="container">
+          <h3 class="mb-4">Available Vehicles</h3>
+          <div class="mb-3">
+            <label for="movie-category" class="form-label"
+              >Select Vehicle Type:</label
+            >
+            <select
+              id="movie-category"
+              class="form-control"
+              style="max-width: 350px"
+            >
               <option value="">-- Choose Vehicle Type --</option>
               <option value="Action">Action</option>
               <option value="Adventure">Adventure</option>
@@ -99,83 +151,223 @@
               <option value="Sci-Fi">Sci-Fi</option>
               <option value="Sports">Sports</option>
               <option value="Thriller">Thriller</option>
-
-          </select>
-        </div>
-        <div id="movie-list" class="row">
-          <!-- Movie cards will be loaded here -->
-        </div>
-      </div>
-    </section>
-    <section class="reservation-section">
-      <div class="forms-wrapper single-form">
-        <div class="reservation-form-container">
-        <form id="reservation-form" action="/api/reservations" method="post">
-          <h3>Reservation</h3>
-          <label for="customer_name">Name:</label>
-          <input type="text" name="customer_name" id="customer_name" required>
-          <label for="end_date" style="margin-left:10px;">Return Date:</label>
-          <input type="date" name="end_date" id="end_date" required>
-          <select id="location" name="location" required>
-            <option value=""disabled selected>-- Choose Pickup Location --</option>
-            <option value="Digital">Digital Delivery</option>
-            <option value="Dearborn">Dearborn</option>
-            <option value="Warren">Warren</option>
-            <option value="DearbornHeights">Dearborn Heights</option>
-            <option value="annArbor">Ann Arbor</option>
-            <option value="GrandRapids">Grand Rapids</option>
-            <option value="Lansing">Lansing</option>
-          </select>
-          <select id="address" name="address" required>
-            <option value="" disabled selected>-- Choose Billing address--</option>
-          </select>
-          <div style="margin-top: 5px;">
-            <button type="button" id="add-address-btn" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Address</button>
+            </select>
           </div>
-          <select id="payment" name="payment" required>
-            <option value=""disabled selected>-- Choose Payment Method --</option>
-          </select>
-          <div style="margin-top: 5px;">
-            <button type="button" id="add-payment-btn" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Payment Method</button>
+          <div id="movie-list" class="row">
+            <!-- Movie cards will be loaded here -->
           </div>
-          <!-- Hidden input for selected movie -->
-          <input type="hidden" name="movie_ids" id="selected-movie">
-          <input type="hidden" name="total_cost" id="total-cost">
-          <input type="submit" name="submit" value="Reserve Selected Movies" class="form-btn">
-          <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
-          <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
-        </form>
         </div>
-      </div>
+      </section>
+      <section class="reservation-section">
+        <div class="forms-wrapper single-form">
+          <div class="reservation-form-container">
+            <form
+              id="reservation-form"
+              action="/api/reservations"
+              method="post"
+            >
+              <h3>Reservation</h3>
+              <label for="customer_name">Name:</label>
+              <input
+                type="text"
+                name="customer_name"
+                id="customer_name"
+                required
+              />
+              <label for="end_date" style="margin-left: 10px"
+                >Return Date:</label
+              >
+              <input type="date" name="end_date" id="end_date" required />
+              <select id="location" name="location" required>
+                <option value="" disabled selected>
+                  -- Choose Pickup Location --
+                </option>
+                <option value="Digital">Digital Delivery</option>
+                <option value="Dearborn">Dearborn</option>
+                <option value="Warren">Warren</option>
+                <option value="DearbornHeights">Dearborn Heights</option>
+                <option value="annArbor">Ann Arbor</option>
+                <option value="GrandRapids">Grand Rapids</option>
+                <option value="Lansing">Lansing</option>
+              </select>
+              <select id="address" name="address" required>
+                <option value="" disabled selected>
+                  -- Choose Billing address--
+                </option>
+              </select>
+              <div style="margin-top: 5px">
+                <button
+                  type="button"
+                  id="add-address-btn"
+                  style="
+                    padding: 5px 10px;
+                    background: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 3px;
+                    font-size: 0.9em;
+                    cursor: pointer;
+                  "
+                >
+                  + Add New Address
+                </button>
+              </div>
+              <select id="payment" name="payment" required>
+                <option value="" disabled selected>
+                  -- Choose Payment Method --
+                </option>
+              </select>
+              <div style="margin-top: 5px">
+                <button
+                  type="button"
+                  id="add-payment-btn"
+                  style="
+                    padding: 5px 10px;
+                    background: #28a745;
+                    color: white;
+                    border: none;
+                    border-radius: 3px;
+                    font-size: 0.9em;
+                    cursor: pointer;
+                  "
+                >
+                  + Add New Payment Method
+                </button>
+              </div>
+              <!-- Hidden input for selected movie -->
+              <input type="hidden" name="movie_ids" id="selected-movie" />
+              <input type="hidden" name="total_cost" id="total-cost" />
+              <input
+                type="submit"
+                name="submit"
+                value="Reserve Selected Movies"
+                class="form-btn"
+              />
+              <div
+                id="reservation-error"
+                style="color: red; font-weight: bold; margin-top: 10px"
+              ></div>
+              <div
+                id="reservation-success"
+                style="color: green; font-weight: bold; margin-top: 10px"
+              ></div>
+            </form>
+          </div>
+        </div>
         <div class="forms-wrapper">
           <div class="reservation-form-container">
-            <form id="Payment-form" class="hidden-form" action="/payments" method="post">
+            <form
+              id="Payment-form"
+              class="hidden-form"
+              action="/payments"
+              method="post"
+            >
               <h3>Add Payment Info</h3>
-              <input type="text" name="payment_cardholder_name" id="payment_cardholder_name" required placeholder="Cardholder Name">
-              <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" maxlength="19"inputmode="numeric">
-              <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date">
-              <input type="text" name="cvv" id="cvv" required placeholder="CVV (3 or 4 digits)" pattern="\d{3,4}" maxlength="4" minlength="3" inputmode="numeric" title="CVV must be 3 or 4 digits">
+              <input
+                type="text"
+                name="payment_cardholder_name"
+                id="payment_cardholder_name"
+                required
+                placeholder="Cardholder Name"
+              />
+              <input
+                type="text"
+                name="card_number"
+                id="card_number"
+                required
+                placeholder="Card Number (16 digits)"
+                maxlength="19"
+                inputmode="numeric"
+              />
+              <input
+                type="date"
+                name="expiration"
+                id="expiration"
+                required
+                placeholder="Expiration Date"
+              />
+              <input
+                type="text"
+                name="cvv"
+                id="cvv"
+                required
+                placeholder="CVV (3 or 4 digits)"
+                pattern="\d{3,4}"
+                maxlength="4"
+                minlength="3"
+                inputmode="numeric"
+                title="CVV must be 3 or 4 digits"
+              />
               <select id="card_type" name="card_type" required>
-                <option value=""disabled selected>-- Choose Card Type --</option>
+                <option value="" disabled selected>
+                  -- Choose Card Type --
+                </option>
                 <option value="Visa">Visa</option>
                 <option value="Mastercard">Mastercard</option>
                 <option value="Discover">Discover</option>
                 <option value="American Express">American Express</option>
               </select>
-              <input type="text" name="payment_zip_code" id="payment_zip_code" required placeholder="Zip Code (5 digits)" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
-              <input type="text" name="payment_nickname" id="payment_nickname" required placeholder="Payment Nickname">
-              <input type="submit" name="submit" value="Add Payment Card to Account" class="form-btn">
-              <div id="payments-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
-              <div id="payments-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+              <input
+                type="text"
+                name="payment_zip_code"
+                id="payment_zip_code"
+                required
+                placeholder="Zip Code (5 digits)"
+                pattern="\d{5}"
+                maxlength="5"
+                minlength="5"
+                inputmode="numeric"
+                title="Zip code must be 5 digits"
+              />
+              <input
+                type="text"
+                name="payment_nickname"
+                id="payment_nickname"
+                required
+                placeholder="Payment Nickname"
+              />
+              <input
+                type="submit"
+                name="submit"
+                value="Add Payment Card to Account"
+                class="form-btn"
+              />
+              <div
+                id="payments-error"
+                style="color: red; font-weight: bold; margin-top: 10px"
+              ></div>
+              <div
+                id="payments-success"
+                style="color: green; font-weight: bold; margin-top: 10px"
+              ></div>
             </form>
           </div>
           <div class="reservation-form-container">
-            <form id="Address-form" class="hidden-form" action="/addresses" method="post">
+            <form
+              id="Address-form"
+              class="hidden-form"
+              action="/addresses"
+              method="post"
+            >
               <h3>Add Address Info</h3>
               <label for="street">Street</label>
-              <input type="text" name="street" id="street" required placeholder="e.g., 4901 Evergreen Rd" minlength="2">
+              <input
+                type="text"
+                name="street"
+                id="street"
+                required
+                placeholder="e.g., 4901 Evergreen Rd"
+                minlength="2"
+              />
               <label for="city">City</label>
-              <input type="text" name="city" id="city" required placeholder="e.g., Dearborn" minlength="2">
+              <input
+                type="text"
+                name="city"
+                id="city"
+                required
+                placeholder="e.g., Dearborn"
+                minlength="2"
+              />
               <label for="state">State</label>
               <select name="state" id="state" required>
                 <option value="" disabled selected>Select State</option>
@@ -231,245 +423,372 @@
                 <option value="WY">Wyoming</option>
               </select>
               <label for="zip_code">Zip Code</label>
-              <input type="text" name="zip_code" id="zip_code" required placeholder="e.g., 48128" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
+              <input
+                type="text"
+                name="zip_code"
+                id="zip_code"
+                required
+                placeholder="e.g., 48128"
+                pattern="\d{5}"
+                maxlength="5"
+                minlength="5"
+                inputmode="numeric"
+                title="Zip code must be 5 digits"
+              />
               <label for="phone_number">Phone Number</label>
-              <input type="text" name="phone_number" id="phone_number" required placeholder="e.g., 248-420-6969" pattern="\d{3}-\d{3}-\d{4}" title="Phone number must be in the format 248-420-6969">
+              <input
+                type="text"
+                name="phone_number"
+                id="phone_number"
+                required
+                placeholder="e.g., 248-420-6969"
+                pattern="\d{3}-\d{3}-\d{4}"
+                title="Phone number must be in the format 248-420-6969"
+              />
               <label for="address_nickname">Address Nickname</label>
-              <input type="text" name="address_nickname" id="address_nickname" required placeholder="Default" minlength="2">
-              <input type="submit" name="submit" value="Add Address to Account" class="form-btn">
-              <div id="address-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
-              <div id="address-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+              <input
+                type="text"
+                name="address_nickname"
+                id="address_nickname"
+                required
+                placeholder="Default"
+                minlength="2"
+              />
+              <input
+                type="submit"
+                name="submit"
+                value="Add Address to Account"
+                class="form-btn"
+              />
+              <div
+                id="address-error"
+                style="color: red; font-weight: bold; margin-top: 10px"
+              ></div>
+              <div
+                id="address-success"
+                style="color: green; font-weight: bold; margin-top: 10px"
+              ></div>
             </form>
           </div>
+        </div>
+      </section>
+      <!-- Reservation Success Modal -->
+      <div
+        id="reservation-modal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 9999;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px #0003;
+            text-align: center;
+            max-width: 90vw;
+          "
+        >
+          <h2 style="margin-bottom: 20px" id="reservation-modal-title">
+            Reservation successful!
+          </h2>
+          <div id="reservation-modal-body"></div>
+          <!-- <button id="close-modal-btn" ...>Okay</button> -->
+        </div>
       </div>
-    </section>
-    <!-- Reservation Success Modal -->
-    <div id="reservation-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
-        <h2 style="margin-bottom:20px;" id="reservation-modal-title">Reservation successful!</h2>
-        <div id="reservation-modal-body"></div>
-        <!-- <button id="close-modal-btn" ...>Okay</button> -->
+      <div
+        id="payment-modal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 9999;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px #0003;
+            text-align: center;
+            max-width: 90vw;
+          "
+        >
+          <h2 style="margin-bottom: 20px" id="payment-modal-title">
+            Payment Added successful!
+          </h2>
+          <div id="payment-modal-body"></div>
+          <!-- <button id="close-modal-btn" ...>Okay</button> -->
+        </div>
       </div>
-    </div>
-    <div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
-        <h2 style="margin-bottom:20px;" id="payment-modal-title">Payment Added successful!</h2>
-        <div id="payment-modal-body"></div>
-        <!-- <button id="close-modal-btn" ...>Okay</button> -->
+      <div
+        id="address-modal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 9999;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px #0003;
+            text-align: center;
+            max-width: 90vw;
+          "
+        >
+          <h2 style="margin-bottom: 20px" id="address-modal-title">
+            Address Added successful!
+          </h2>
+          <div id="address-modal-body"></div>
+          <!-- <button id="close-modal-btn" ...>Okay</button> -->
+        </div>
       </div>
-    </div>
-     <div id="address-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
-        <h2 style="margin-bottom:20px;" id="address-modal-title">Address Added successful!</h2>
-        <div id="address-modal-body"></div>
-        <!-- <button id="close-modal-btn" ...>Okay</button> -->
-      </div>
-    </div>
-  </main><!-- End #main -->
+    </main>
+    <!-- End #main -->
 
-  <!-- ======= Footer ======= -->
-  <footer id="footer">
-    <div class="footer-top">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-12 footer-links">            
-            <ul>
-              <li><a href="tos.html">Terms of Services </a></li>
-              <li><a href="privacy.html">Privacy Policy</a></li>
-              <li><a href="cookies_settings.html">Cookies Settings</a></li>
-            </ul>
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 footer-links">
+              <ul>
+                <li><a href="tos.html">Terms of Services </a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="cookies_settings.html">Cookies Settings</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
+      <div class="container">
+        <div class="copyright">
+          &copy; Copyright <strong><span>DriveShare Corporation</span></strong
+          >. All Rights Reserved
+        </div>
+        <div class="credits">
+          Designed by <a href="Home.html#team">Meaad Hassan</a>
+        </div>
       </div>
-      <div class="credits">
-           Designed by <a href="Home.html#team">Meaad Hassan</a>
-      </div>
-    </div>
-  </footer><!-- End Footer -->
+    </footer>
+    <!-- End Footer -->
 
-  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+    <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/jquery/jquery.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
-  <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
-  <script src="assets/vendor/venobox/venobox.min.js"></script>
-  <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
-  <script src="assets/vendor/counterup/counterup.min.js"></script>
-  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+    <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+    <script src="assets/vendor/venobox/venobox.min.js"></script>
+    <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+    <script src="assets/vendor/counterup/counterup.min.js"></script>
+    <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+    <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
 
-  <!-- Main JS File -->
-  <script src="assets/js/main.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/userdetail")
-        .then(res => {
-          if (!res.ok) throw new Error("Not logged in");
-          return res.json();
-        })
-        .then(data => {
-          if (data.user_type !== "customer") {
-            fetch("/logout", { credentials: "include" })
-              .then(() => window.location.href = "/loginform.html");
-          } else {
-            document.getElementById("main").classList.remove("hidden-page");
-          } 
-        })
-        .catch(() => {
-          window.location.href = "/loginform.html"; 
-        });
-    });
-    document.addEventListener("DOMContentLoaded", function () {
-      const logoImg = document.getElementById("logo-img");
-      const fallbackText = document.getElementById("logo-fallback");
-
-      logoImg.addEventListener("error", function () {
-        logoImg.style.display = "none";
-        fallbackText.style.display = "block";
-      });
-
-      logoImg.addEventListener("load", function () {
-        fallbackText.style.display = "none";
-      });
-    });
-    document.getElementById("phone_number").addEventListener("input", function (e) {
-    let digits = e.target.value.replace(/\D/g, "").substring(0, 10); 
-    let formatted = "";
-
-    if (digits.length > 0) formatted = digits.substring(0, 3);
-    if (digits.length > 3) formatted += "-" + digits.substring(3, 6);
-    if (digits.length > 6) formatted += "-" + digits.substring(6, 10);
-
-    e.target.value = formatted;
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-      const addressForm = document.getElementById('Address-form');
-      if (addressForm) {
-        addressForm.addEventListener('submit', function(e) {
-          let valid = true;
-          let errorMsg = '';
-          const street = document.getElementById('street');
-          const city = document.getElementById('city');
-          const state = document.getElementById('state');
-          const zip = document.getElementById('zip_code');
-          const phone = document.getElementById('phone_number');
-          const nickname = document.getElementById('address_nickname');
-          if (!street.value.trim() || street.value.length < 2) {
-            valid = false;
-            errorMsg += 'Street is required and must be at least 2 characters.\n';
-          }
-          if (!city.value.trim() || city.value.length < 2) {
-            valid = false;
-            errorMsg += 'City is required and must be at least 2 characters.\n';
-          }
-          if (!state.value) {
-            valid = false;
-            errorMsg += 'State is required.\n';
-          }
-          if (!zip.value.match(/^\d{5}$/)) {
-            valid = false;
-            errorMsg += 'Zip code must be exactly 5 digits.\n';
-          }
-          if (!phone.value.match(/^\d{3}-\d{3}-\d{4}$/)) {
-            valid = false;
-            errorMsg += 'Phone number must be in the format 248-420-6969.\n';
-          }
-          if (!nickname.value.trim() || nickname.value.length < 2) {
-            valid = false;
-            errorMsg += 'Address nickname is required and must be at least 2 characters.';
-          }
-          if (!valid) {
-            e.preventDefault();
-            const errorDiv = document.getElementById('address-error');
-            errorDiv.textContent = errorMsg;
-            errorDiv.style.display = 'block';
-            document.getElementById('address-success').textContent = '';
-          } else {
-            const errorDiv = document.getElementById('address-error');
-            errorDiv.textContent = '';
-            errorDiv.style.display = 'none';
-          }
-        });
-      }
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-      const addressForm = document.getElementById('Address-form');
-      const addressModal = document.getElementById('address-modal');
-      const addressModalTitle = document.getElementById('address-modal-title');
-      const addressModalBody = document.getElementById('address-modal-body');
-      if (addressForm) {
-        addressForm.addEventListener('submit', function(e) {
-          setTimeout(function() {
-            const successDiv = document.getElementById('address-success');
-            if (successDiv && successDiv.textContent.trim() !== '') {
-              if (addressModal && addressModalTitle && addressModalBody) {
-                addressModalTitle.textContent = 'Address added successfully!';
-                addressModalBody.innerHTML = '<button id="close-address-modal-btn" style="margin-top:20px;padding:8px 24px;background:#007bff;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">Okay</button>';
-                addressModal.style.display = 'flex';
-                document.getElementById('close-address-modal-btn').onclick = function() {
-                  addressModal.style.display = 'none';
-                };
-              }
+    <!-- Main JS File -->
+    <script src="assets/js/main.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("/userdetail")
+          .then((res) => {
+            if (!res.ok) throw new Error("Not logged in");
+            return res.json();
+          })
+          .then((data) => {
+            if (data.user_type !== "customer") {
+              fetch("/logout", { credentials: "include" }).then(
+                () => (window.location.href = "/loginform.html"),
+              );
+            } else {
+              document.getElementById("main").classList.remove("hidden-page");
             }
-          }, 500);
-        });
-      }
-      if (addressModal) {
-        addressModal.addEventListener('click', function(e) {
-          if (e.target === addressModal) {
-            addressModal.style.display = 'none';
-          }
-        });
-      }
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-      const paymentForm      = document.getElementById('Payment-form');
-      const paymentModal     = document.getElementById('payment-modal');
-      const paymentModalTitle = document.getElementById('payment-modal-title');
-      const paymentModalBody  = document.getElementById('payment-modal-body');
+          })
+          .catch(() => {
+            window.location.href = "/loginform.html";
+          });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const logoImg = document.getElementById("logo-img");
+        const fallbackText = document.getElementById("logo-fallback");
 
-      if (paymentForm) {
-        paymentForm.addEventListener('submit', function(e) {
-          setTimeout(function() {
-            const successDiv = document.getElementById('payments-success');
-            if (successDiv && successDiv.textContent.trim() !== '') {
-              if (paymentModal && paymentModalTitle && paymentModalBody) {
-                paymentModalTitle.textContent = 'Payment method added successfully!';
-                paymentModalBody.innerHTML = `
+        logoImg.addEventListener("error", function () {
+          logoImg.style.display = "none";
+          fallbackText.style.display = "block";
+        });
+
+        logoImg.addEventListener("load", function () {
+          fallbackText.style.display = "none";
+        });
+      });
+      document
+        .getElementById("phone_number")
+        .addEventListener("input", function (e) {
+          let digits = e.target.value.replace(/\D/g, "").substring(0, 10);
+          let formatted = "";
+
+          if (digits.length > 0) formatted = digits.substring(0, 3);
+          if (digits.length > 3) formatted += "-" + digits.substring(3, 6);
+          if (digits.length > 6) formatted += "-" + digits.substring(6, 10);
+
+          e.target.value = formatted;
+        });
+      document.addEventListener("DOMContentLoaded", function () {
+        const addressForm = document.getElementById("Address-form");
+        if (addressForm) {
+          addressForm.addEventListener("submit", function (e) {
+            let valid = true;
+            let errorMsg = "";
+            const street = document.getElementById("street");
+            const city = document.getElementById("city");
+            const state = document.getElementById("state");
+            const zip = document.getElementById("zip_code");
+            const phone = document.getElementById("phone_number");
+            const nickname = document.getElementById("address_nickname");
+            if (!street.value.trim() || street.value.length < 2) {
+              valid = false;
+              errorMsg +=
+                "Street is required and must be at least 2 characters.\n";
+            }
+            if (!city.value.trim() || city.value.length < 2) {
+              valid = false;
+              errorMsg +=
+                "City is required and must be at least 2 characters.\n";
+            }
+            if (!state.value) {
+              valid = false;
+              errorMsg += "State is required.\n";
+            }
+            if (!zip.value.match(/^\d{5}$/)) {
+              valid = false;
+              errorMsg += "Zip code must be exactly 5 digits.\n";
+            }
+            if (!phone.value.match(/^\d{3}-\d{3}-\d{4}$/)) {
+              valid = false;
+              errorMsg += "Phone number must be in the format 248-420-6969.\n";
+            }
+            if (!nickname.value.trim() || nickname.value.length < 2) {
+              valid = false;
+              errorMsg +=
+                "Address nickname is required and must be at least 2 characters.";
+            }
+            if (!valid) {
+              e.preventDefault();
+              const errorDiv = document.getElementById("address-error");
+              errorDiv.textContent = errorMsg;
+              errorDiv.style.display = "block";
+              document.getElementById("address-success").textContent = "";
+            } else {
+              const errorDiv = document.getElementById("address-error");
+              errorDiv.textContent = "";
+              errorDiv.style.display = "none";
+            }
+          });
+        }
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const addressForm = document.getElementById("Address-form");
+        const addressModal = document.getElementById("address-modal");
+        const addressModalTitle = document.getElementById(
+          "address-modal-title",
+        );
+        const addressModalBody = document.getElementById("address-modal-body");
+        if (addressForm) {
+          addressForm.addEventListener("submit", function (e) {
+            setTimeout(function () {
+              const successDiv = document.getElementById("address-success");
+              if (successDiv && successDiv.textContent.trim() !== "") {
+                if (addressModal && addressModalTitle && addressModalBody) {
+                  addressModalTitle.textContent = "Address added successfully!";
+                  addressModalBody.innerHTML =
+                    '<button id="close-address-modal-btn" style="margin-top:20px;padding:8px 24px;background:#007bff;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">Okay</button>';
+                  addressModal.style.display = "flex";
+                  document.getElementById("close-address-modal-btn").onclick =
+                    function () {
+                      addressModal.style.display = "none";
+                    };
+                }
+              }
+            }, 500);
+          });
+        }
+        if (addressModal) {
+          addressModal.addEventListener("click", function (e) {
+            if (e.target === addressModal) {
+              addressModal.style.display = "none";
+            }
+          });
+        }
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const paymentForm = document.getElementById("Payment-form");
+        const paymentModal = document.getElementById("payment-modal");
+        const paymentModalTitle = document.getElementById(
+          "payment-modal-title",
+        );
+        const paymentModalBody = document.getElementById("payment-modal-body");
+
+        if (paymentForm) {
+          paymentForm.addEventListener("submit", function (e) {
+            setTimeout(function () {
+              const successDiv = document.getElementById("payments-success");
+              if (successDiv && successDiv.textContent.trim() !== "") {
+                if (paymentModal && paymentModalTitle && paymentModalBody) {
+                  paymentModalTitle.textContent =
+                    "Payment method added successfully!";
+                  paymentModalBody.innerHTML = `
                   <button id="close-payment-modal-btn"
                     style="margin-top:20px;padding:8px 24px;background:#28a745;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">
                     Okay
                   </button>
                 `;
-                paymentModal.style.display = 'flex';
+                  paymentModal.style.display = "flex";
 
-                document.getElementById('close-payment-modal-btn').onclick = function() {
-                  paymentModal.style.display = 'none';
-                };
+                  document.getElementById("close-payment-modal-btn").onclick =
+                    function () {
+                      paymentModal.style.display = "none";
+                    };
+                }
               }
+            }, 500);
+          });
+        }
+        if (paymentModal) {
+          paymentModal.addEventListener("click", function (e) {
+            if (e.target === paymentModal) {
+              paymentModal.style.display = "none";
             }
-          }, 500);
-        });
-      }
-      if (paymentModal) {
-        paymentModal.addEventListener('click', function(e) {
-          if (e.target === paymentModal) {
-            paymentModal.style.display = 'none';
-          }
-        });
-      }
-    });
-  </script>
-
-</body>
-
+          });
+        }
+      });
+    </script>
+  </body>
 </html>
