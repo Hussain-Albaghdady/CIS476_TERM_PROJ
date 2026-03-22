@@ -171,8 +171,7 @@ async function connectToDB() {
     const adminIdMax = a?.maxUserIdFromAdmin || 0;
     const userIdMax = b?.maxUserIdFromRental || 0;
     const orderIdMax = Math.max(c?.maxOrderIdFromRental || 0);
-    const hostIdMax = Math.max(d?.maxHostIdFromHost || 0);
-
+    const hostIdMax = d?.maxHostIdFromHost || 0;
     await db
       .collection("counters")
       .updateOne(
