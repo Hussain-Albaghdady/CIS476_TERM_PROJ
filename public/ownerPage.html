@@ -77,7 +77,7 @@
   <div id="page-header" style="background-color: #f9fafb;">
   <div class="container text-center" id="welcome">
     <div class="d-flex flex-column justify-content-center align-items-center">
-      <h2 data-aos="fade-up">Welcome, <span>Management Team</span></h2>
+      <h2 data-aos="fade-up">Welcome, <span>Host</span></h2>
       <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
       <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>DriveShare</span></h1>
       <p data-aos="fade-up" data-aos-delay="100">Rent a ride. Share the journey.Rent a ride. Share the journey.<br></p>
@@ -87,7 +87,7 @@
     <div class="content">
       <h3 data-aos="fade-up" data-aos-delay="100">
         <span  class="label">Signed in as</span>
-        <span id="user-welcome-name" class="username">Management</span>
+        <span id="user-welcome-name" class="username">Host</span>
       </h3>
     </div>
   </div>
@@ -437,7 +437,7 @@
           return res.json();
         })
         .then(data => {
-          if (data.user_type !== "maintenance") {
+          if (data.user_type !== "host") {
             fetch("/logout", { credentials: "include" })
               .then(() => window.location.href = "/loginform.html");
           } else {

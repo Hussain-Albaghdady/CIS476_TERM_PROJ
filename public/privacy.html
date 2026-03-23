@@ -1,106 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>DriveShare</title>
+    <meta content="" name="descriptison" />
+    <meta content="" name="keywords" />
 
-  <title>DriveShare</title>
-  <meta content="" name="descriptison">
-  <meta content="" name="keywords">
+    <!-- Favicons -->
+    <link href="assets/img/favicon_io/android-chrome-512x512.png" rel="icon" />
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
 
-  <!-- Favicons -->
-  <link href="assets/img/favicon_io/favicon-2.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900"
+      rel="stylesheet"
+    />
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link
+      href="assets/vendor/bootstrap/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet" />
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+    <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet" />
+    <link href="assets/vendor/venobox/venobox.css" rel="stylesheet" />
+    <link
+      href="assets/vendor/owl.carousel/assets/owl.carousel.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet" />
 
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
-  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
-  <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
-  <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <!-- Main CSS File -->
+    <link href="assets/css/style.css" rel="stylesheet" />
+  </head>
 
-  <!-- Main CSS File -->
-  <link href="assets/css/style.css" rel="stylesheet">
-
-</head>
-
-<body>
-  
+  <body>
     <!-- ======= Top Bar ======= -->
-  <div id="topbar" class="d-none d-lg-block">
-    <div class="container clearfix">
-      <div class="contact-info float-left">
-        <i class="icofont-envelope"></i><a href="mailto:contact@example.com">contact.admin@DriveShare.com</a>
-        <i class="icofont-phone"></i><a href="tel:586-489-9689"> +1 248-420-6969</a>
-      </div>
-      <div class="social-links float-right">
-        <a href="#" class="facebook"><i class="icofont-facebook"></i></a>
+    <div id="topbar" class="d-none d-lg-block">
+      <div class="container clearfix">
+        <div class="contact-info float-left">
+          <i class="icofont-envelope"></i
+          ><a href="mailto:contact@example.com">contact.admin@DriveShare.com</a>
+          <i class="icofont-phone"></i
+          ><a href="tel:586-489-9689"> +1 248-420-6969</a>
+        </div>
+        <div class="social-links float-right">
+          <a href="#" class="facebook"><i class="icofont-facebook"></i></a>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ======= Header ======= -->
-  <header id="header">
-    <div class="container">
-    <div class="logo float-left">
-          <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo_3.png" alt="" class="img-fluid"></a>
-    </div>
-    <div class="mobile">
-      <div class="login float-right">
-      <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link-2"><i class="icofont-login"></i>
-      | Login</a></h1>
+    <!-- ======= Header ======= -->
+    <header id="header">
+      <div class="container">
+        <div class="logo float-left">
+          <a href="Home.html"
+            ><img
+              src="assets/img/DriveShare_Full_Logo.png"
+              alt=""
+              class="img-fluid"
+          /></a>
+        </div>
+        <div class="mobile">
+          <div class="login float-right">
+            <h1>
+              <a
+                href="loginform.html"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                id="login-link-2"
+                ><i class="icofont-login"></i> | Login</a
+              >
+            </h1>
+          </div>
+        </div>
+        <nav class="nav-menu float-right d-none d-lg-block">
+          <ul id="main-navbar-list">
+            <li><a href="/Home.html">Home</a></li>
+            <li><a href="/Home.html#about">About Us</a></li>
+            <li><a href="/Home.html#avaliablity">Vehicles</a></li>
+            <li><a href="/Home.html#location">Locations</a></li>
+            <li><a href="/Home.html#team">Team Members</a></li>
+            <li><a href="/Home.html#contact">Contact Us</a></li>
+            <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
+            <li id="login-link-li">
+              <a
+                href="loginform.html"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                id="login-link"
+                ><i class="icofont-login"></i> | Login</a
+              >
+            </li>
+          </ul>
+        </nav>
+        <!-- .nav-menu -->
+      </div>
+    </header>
+    <!-- End Header -->
+    <div id="page-header" style="background-color: #f9fafb">
+      <div class="legal-container">
+        <div class="content">
+          <h2>Privacy Policy</h2>
+          <h3>
+            <span class="page-highlight">Last Updated: March 10, 2026</span>
+          </h3>
+          <p>
+            Please read this Privacy Policy carefully before using our services
+          </p>
+        </div>
       </div>
     </div>
-    <nav class="nav-menu float-right d-none d-lg-block">
-      <ul id="main-navbar-list">
-        <li><a href="/Home.html">Home</a></li>
-        <li><a href="/Home.html#about">About Us</a></li>
-        <li><a href="/Home.html#avaliablity">Equipments</a></li>
-        <li><a href="/Home.html#location">Locations</a></li>
-        <li><a href="/Home.html#team">Team Members</a></li>
-        <li><a href="/Home.html#contact">Contact Us</a></li>
-        <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
-        <li id="login-link-li">
-          <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
-            | Login</a>
-        </li>
-      </ul>
-    </nav><!-- .nav-menu -->
-    </div>
-  </header><!-- End Header -->
-  <div id="page-header" style="background-color: #f9fafb;">
-    <div class="legal-container">
-      <div class="content">
-        <h2>Privacy Policy</h2>
-        <h3><span class="page-highlight">Last Updated: August 10, 2025</span></h3>
-        <p>Please read this Privacy Policy carefully before using our services</p>
-      </div>
-    </div>
-  </div>
-  <main id="main">
-    <div class="customers-law-container">
+    <main id="main">
+      <div class="customers-law-container">
         <div class="privacy-content aos-init aos-animate" data-aos="fade-up">
           <!-- Introduction -->
           <div id="Introduction" class="content-section">
             <h2>1. Introduction</h2>
             <p>At DriveShare, your privacy is important to us.</p>
-            <p>This Privacy Policy is meant to help you understand what information we collect, why we collect it, and how you can update, manage, export, and delete your information.</p>
+            <p>
+              This Privacy Policy is meant to help you understand what
+              information we collect, why we collect it, and how you can update,
+              manage, export, and delete your information.
+            </p>
           </div>
 
           <!-- Information Collection -->
           <div id="collection" class="content-section">
             <h2>2. Information We Collect</h2>
             <p>We may collect the following types of information:</p>
-              <ol class="subsections">
-                <li class="subsection">
+            <ol class="subsections">
+              <li class="subsection">
                 <h3>2.1 Information You Provide</h3>
-                <p>When you create an account or use our services, you provide us with personal information that includes:</p>
+                <p>
+                  When you create an account or use our services, you provide us
+                  with personal information that includes:
+                </p>
                 <ul class="list-items">
                   <li>Your name and contact information</li>
                   <li>Account credentials</li>
@@ -108,24 +148,30 @@
                   <li>Communication preferences</li>
                   <li>Rental Details</li>
                 </ul>
-                </li>
-                <li class="subsection">                
+              </li>
+              <li class="subsection">
                 <h3>2.2 Automatic Information</h3>
-                <p>We automatically collect and store certain information when you use our services:</p>
+                <p>
+                  We automatically collect and store certain information when
+                  you use our services:
+                </p>
                 <ul class="list-items">
                   <li>Device information and identifiers</li>
                   <li>Log information and usage statistics</li>
                   <li>Location information when enabled</li>
                   <li>Browser type and settings</li>
                 </ul>
-                </li>
-              </ol>
+              </li>
+            </ol>
           </div>
 
           <!-- Use of Information -->
           <div id="personal-info" class="content-section">
             <h2>3. How We Use Your Information</h2>
-            <p>We use the information we collect to provide, maintain, and improve our services. Specifically, we use your information to:</p>
+            <p>
+              We use the information we collect to provide, maintain, and
+              improve our services. Specifically, we use your information to:
+            </p>
             <ul class="list-items">
               <li>Provide and personalize our services</li>
               <li>Process transactions related to your rentals</li>
@@ -137,7 +183,10 @@
 
           <div id="sharing" class="content-section">
             <h2>4. Information Sharing and Disclosure</h2>
-            <p>We do not share personal information outside our company except in the cases below.</p>
+            <p>
+              We do not share personal information outside our company except in
+              the cases below.
+            </p>
 
             <!-- Indented block for subparts -->
             <ol class="subsections">
@@ -148,11 +197,16 @@
 
               <li class="subsection">
                 <h3>4.2 For Legal Reasons</h3>
-                <p>We may disclose information when we believe, in good faith, it is necessary to:</p>
+                <p>
+                  We may disclose information when we believe, in good faith, it
+                  is necessary to:
+                </p>
                 <ul class="list-items">
                   <li>Comply with law, regulation, or legal process</li>
                   <li>Enforce our Terms of Service</li>
-                  <li>Detect or prevent fraud, security, or technical issues</li>
+                  <li>
+                    Detect or prevent fraud, security, or technical issues
+                  </li>
                   <li>Protect the rights, property, or safety of users</li>
                 </ul>
               </li>
@@ -162,98 +216,132 @@
           <!-- Data Security -->
           <div id="data-security" class="content-section">
             <h2>5. Data Security</h2>
-            <p>We work to protect information from unauthorized access, alteration, or disclosure.</p>
+            <p>
+              We work to protect information from unauthorized access,
+              alteration, or disclosure.
+            </p>
             <ul class="list-items">
-              <li>Encryption in transit (SSL/TLS) and SHA-256 hashing where applicable</li>
+              <li>
+                Encryption in transit (SSL/TLS) and SHA-256 hashing where
+                applicable
+              </li>
               <li>Restricted employee access based on need-to-know</li>
-              <li>Periodic reviews of collection, storage, and processing practices</li>
+              <li>
+                Periodic reviews of collection, storage, and processing
+                practices
+              </li>
             </ul>
             <div class="alert-box">
               <i class="bi bi-exclamation-triangle"></i>
               <div class="alert-content">
                 <h5>Important Notice</h5>
-                <p>You are responsible for safeguarding your password and account activity.</p>
+                <p>
+                  You are responsible for safeguarding your password and account
+                  activity.
+                </p>
               </div>
             </div>
           </div>
 
-             <!-- Cookies -->
+          <!-- Cookies -->
           <div id="sharing" class="content-section">
             <h2>6. Cookies</h2>
-            <p>We may use cookies to enhance your browsing experience. You may choose to disable cookies in your browser settings</p>
+            <p>
+              We may use cookies to enhance your browsing experience. You may
+              choose to disable cookies in your browser settings
+            </p>
           </div>
-          
+
           <!-- Your Rights -->
           <div id="Rights" class="content-section">
             <h2>7. Your Rights and Choices</h2>
-            <p>You have certain rights regarding your personal information, including:</p>
+            <p>
+              You have certain rights regarding your personal information,
+              including:
+            </p>
             <ul class="list-items">
               <li>The right to access your personal information</li>
               <li>The right to correct inaccurate information</li>
               <li>The right to request deletion of your information</li>
-              <li>The right to restrict or object to our processing of your information</li>
+              <li>
+                The right to restrict or object to our processing of your
+                information
+              </li>
             </ul>
           </div>
 
           <!-- Policy Updates -->
           <div id="Updates" class="content-section">
             <h2>8. Changes to This Policy</h2>
-            <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the effective date at the top.</p>
-            <p>Your continued use of our services after any changes to this Privacy Policy constitutes your acceptance of such changes.</p>
+            <p>
+              We may update this Privacy Policy from time to time. We will
+              notify you of any changes by posting the new Privacy Policy on
+              this page and updating the effective date at the top.
+            </p>
+            <p>
+              Your continued use of our services after any changes to this
+              Privacy Policy constitutes your acceptance of such changes.
+            </p>
             <div class="notice-box">
-            <i class="bi bi-bell"></i>
-            <p>By continuing to access or use our service after those revisions become effective, you agree to be bound by the revised terms of this policy.</p>
+              <i class="bi bi-bell"></i>
+              <p>
+                By continuing to access or use our service after those revisions
+                become effective, you agree to be bound by the revised terms of
+                this policy.
+              </p>
             </div>
           </div>
         </div>
-    </div>
-  </main><!-- End #main -->
+      </div>
+    </main>
+    <!-- End #main -->
 
-  <!-- ======= Footer ======= -->
-  <footer id="footer">
-    <div class="footer-top">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-12 footer-links">            
-            <ul>
-              <li><a href="tos.html">Terms of Services </a></li>
-              <li><a href="privacy.html">Privacy Policy</a></li>
-              <li><a href="cookies_settings.html">Cookies Settings</a></li>
-            </ul>
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 footer-links">
+              <ul>
+                <li><a href="tos.html">Terms of Services </a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="cookies_settings.html">Cookies Settings</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
+      <div class="container">
+        <div class="copyright">
+          &copy; Copyright <strong><span>DriveShare Corporation</span></strong
+          >. All Rights Reserved
+        </div>
+        <div class="credits">
+          Designed by <a href="Home.html#team">Meaad Hassan</a>
+        </div>
       </div>
-      <div class="credits">
-        Designed by <a href="Home.html#team">Meaad Hassan</a>
-      </div>
-    </div>
-  </footer><!-- End Footer -->
+    </footer>
+    <!-- End Footer -->
 
-  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+    <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/jquery/jquery.min.js"></script>
-  <script src="/assets/vendor/imagesloaded.pkgd.min.js"></script>
-  <script src="/assets/vendor/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
-  <script src="assets/vendor/venobox/venobox.min.js"></script>
-  <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
-  <script src="assets/vendor/counterup/counterup.min.js"></script>
-  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="/assets/vendor/imagesloaded.pkgd.min.js"></script>
+    <script src="/assets/vendor/isotope.pkgd.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+    <script src="assets/vendor/php-email-form/validate.js"></script>
+    <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+    <script src="assets/vendor/venobox/venobox.min.js"></script>
+    <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+    <script src="assets/vendor/counterup/counterup.min.js"></script>
+    <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+    <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
 
-  <!-- Main JS File -->
-  <script src="assets/js/main.js"></script>
-</body>
-
+    <!-- Main JS File -->
+    <script src="assets/js/main.js"></script>
+  </body>
 </html>

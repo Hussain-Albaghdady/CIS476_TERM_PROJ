@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+    <title>DriveShare</title>
+    <meta content="" name="descriptison" />
+    <meta content="" name="keywords" />
+
+    <!-- Favicons -->
+    <link href="assets/img/favicon_io/favicon-2.png" rel="icon" />
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900"
+      rel="stylesheet"
+    />
+
+    <!-- Vendor CSS Files -->
+    <link
+      href="assets/vendor/bootstrap/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet" />
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+    <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet" />
+    <link href="assets/vendor/venobox/venobox.css" rel="stylesheet" />
+    <link
+      href="assets/vendor/owl.carousel/assets/owl.carousel.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="assets/vendor/fonts/Montserrat/fonts/webfonts/Montserrat-Alt1.css"
+    />
+
+    <!-- Main CSS File -->
+    <link href="assets/css/style.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- ======= Top Bar ======= -->
+    <section id="topbar" class="d-none d-lg-block">
+      <div class="container clearfix">
+        <div class="contact-info float-left">
+          <i class="icofont-envelope"></i
+          ><a href="mailto:contact@example.com">contact.admin@DriveShare.com</a>
+          <i class="icofont-phone"></i
+          ><a href="tel:586-489-9689"> +1 248-420-6969</a>
+        </div>
+        <div class="social-links float-right">
+          <a href="#" class="facebook"><i class="icofont-facebook"></i></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= Header ======= -->
+    <header id="header">
+      <div class="container">
+        <div class="logo float-left">
+          <a href="Home.html"
+            ><img
+              src="assets/img/DriveShare_Full_Logo.png"
+              alt=""
+              class="img-fluid"
+          /></a>
+        </div>
+        <div class="mobile">
+          <div class="login float-right">
+            <h1>
+              <a
+                href="loginform.html"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                id="login-link-2"
+                ><i class="icofont-login"></i> | Login</a
+              >
+            </h1>
+          </div>
+        </div>
+        <nav class="nav-menu float-right d-none d-lg-block">
+          <ul id="main-navbar-list">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="home.html#about">About Us</a></li>
+            <li><a href="home.html#location">Locations</a></li>
+            <li><a href="Home.html#team">Team Members</a></li>
+            <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
+            <li id="login-link-li">
+              <a
+                href="/logout"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                id="login-link"
+                ><i class="icofont-logout"></i> | Logout</a
+              >
+            </li>
+          </ul>
+        </nav>
+        <!-- .nav-menu -->
+      </div>
+    </header>
+    <!-- End Header -->
+
+    <div id="page-header" style="background-color: #f9fafb">
+      <div class="container text-center" id="welcome">
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+        >
+          <h2 data-aos="fade-up">Welcome, <span>Owners</span></h2>
+          <img
+            id="logo-img"
+            src="assets/img/DriveShare_Full_Logo.png"
+            class="img-fluid page-image"
+            alt=""
+            data-aos="zoom-out"
+          />
+          <h1
+            id="logo-fallback"
+            class="gradient-text"
+            data-aos="fade-up"
+            style="display: none"
+          >
+            <span>DriveShare</span>
+          </h1>
+          <p data-aos="fade-up" data-aos-delay="100">
+            Your Movie. Your Way. Right Away.<br />
+          </p>
+        </div>
+      </div>
+      <div class="user-container">
+        <div class="content">
+          <h3 data-aos="fade-up" data-aos-delay="100">
+            <span class="label">Signed in as</span>
+            <span id="user-welcome-name" class="username">Management</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <main id="main" class="hidden-page">
+      <div class="form-container">
+        <form action="/managment" method="post">
+          <h3>USER MANAGEMENT</h3>
+          <select name="user_type">
+            <option value="maintenance">Maintenance</option>
+          </select>
+          <input
+            type="text"
+            name="fname"
+            required
+            placeholder="enter their first name"
+          />
+          <input
+            type="text"
+            name="lname"
+            required
+            placeholder="enter their last name"
+          />
+          <input
+            type="text"
+            name="username"
+            required
+            placeholder="enter a username"
+          />
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="enter their email"
+          />
+          <input
+            type="password"
+            name="password"
+            required
+            placeholder="enter a password"
+          />
+          <input
+            type="password"
+            name="cpassword"
+            required
+            placeholder="enter password again"
+          />
+          <input type="submit" value="Submit" class="form-btn" />
+        </form>
+      </div>
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-5 d-flex align-items-stretch" data-aos="fade-up">
+              <div class="info-box">
+                <a
+                  href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  ><i class="bx bx-map"></i>
+                  <h3>Our Headquarter Address</h3>
+                  <p>4901 Evergreen Rd Dearborn, MI 48128</p></a
+                >
+              </div>
+            </div>
+            <div
+              class="col-md-4 d-flex align-items-stretch"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
+              <div class="info-box">
+                <a href="mailto:info@conference.com"
+                  ><i class="bx bx-envelope"></i>
+                  <h3>Email Us</h3>
+                  <p>info@DriveShare.com</p></a
+                >
+              </div>
+            </div>
+            <div
+              class="col-md-3 d-flex align-items-stretch"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <div class="info-box">
+                <a href="tel:248-420-6969"
+                  ><i class="bx bx-phone-call"></i>
+                  <h3>Call Us</h3>
+                  <p>+1 248-420-6969</p></a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 footer-links">
+              <ul>
+                <li><a href="tos.html">Terms of Services </a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="cookies_settings.html">Cookies Settings</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="copyright">
+          &copy; Copyright
+          <strong><span>ProRigs Rentals Corporation</span></strong
+          >. All Rights Reserved
+        </div>
+        <div class="credits">
+          Designed by <a href="home.html#team">Meaad Hassan</a>
+        </div>
+      </div>
+    </footer>
+    <!-- End Footer -->
+
+    <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+    <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+    <script src="assets/vendor/venobox/venobox.min.js"></script>
+    <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+    <script src="assets/vendor/counterup/counterup.min.js"></script>
+    <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+    <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+
+    <!-- Main JS File -->
+    <script src="assets/js/main.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("/userdetail")
+          .then((res) => {
+            if (!res.ok) throw new Error("Not logged in");
+            return res.json();
+          })
+          .then((data) => {
+            if (data.user_type !== "admin") {
+              fetch("/logout", { credentials: "include" }).then(
+                () => (window.location.href = "/loginform.html"),
+              );
+            } else {
+              document.getElementById("main").classList.remove("hidden-page");
+            }
+          })
+          .catch(() => {
+            window.location.href = "/loginform.html";
+          });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const logoImg = document.getElementById("logo-img");
+        const fallbackText = document.getElementById("logo-fallback");
+
+        logoImg.addEventListener("error", function () {
+          logoImg.style.display = "none";
+          fallbackText.style.display = "block";
+        });
+
+        logoImg.addEventListener("load", function () {
+          fallbackText.style.display = "none";
+        });
+      });
+    </script>
+  </body>
+</html>
