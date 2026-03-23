@@ -97,7 +97,7 @@ async function connectToDB() {
       .collection("RentalUsers")
       .createIndex({ username: 1 }, { unique: true });
     await db
-      .collection("hostUsers")
+      .collection("HostUsers")
       .createIndex({ username: 1 }, { unique: true });
     await db
       .collection("AdminUsers")
@@ -106,7 +106,7 @@ async function connectToDB() {
       .collection("RentalUsers")
       .createIndex({ userId: 1 }, { unique: true });
     await db
-      .collection("hostUsers")
+      .collection("HostUsers")
       .createIndex({ hostId: 1 }, { unique: true });
     await db
       .collection("Reservations")
@@ -292,7 +292,7 @@ app.post("/sign_up", async (req, res) => {
       .collection("RentalUsers")
       .findOne({ username: username });
     const existingHost = await db
-      .collection("hostUsers")
+      .collection("HostUsers")
       .findOne({ username: username });
     if (existingRental || existingHost) {
       console.log(`Registration failed: Username '${username}' already exists`);
@@ -318,7 +318,7 @@ app.post("/sign_up", async (req, res) => {
         created_at: now,
         updated_at: now,
       };
-      await db.collection("hostUsers").insertOne(data);
+      await db.collection("HostUsers").insertOne(data);
       console.log(
         `Successfully registered host to the ${dbname} database with hostId:`,
         hostId,
@@ -361,7 +361,7 @@ app.post("/sign_up", async (req, res) => {
   }
 });
 async function findUser(db, username, hashedPass) {
-  const collections = ["AdminUsers", "RentalUsers", "hostUsers"];
+  const collections = ["AdminUsers", "RentalUsers", "HostUsers"];
   for (const coll of collections) {
     const user = await db
       .collection(coll)
@@ -530,7 +530,7 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     let hostId = null;
     if (req.session && req.session.user_name) {
       const host = await db
-        .collection("hostUsers")
+        .collection("HostUsers")
         .findOne({ username: req.session.user_name });
       if (host && host._id) {
         hostId = host._id;
