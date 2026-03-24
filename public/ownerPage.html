@@ -723,15 +723,17 @@
                 </span>
               </td>
               <td data-label="Actions">
-                <button class="btn btn-sm ${vehicle.availability ? 'btn-warning' : 'btn-success'} toggle-availability-btn" data-id="${vehicle._id}" data-available="${vehicle.availability}">
-                  ${vehicle.availability ? 'Mark Unavailable' : 'Mark Available'}
-                </button>
-                <button class="btn btn-sm btn-primary edit-vehicle-btn" data-id="${vehicle._id}">
-                  <i class="icofont-edit"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-danger delete-vehicle-btn" data-id="${vehicle._id}" data-name="${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}">
-                  <i class="icofont-trash"></i> Delete
-                </button>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                  <button class="btn btn-sm ${vehicle.availability ? 'btn-warning' : 'btn-success'} toggle-availability-btn" data-id="${vehicle._id}" data-available="${vehicle.availability}">
+                    ${vehicle.availability ? 'Mark Unavailable' : 'Mark Available'}
+                  </button>
+                  <button class="btn btn-sm btn-primary edit-vehicle-btn" data-id="${vehicle._id}">
+                    <i class="icofont-edit"></i> Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger delete-vehicle-btn" data-id="${vehicle._id}" data-name="${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}">
+                    <i class="icofont-trash"></i> Delete
+                  </button>
+                </div>
               </td>
             `;
             tbody.appendChild(row);
@@ -992,6 +994,7 @@
                   else { img.onload = img.onerror = () => { if (++loaded === imgs.length) initIso(); }; }
                 });
               }
+              setTimeout(() => { if ($container.data('isotope')) $container.isotope('layout'); }, 800);
             })
             .catch(err => {
               console.error("Error refreshing vehicles:", err);

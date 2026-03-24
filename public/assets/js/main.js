@@ -272,72 +272,46 @@ document.addEventListener("DOMContentLoaded", function () {
     const $container = $(".event-container");
     if (!$container.length) return;
 
-    function renderHomeVehicles(data, locationFilter) {
-      $container.empty();
-
-      if (!Array.isArray(data) || data.length === 0) {
-        $container.append(
-          '<div class="col-12"><p style="color:#888;text-align:center;">No vehicles found for the selected filters.</p></div>',
-        );
-        if ($container.data("isotope")) $container.isotope("destroy");
-        return;
-      }
-
-      let filtered = data;
-      if (locationFilter) {
-        filtered = data.filter(
-          (v) =>
-            (v.pickup_location || "").toLowerCase() ===
-            locationFilter.toLowerCase(),
-        );
-      }
-
-      if (!filtered.length) {
-        $container.append(
-          '<div class="col-12"><p style="color:#888;text-align:center;">No vehicles available at the selected location.</p></div>',
-        );
-        if ($container.data("isotope")) $container.isotope("destroy");
-        return;
-      }
-
-      filtered.sort((a, b) => {
-        const p = {
-          "Compact SUV": 0,
-          Minivan: 1,
-          "Passenger Van": 2,
-          Pickup: 3,
-          Sedan: 4,
-          "Sports Car": 5,
-          SUV: 6,
-        };
-        if (a.category !== b.category)
-          return (p[a.category] ?? 999) - (p[b.category] ?? 999);
-        return (a.name || "").localeCompare(b.name || "");
-      });
-
-      filtered.forEach((item) => {
-        const filters = [];
-        if (item.quantity_available > 0) filters.push("filter-Available");
-        else filters.push("filter-Booked");
-        if (item.category === "Compact SUV") filters.push("filter-CompactSUV");
-        if (item.category === "Minivan") filters.push("filter-Minivan");
-        if (item.category === "Passenger Van")
-          filters.push("filter-PassengerVan");
-        if (item.category === "Pickup") filters.push("filter-Pickup");
-        if (item.category === "Sedan") filters.push("filter-Sedan");
-        if (item.category === "Sports Car") filters.push("filter-SportsCar");
-        if (item.category === "SUV") filters.push("filter-SUV");
-
-        const imgUrl =
-          item.image?.trim() ||
-          item.image_url?.trim() ||
-          "assets/img/no-image.png";
-        $container.append(`
+    fetch("/api/vehicles", { credentials: "include" })
+      .then(async (res) => {
+        if (!res.ok) {
+          if (res.status === 401) throw new Error("NOT_LOGGED_IN");
+          return res.text().then((text) => { throw new Error("HTTP " + res.status + " – " + text); });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        $container.empty();
+        if (!Array.isArray(data) || data.length === 0) {
+          $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No vehicles found. Check your API or database.</p></div>');
+          return;
+        }
+        data.sort((a, b) => {
+          const categoryPriority = { "Compact SUV": 0, Minivan: 1, "Passenger Van": 2, Pickup: 3, Sedan: 4, "Sports Car": 5, SUV: 6 };
+          if (a.category !== b.category) {
+            return (categoryPriority[a.category] ?? 999) - (categoryPriority[b.category] ?? 999);
+          }
+          return (a.name || "").localeCompare(b.name || "");
+        });
+        data.forEach((item) => {
+          const filters = [];
+          if (item.quantity_available > 0) filters.push("filter-Available");
+          else filters.push("filter-Booked");
+          if (item.category === "Compact SUV") filters.push("filter-CompactSUV");
+          if (item.category === "Minivan") filters.push("filter-Minivan");
+          if (item.category === "Passenger Van") filters.push("filter-PassengerVan");
+          if (item.category === "Pickup") filters.push("filter-Pickup");
+          if (item.category === "Sedan") filters.push("filter-Sedan");
+          if (item.category === "Sports Car") filters.push("filter-SportsCar");
+          if (item.category === "SUV") filters.push("filter-SUV");
+          const imgUrl = item.image && item.image.trim() !== "" ? item.image : item.image_url && item.image_url.trim() !== "" ? item.image_url : "assets/img/no-image.png";
+          $container.append(`
           <div class="col-lg-4 col-md-6 event-item ${filters.join(" ")}">
             <div class="card">
               <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category || "Vehicle"}" />
               <div class="card-text">
                 <h2>${[item.year, item.make, item.model].filter(Boolean).join(" ") || item.category || "Vehicle"}</h2>
+                <h3>${item.availability ? "Available" : "Unavailable"}</h3>
                 <p class="hosted-by">Hosted By ${item.host_fname || "Unknown"}</p>
                 <p class="desc">${item.description || ""}</p>
                 ${item.range ? `<p class="range"><b>Range:</b> ${item.range} mi</p>` : ""}
@@ -346,94 +320,21 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
           </div>
         `);
-      });
-
-      const initIso = () => {
+        });
         if ($container.data("isotope")) {
-          $container.isotope("reloadItems").isotope("layout");
+          $container.isotope("reloadItems").isotope();
         } else if (typeof Isotope !== "undefined") {
           $container.isotope({ itemSelector: ".event-item" });
         }
-      };
-      const imgs = $container.find("img").toArray();
-      let loaded = 0;
-      if (!imgs.length) {
-        initIso();
-      } else {
-        imgs.forEach((img) => {
-          if (img.complete) {
-            if (++loaded === imgs.length) initIso();
-          } else {
-            img.onload = img.onerror = () => {
-              if (++loaded === imgs.length) initIso();
-            };
-          }
-        });
-      }
-    }
-
-    function fetchHomeVehicles() {
-      const startDate = document.getElementById("Home-start-date")?.value || "";
-      const endDate = document.getElementById("Home-end-date")?.value || "";
-      const location = document.getElementById("Home-location")?.value || "";
-      const msg = document.getElementById("Home-search-msg");
-
-      let url =
-        startDate && endDate
-          ? `/api/vehicles/available?start_date=${startDate}&end_date=${endDate}`
-          : "/api/vehicles";
-
-      if (msg) {
-        if (startDate && endDate) {
-          const locEl = document.getElementById("Home-location");
-          const locText = locEl && locEl.selectedIndex > 0 ? locEl.options[locEl.selectedIndex].text : "";
-          msg.textContent = `Showing vehicles available ${startDate} – ${endDate}${locText ? " in " + locText : ""}.`;
-          msg.style.display = "";
+      })
+      .catch((err) => {
+        $container.empty();
+        if (err.message === "NOT_LOGGED_IN") {
+          $container.append('<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>');
         } else {
-          msg.style.display = "none";
+          $container.append('<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Failed to load vehicles. Please try again later.</p></div>');
         }
-      }
-
-      fetch(url, { credentials: "include" })
-        .then(async (res) => {
-          if (!res.ok) throw new Error("fetch error");
-          return res.json();
-        })
-        .then((data) => renderHomeVehicles(data, location))
-        .catch(() => {
-          $container
-            .empty()
-            .append(
-              '<div class="col-12"><p style="color:red;font-weight:bold;text-align:center;">Failed to load vehicles.</p></div>',
-            );
-        });
-    }
-
-    // Search & Clear buttons
-    document
-      .getElementById("Home-search-btn")
-      ?.addEventListener("click", function () {
-        const s = document.getElementById("Home-start-date").value;
-        const e = document.getElementById("Home-end-date").value;
-        if (s && e && e <= s) {
-          const msg = document.getElementById("Home-search-msg");
-          if (msg) { msg.textContent = "Return date must be after start date."; msg.style.display = ""; }
-          return;
-        }
-        fetchHomeVehicles();
       });
-    document
-      .getElementById("Home-clear-btn")
-      ?.addEventListener("click", function () {
-        document.getElementById("Home-start-date").value = "";
-        document.getElementById("Home-end-date").value = "";
-        document.getElementById("Home-location").value = "";
-        const msg = document.getElementById("Home-search-msg");
-        if (msg) msg.style.display = "none";
-        fetchHomeVehicles();
-      });
-
-    fetchHomeVehicles();
   });
 
   document.addEventListener("DOMContentLoaded", function () {

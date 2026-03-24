@@ -579,6 +579,7 @@
                   else { img.onload = img.onerror = () => { if (++loaded === imgs.length) initIsotope(); }; }
                 });
               }
+              setTimeout(() => { if ($container.data('isotope')) $container.isotope('layout'); }, 800);
             })
             .catch(err => {
               console.error("Error refreshing vehicles:", err);
