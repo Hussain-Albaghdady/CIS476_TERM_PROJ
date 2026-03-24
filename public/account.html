@@ -64,7 +64,7 @@
       <h2 data-aos="fade-up">Welcome, <span>Customer</span></h2>
       <img id="logo-img" src="assets/img/RentFlicks_Full_Logo_3.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
       <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>RentFlicks</span></h1>
-      <p data-aos="fade-up" data-aos-delay="100">Your Movie. Your Way. Right Away.<br></p>
+      <p data-aos="fade-up" data-aos-delay="100">Your Vehicle. Your Way. Right Away.<br></p>
     </div>
   </div>
   <div class="user-container">
@@ -94,9 +94,8 @@
                     <th>Start Date</th>
                     <th>Return Date</th>
                     <th>Status</th>
-                    <th>Movies</th>
+                    <th>Vehicles</th>
                     <th>Pick-Up Location</th>
-                    <th>Download <i class="icofont-download"></i></th>
                     <th>Total</th>
                   </tr>
                 </thead>
@@ -141,22 +140,22 @@
     </section>
     <section id="return" class="container" style="max-width: 800px;">
       <div class="section-title" id="section-subtext">
-        <h2 style="font-weight: bold;">Return Your Rented Movie</h2>
+        <h2 style="font-weight: bold;">Return Your Rented Vehicle</h2>
         <p>Please select the item you wish to return from your active rentals</p>
       </div>
       <div id="return-success" class="alert alert-success" style="display:none;"></div>
       <div id="return-error" class="alert alert-danger" style="display:none;"></div>
       <form id="return-form">
         <div class="form-group">
-          <label id="form-header" for="movieSelect">Your Rented Movie</label>
-          <select class="form-control" id="movieSelect" name="movieId" required>
+          <label id="form-header" for="vehicleSelect">Your Rented Vehicle</label>
+          <select class="form-control" id="vehicleSelect" name="vehicleId" required>
             <option value="">Loading...</option>
           </select>
-          <small id="movieHelp" class="form-text text-muted">Movie IDs are shown for reference.</small>
+          <small id="vehicleHelp" class="form-text text-muted">Vehicle IDs are shown for reference.</small>
         </div>
-        <button id="submit" type="submit" class="btn btn-primary">Return Movie</button>
+        <button id="submit" type="submit" class="btn btn-primary">Return Vehicle</button>
       </form>
-      <div id="no-movie-message" class="alert alert-info" style="display:none; text-align: center;">You have no movies avaliable to return.</div>
+      <div id="no-vehicle-message" class="alert alert-info" style="display:none; text-align: center;">You have no vehicles avaliable to return.</div>
     </section>
     
     <div id="delete-address-modal">
@@ -300,19 +299,11 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td data-label="OrderID">${r.order_id}</td>
-            <td data-label="Start Date">${new Date(r.order_date).toLocaleDateString()}</td>
+            <td data-label="Start Date">${r.start_date ? new Date(r.start_date).toLocaleDateString() : 'N/A'}</td>
             <td data-label="Return Date">${new Date(r.end_date).toLocaleDateString()}</td>
             <td data-label="Status">${r.status}</td>
             <td data-label="Items">${r.items.join(', ')}</td>
             <td data-label="Pick-Up Location">${r.location}</td>
-            <td data-label="Download">
-              ${r.status === "Complete" || !r.location || r.location !== "Digital"
-                ? `<i class="icofont-download" style="color:gray;opacity:0.4;cursor:not-allowed;"></i>`
-                : `<a href="/download/${r.order_id}">
-                    <i class="icofont-download" style="color:red;font-size:20px;"></i>
-                  </a>`
-              }
-            </td>
             <td data-label="Total">${"$",r.total_cost}</td>
           `;
           tbody.appendChild(tr);
@@ -464,17 +455,17 @@
         });
     });
 
-    function loadUserMovie() {
+    function loadUserVehicle() {
       fetch('/api/myrentals')
         .then(res => {
           if (!res.ok) throw new Error('Network response was not ok');
           return res.json();
         })
         .then(data => {
-          const select = document.getElementById('movieSelect');
-          const noMsg = document.getElementById('no-movie-message');
+          const select = document.getElementById('vehicleSelect');
+          const noMsg = document.getElementById('no-vehicle-message');
           const msg = document.getElementById('form-header');
-          const movieHelp = document.getElementById('movieHelp');
+          const vehicleHelp = document.getElementById('vehicleHelp');
           const submit=document.getElementById('submit');
           const subtext=document.getElementById('section-subtext');
 
@@ -488,31 +479,31 @@
             });
             select.required = true;
             select.style.display = '';
-            movieHelp.style.display='';
+            vehicleHelp.style.display='';
             submit.style.display = '';
             msg.style.display = '';
             subtext.style.display = '';
             noMsg.style.display = 'none';
           } else {
             select.style.display = 'none';
-            movieHelp.style.display='none';
+            vehicleHelp.style.display='none';
             submit.style.display = 'none';
-            noMsg.textContent = 'You have no movies to return.';
+            noMsg.textContent = 'You have no vehicles to return.';
             msg.style.display = 'none';
             subtext.style.display = 'none';
             noMsg.style.display = '';
           }
         })
         .catch(() => {
-          const select = document.getElementById('movieSelect');
-          const noMsg = document.getElementById('no-movie-message');
+          const select = document.getElementById('vehicleSelect');
+          const noMsg = document.getElementById('no-vehicle-message');
           const msg = document.getElementById('form-header');
-          const movieHelp = document.getElementById('movieHelp');
+          const vehicleHelp = document.getElementById('vehicleHelp');
           const subtext=document.getElementById('section-subtext');
 
 
           select.style.display = 'none';
-          movieHelp.style.display='none';
+          vehicleHelp.style.display='none';
           submit.style.display = 'none';
           msg.style.display = 'none';
           subtext.style.display = 'none';
@@ -520,34 +511,34 @@
           noMsg.style.display = '';
         });
     }
-    loadUserMovie();
+    loadUserVehicle();
 
     document.getElementById('return-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const select = document.getElementById('movieSelect');
-      const movieId = select.value;
+      const select = document.getElementById('vehicleSelect');
+      const vehicleId = select.value;
       document.getElementById('return-success').style.display = 'none';
       document.getElementById('return-error').style.display = 'none';
-      if (!movieId) {
-        document.getElementById('return-error').textContent = 'Please select movie to return.';
+      if (!vehicleId) {
+        document.getElementById('return-error').textContent = 'Please select vehicle to return.';
         document.getElementById('return-error').style.display = 'block';
         return;
       }
       fetch('/api/return', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ movieId })
+        body: JSON.stringify({ vehicleId })
       })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          document.getElementById('return-success').textContent = 'Movie returned successfully!';
+          document.getElementById('return-success').textContent = 'Vehicle returned successfully!';
           document.getElementById('return-success').style.display = 'block';
           document.getElementById('return-form').reset();
           window.location.reload();
-          loadUserMovie();
+          loadUserVehicle();
         } else {
-          document.getElementById('return-error').textContent = data.error || 'Failed to return movie.';
+          document.getElementById('return-error').textContent = data.error || 'Failed to return vehicle.';
           document.getElementById('return-error').style.display = 'block';
         }
       })

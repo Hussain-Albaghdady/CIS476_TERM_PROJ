@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  if (window.location.pathname.endsWith('movie-reservation.html')) {
+  if (window.location.pathname.endsWith('vehicle-reservation.html')) {
     fetch('/api/userinfo')
       .then(res => res.json())
       .then(data => {
@@ -238,9 +238,9 @@ $(document).ready(function () {
   const $container = $('.event-container');
   if (!$container.length) return;
 
-  fetch('/api/movies', { credentials: 'include' })
+  fetch('/api/vehicles', { credentials: 'include' })
     .then(res => {
-      console.log('GET /api/movies status:', res.status);
+      console.log('GET /api/vehicles status:', res.status);
 
       if (!res.ok) {
         if (res.status === 401) {
@@ -253,31 +253,25 @@ $(document).ready(function () {
       return res.json();
     })
     .then(data => {
-      console.log("Fetched movie data:", data);
+      console.log("Fetched vehicle data:", data);
       $container.empty();
 
       if (!Array.isArray(data) || data.length === 0) {
         $container.append(
-          '<div class="col-12"><p style="color:red;font-weight:bold;">No movies found. Check your API or database.</p></div>'
+          '<div class="col-12"><p style="color:red;font-weight:bold;">No vehicles found. Check your API or database.</p></div>'
         );
         return;
       }
 
       data.sort((a, b) => {
         const categoryPriority = {
-          "Action": 0,
-          "Adventure": 1,
-          "Anime": 2,
-          "Crime": 3,
-          "Comedy": 4,
-          "Documentary": 5,
-          "Drama": 6,
-          "Horror": 7,
-          "Kids": 8,
-          "Romance": 9,
-          "Sci-Fi": 10,
-          "Sports": 11,
-          "Thriller": 12,
+          "Compact SUV": 0,
+          "Minivan": 1,
+          "Passenger Van": 2,
+          "Pickup": 3,
+          "Sedan": 4,
+          "Sports Car": 5,
+          "SUV": 6,
         };
 
         if (a.category !== b.category) {
@@ -293,19 +287,13 @@ $(document).ready(function () {
         if (item.quantity_available > 0) filters.push("filter-Available");
         else filters.push("filter-Booked");
 
-        if (item.category === "Action") filters.push("filter-Action");
-        if (item.category === "Adventure") filters.push("filter-Adventure");
-        if (item.category === "Anime") filters.push("filter-Anime");
-        if (item.category === "Comedy") filters.push("filter-Comedy");
-        if (item.category === "Crime") filters.push("filter-Crime");
-        if (item.category === "Drama") filters.push("filter-Drama");
-        if (item.category === "Documentary") filters.push("filter-Documentary");
-        if (item.category === "Horror") filters.push("filter-Horror");
-        if (item.category === "Kids") filters.push("filter-Kids");
-        if (item.category === "Romance") filters.push("filter-Romance");
-        if (item.category === "Sci-Fi") filters.push("filter-SciFi");
-        if (item.category === "Sports") filters.push("filter-Sports");
-        if (item.category === "Thriller") filters.push("filter-Thriller");
+        if (item.category === "Compact SUV") filters.push("filter-CompactSUV");
+        if (item.category === "Minivan") filters.push("filter-Minivan");
+        if (item.category === "Passenger Van") filters.push("filter-PassengerVan");
+        if (item.category === "Pickup") filters.push("filter-Pickup");
+        if (item.category === "Sedan") filters.push("filter-Sedan");
+        if (item.category === "Sports Car") filters.push("filter-SportsCar");
+        if (item.category === "SUV") filters.push("filter-SUV");
 
 
         const imgUrl =
@@ -318,10 +306,11 @@ $(document).ready(function () {
         $container.append(`
           <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
             <div class="card">
-              <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category || 'Movie'}" />
+              <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category || 'Vehicle'}" />
               <div class="card-text">
-                <h2>${item.name || item.category || 'Movie'}</h2>
-                <h3>Available: ${item.quantity_available > 0 ? "Yes" : "No"} (${item.quantity_available || 0} in stock)</h3>
+                <h2>${item.name || item.category || 'Vehicle'}</h2>
+                <h3>${item.availability ? 'Available' : 'Unavailable'}</h3>
+                <p class="hosted-by">Hosted By ${item.host_fname || 'Unknown'}</p>
                 <p class="desc">${item.description || ""}</p>
                 <p class="rate">Rate: $${item.rental_rate_per_day} / day</p>
               </div>
@@ -337,7 +326,7 @@ $(document).ready(function () {
       }
     })
     .catch(err => {
-      console.error("Error fetching /api/movies:", err);
+      console.error("Error fetching /api/vehicles:", err);
 
       $container.empty();
 
@@ -347,7 +336,7 @@ $(document).ready(function () {
         );
       } else {
         $container.append(
-          '<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Failed to load movies. Please try again later.</p></div>'
+          '<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Failed to load vehicles. Please try again later.</p></div>'
         );
       }
     });
@@ -406,10 +395,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 <a href="account.html" id="dashboard-page-link-anchor">Dashboard</a>
               </li>
               <li id="customer-page-link">
-                <a href="movie-reservation.html" id="customer-page-link-anchor">Rent Movies</a>
+                <a href="vehicle-reservation.html" id="customer-page-link-anchor">Rent Vehicles</a>
               </li>
               <li id="return-page-link">
-                <a href="account.html#return" id="return-page-link-anchor">Return Movies</a>
+                <a href="account.html#return" id="return-page-link-anchor">Return Vehicles</a>
               </li>
             </ul>
           `;
@@ -456,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (current.endsWith('account.html')) {
         document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
       }
-      if (current.endsWith('movie-reservation.html')) {
+      if (current.endsWith('vehicle-reservation.html')) {
         document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
       }
       if (current.endsWith('account.html#return')) {
@@ -479,12 +468,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })
   .catch(() => { /* not logged in, do nothing */ });
-  let allMovie = [];
-  let selectedMovieSet = new Set();
+  let allVehicle = [];
+  let selectedVehicleSet = new Set();
 
-  function renderMovie(category) {
-    const list = document.getElementById('movie-list');
-    let filtered = allMovie.filter(eq => (eq.quantity_available || 0) > 0);
+  function renderVehicle(category) {
+    const list = document.getElementById('vehicle-list');
+    let filtered = allVehicle.filter(eq => (eq.quantity_available || 0) > 0);
     if (category) {
       filtered = filtered.filter(eq =>
         (eq.category || eq.type || '').toLowerCase() === category.toLowerCase()
@@ -493,11 +482,13 @@ document.addEventListener('DOMContentLoaded', function () {
     
     filtered.sort((a, b) => {
       const categoryPriority = {
-        "Heavy Movie": 0,
-        "Carpet Cleaners & Pressure Washers": 1,
-        "Ladder & Lifts": 2,
-        "Landscaping Tools": 3,
-        "Light Movie": 4
+        "Compact SUV": 0,
+        "Minivan": 1,
+        "Passenger Van": 2,
+        "Pickup": 3,
+        "Sedan": 4,
+        "Sports Car": 5,
+        "SUV": 6,
       };
       
       if (a.category !== b.category) {
@@ -509,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     
     if (!filtered.length) {
-      list.innerHTML = '<div class="col-12"><p>No movies available for this category.</p></div>';
+      list.innerHTML = '<div class="col-12"><p>No vehicles available for this category.</p></div>';
       return;
     }
     list.innerHTML = filtered.map(eq => {
@@ -521,9 +512,9 @@ document.addEventListener('DOMContentLoaded', function () {
       return `
       <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
-          <img src="${imgUrl}" class="card-img-top" alt="${eq.name || eq.movieName || 'Movie'}">
+          <img src="${imgUrl}" class="card-img-top" alt="${eq.name || eq.vehicleName || 'Vehicle'}">
           <div class="card-body">
-            <h5 class="card-title">${eq.name || eq.movieName || 'Movie'}</h5>
+            <h5 class="card-title">${eq.name || eq.vehicleName || 'Vehicle'}</h5>
             <p class="card-text">${eq.description || ''}</p>
             <div style="font-weight:bold;margin-bottom:5px;">
               Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : 'N/A'} per day
@@ -532,8 +523,8 @@ document.addEventListener('DOMContentLoaded', function () {
               <b>Quantity Available:</b> ${eq.quantity_available || 0}
             </div>
             <div>
-              <input type="checkbox" class="movie-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedMovieSet.has(eq._id) ? 'checked' : ''}>
-              <label for="equip_${eq._id}">Select this Movie</label>
+              <input type="checkbox" class="vehicle-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedVehicleSet.has(eq._id) ? 'checked' : ''}>
+              <label for="equip_${eq._id}">Select this Vehicle</label>
             </div>
           </div>
         </div>
@@ -541,27 +532,45 @@ document.addEventListener('DOMContentLoaded', function () {
       `;
     }).join('');
 
-  document.querySelectorAll('.movie-checkbox').forEach(cb => {
+  document.querySelectorAll('.vehicle-checkbox').forEach(cb => {
     cb.addEventListener('change', function() {
       if (this.checked) {
-        selectedMovieSet.add(this.value);
+        selectedVehicleSet.clear();
+        selectedVehicleSet.add(this.value);
+        // Gray out all other vehicle cards
+        document.querySelectorAll('.vehicle-checkbox').forEach(other => {
+          if (other !== this) {
+            other.checked = false;
+            other.disabled = true;
+            other.closest('.col-md-4').style.opacity = '0.4';
+            other.closest('.col-md-4').style.pointerEvents = 'none';
+          }
+        });
       } else {
-        selectedMovieSet.delete(this.value);
+        selectedVehicleSet.delete(this.value);
+        // Restore all other vehicle cards
+        document.querySelectorAll('.vehicle-checkbox').forEach(other => {
+          other.disabled = false;
+          other.closest('.col-md-4').style.opacity = '';
+          other.closest('.col-md-4').style.pointerEvents = '';
+        });
       }
     });
   });
 }
 
-fetch('/api/movies')
+fetch('/api/vehicles')
   .then(res => res.json())
   .then(data => {
     data.sort((a, b) => {
       const categoryPriority = {
-        "Heavy Movie": 0,
-        "Carpet Cleaners & Pressure Washers": 1,
-        "Ladder & Lifts": 2,
-        "Landscaping Tools": 3,
-        "Light Movie": 4
+        "Compact SUV": 0,
+        "Minivan": 1,
+        "Passenger Van": 2,
+        "Pickup": 3,
+        "Sedan": 4,
+        "Sports Car": 5,
+        "SUV": 6,
       };
       
       if (a.category !== b.category) {
@@ -572,15 +581,15 @@ fetch('/api/movies')
       return a.name.localeCompare(b.name);
     });
     
-    allMovie = data;
-    renderMovie("");
+    allVehicle = data;
+    renderVehicle("");
   })
   .catch(() => {
-    document.getElementById('movie-list').innerHTML = '<div class="col-12"><p>Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>';
+    document.getElementById('vehicle-list').innerHTML = '<div class="col-12"><p>Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>';
   });
 
-document.getElementById('movie-category').addEventListener('change', function() {
-  renderMovie(this.value);
+document.getElementById('vehicle-category').addEventListener('change', function() {
+  renderVehicle(this.value);
 });
 
 function calculateDays(startDate, endDate) {
@@ -614,23 +623,30 @@ function showPaymentModal(totalPrice, onConfirm) {
     e.preventDefault();
     document.getElementById('reservation-error').textContent = '';
     document.getElementById('reservation-success').textContent = '';
-    document.getElementById('selected-movie').value = JSON.stringify(Array.from(selectedMovieSet));
-    if (selectedMovieSet.size === 0) {
-      document.getElementById('reservation-error').textContent = "Please select at least one movie to reserve.";
+    document.getElementById('selected-vehicle').value = JSON.stringify(Array.from(selectedVehicleSet));
+    if (selectedVehicleSet.size === 0) {
+      document.getElementById('reservation-error').textContent = "Please select at least one vehicle to reserve.";
       return;
     }
-    const selectedIds = Array.from(selectedMovieSet);
+    const selectedIds = Array.from(selectedVehicleSet);
+    const startDate = document.getElementById('start_date').value;
     const endDate = document.getElementById('end_date').value;
+    if (!startDate) {
+      document.getElementById('reservation-error').textContent = "Please select a start date.";
+      return;
+    }
     if (!endDate) {
       document.getElementById('reservation-error').textContent = "Please select a return date.";
       return;
     }
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const days = calculateDays(todayStr, endDate);
+    if (endDate <= startDate) {
+      document.getElementById('reservation-error').textContent = "Return date must be after start date.";
+      return;
+    }
+    const days = calculateDays(startDate, endDate);
     let totalPrice = 0;
     selectedIds.forEach(id => {
-      const eq = allMovie.find(eq => eq._id == id);
+      const eq = allVehicle.find(eq => eq._id == id);
       if (eq && eq.rental_rate_per_day) {
         totalPrice += Number(eq.rental_rate_per_day) * days;
       }
@@ -642,7 +658,6 @@ function showPaymentModal(totalPrice, onConfirm) {
     showPaymentModal(totalPrice, () => {
       const form = document.getElementById('reservation-form');
       const formData = new FormData(form);
-      formData.delete('start_date');
       fetch(form.action, {
         method: 'POST',
         body: new URLSearchParams([...formData])
@@ -654,9 +669,9 @@ function showPaymentModal(totalPrice, onConfirm) {
           document.getElementById('reservation-success').textContent = '';
         } else {
           let msg = "";
-          if (data.unavailable_movie_ids && data.unavailable_movie_ids.length > 0) {
-            msg = `<div style="color:green;font-weight:bold;">Reservation successful for available movies only.</div>
-                    <div style="color:red;font-weight:bold;">Some movies was already booked and not reserved.</div>`;
+          if (data.unavailable_vehicle_ids && data.unavailable_vehicle_ids.length > 0) {
+            msg = `<div style="color:green;font-weight:bold;">Reservation successful for available vehicles only.</div>
+                    <div style="color:red;font-weight:bold;">Some vehicles was already booked and not reserved.</div>`;
           } else {
             msg = `<div style="color:green;font-weight:bold;">Reservation successful!</div>`;
           }
@@ -672,8 +687,8 @@ function showPaymentModal(totalPrice, onConfirm) {
           };
           document.getElementById('reservation-success').textContent = '';
           document.getElementById('reservation-error').textContent = '';
-          selectedMovieSet.clear();
-          renderMovie(document.getElementById('movie-category').value);
+          selectedVehicleSet.clear();
+          renderVehicle(document.getElementById('vehicle-category').value);
         }
       })
       .catch(() => {
@@ -739,7 +754,7 @@ function showPaymentModal(totalPrice, onConfirm) {
       .catch(() => {
       });
 
-    if (window.location.pathname.endsWith('movie-reservation.html')) {
+    if (window.location.pathname.endsWith('vehicle-reservation.html')) {
       populatePaymentDropdown();
       populateAddressDropdown();
       

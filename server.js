@@ -37,7 +37,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "public/assets/img/movies/");
+    cb(null, "public/assets/img/vehicles/");
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -413,7 +413,7 @@ app.post("/login", async (req, res) => {
     if (user.user_type === "admin") {
       return res.redirect("/adminPage.html");
     } else if (user.user_type === "customer") {
-      return res.redirect("/movie-reservation.html");
+      return res.redirect("/vehicle-reservation.html");
     } else if (user.user_type === "host") {
       return res.redirect("/ownerPage.html");
     } else {
@@ -463,12 +463,30 @@ app.get("/userdetail", requireLogin, (req, res) => {
     user_type: user.user_type,
   });
 });
-app.get("/api/movies", async (req, res) => {
+app.get("/api/vehicles", async (req, res) => {
   try {
-    const movies = await db.collection("Movies").find({}).toArray();
-    res.json(movies);
+    const vehicles = await db.collection("Vehicles").find({}).toArray();
+    const hostUsernames = [...new Set(vehicles.filter(v => v.host_username).map(v => v.host_username))];
+    const hosts = await db.collection("HostUsers").find({ username: { $in: hostUsernames } }).toArray();
+    const hostMap = {};
+    hosts.forEach(h => { hostMap[h.username] = h.fname; });
+    const enriched = vehicles.map(v => ({ ...v, host_fname: v.host_username ? (hostMap[v.host_username] || null) : null }));
+    res.json(enriched);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch movies" });
+    res.status(500).json({ error: "Failed to fetch vehicles" });
+  }
+});
+
+app.get("/api/my-vehicles", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const vehicles = await db.collection("Vehicles").find({ host_username: username }).toArray();
+    const host = await db.collection("HostUsers").findOne({ username });
+    const host_fname = host ? host.fname : null;
+    const enriched = vehicles.map(v => ({ ...v, host_fname }));
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch vehicles" });
   }
 });
 
@@ -476,33 +494,35 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
   try {
     const {
       customer_name,
+      start_date,
       end_date,
       location,
       address,
       payment,
-      movie_ids,
+      vehicle_ids,
       total_cost,
       host_name,
     } = req.body;
     if (
       !customer_name ||
+      !start_date ||
       !end_date ||
       !location ||
       !address ||
       !payment ||
-      !movie_ids
+      !vehicle_ids
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
-    let movieIds = movie_ids;
-    if (typeof movieIds === "string") {
+    let vehicleIds = vehicle_ids;
+    if (typeof vehicleIds === "string") {
       try {
-        movieIds = JSON.parse(movieIds);
+        vehicleIds = JSON.parse(vehicleIds);
       } catch {
-        movieIds = [];
+        vehicleIds = [];
       }
     }
-    const objectIds = movieIds.map((id) => {
+    const objectIds = vehicleIds.map((id) => {
       try {
         if (
           typeof id === "object" &&
@@ -536,46 +556,30 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
         hostId = host._id;
       }
     }
-    const movieDocs = await db
-      .collection("Movies")
-      .find({
-        _id: { $in: objectIds },
-      })
-      .toArray();
 
-    let digital_file = null;
-
-    if (location === "Digital") {
-      const firstMovie = movieDocs[0];
-
-      const imgPath = firstMovie?.image_url || firstMovie?.image;
-      if (imgPath) {
-        digital_file = imgPath.split("/").pop();
-      }
-    }
 
     const orderId = await getNextSequence("orderId");
     const data = {
       orderId,
       customer_name,
       host_name,
+      start_date,
       end_date,
       order_date: new Date().toISOString().split("T")[0],
       location,
       address,
       payment,
       status: "Renting",
-      history_movie_ids: movieIds,
-      movie_ids: movieIds,
+      history_vehicle_ids: vehicleIds,
+      vehicle_ids: vehicleIds,
       ...(user_id && { user_id }),
       ...(total_cost && { total_cost: Number(total_cost) }),
-      digital_file: digital_file,
       created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
       updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
     };
     await db.collection("Reservations").insertOne(data);
 
-    console.log("Updating Movies with IDs:", objectIds);
+    console.log("Updating Vehicles with IDs:", objectIds);
 
     const validObjectIds = objectIds.filter(
       (id) => ObjectId.isValid(id) && typeof id === "object",
@@ -584,17 +588,17 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     console.log("Valid ObjectIds for update:", validObjectIds);
 
     if (validObjectIds.length > 0) {
-      const movies = await db
-        .collection("Movies")
+      const vehicles = await db
+        .collection("Vehicles")
         .find({ _id: { $in: validObjectIds } })
         .toArray();
-      for (const eq of movies) {
+      for (const eq of vehicles) {
         if (
           typeof eq.quantity_available === "number" &&
           eq.quantity_available > 0
         ) {
           const newQty = eq.quantity_available - 1;
-          await db.collection("Movies").updateOne(
+          await db.collection("Vehicles").updateOne(
             { _id: eq._id },
             {
               $set: {
@@ -607,7 +611,7 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
         }
       }
     } else {
-      console.log("No valid Movie IDs to update availability.");
+      console.log("No valid Vehicle IDs to update availability.");
     }
 
     res.json({ message: "Reservation created successfully", ...data });
@@ -741,81 +745,21 @@ app.post("/addresses", requireLogin, async (req, res) => {
     }
   } catch (err) {
     console.log(`Address Insert error to the ${dbname} database`, err);
-    return res.redirect(`movie-reservation.html`);
+    return res.redirect(`vehicle-reservation.html`);
   }
 });
 
-app.get("/download/:orderId", requireLogin, async (req, res) => {
-  try {
-    if (!req.session || !req.session.user_name) {
-      return res.status(401).send("Not logged in.");
-    }
-
-    const user = await db
-      .collection("RentalUsers")
-      .findOne({ username: req.session.user_name });
-
-    if (!user) {
-      return res.status(404).send("User not found.");
-    }
-
-    const orderId = Number(req.params.orderId);
-
-    const reservation = await db
-      .collection("Reservations")
-      .findOne({ orderId, user_id: user._id });
-
-    if (!reservation) {
-      return res.status(404).send("Reservation not found.");
-    }
-
-    if (reservation.location !== "Digital" || !reservation.digital_file) {
-      return res
-        .status(400)
-        .send("This reservation does not include a digital download.");
-    }
-
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    const end = new Date(reservation.end_date);
-    end.setHours(23, 59, 59, 999);
-
-    if (now > end) {
-      return res.status(403).send("This download has expired.");
-    }
-
-    const filePath = path.join(
-      __dirname,
-      "public",
-      "assets",
-      "img",
-      "movies",
-      reservation.digital_file,
-    );
-
-    return res.download(filePath, (err) => {
-      if (err) {
-        console.error("Download error:", err);
-        return res.status(404).send("File not found.");
-      }
-    });
-  } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).send("Server error.");
-  }
-});
 
 app.post("/api/return", requireLogin, async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
       return res.status(401).json({ success: false, error: "Not logged in" });
     }
-    const { movieId } = req.body;
-    if (!movieId) {
+    const { vehicleId } = req.body;
+    if (!vehicleId) {
       return res
         .status(400)
-        .json({ success: false, error: "No movie ID provided" });
+        .json({ success: false, error: "No vehicle ID provided" });
     }
     const user = await db
       .collection("RentalUsers")
@@ -831,14 +775,14 @@ app.post("/api/return", requireLogin, async (req, res) => {
     let reservation = null;
     let matchedIdType = null;
     for (const resv of reservations) {
-      if (Array.isArray(resv.movie_ids)) {
-        for (const id of resv.movie_ids) {
+      if (Array.isArray(resv.vehicle_ids)) {
+        for (const id of resv.vehicle_ids) {
           if (
             (typeof id === "object" &&
               id &&
               id._bsontype &&
-              id.toString() === movieId) ||
-            (typeof id === "string" && id === movieId)
+              id.toString() === vehicleId) ||
+            (typeof id === "string" && id === vehicleId)
           ) {
             reservation = resv;
             matchedIdType = typeof id;
@@ -851,22 +795,22 @@ app.post("/api/return", requireLogin, async (req, res) => {
     if (!reservation) {
       return res.status(404).json({
         success: false,
-        error: "Reservation not found for this movie",
+        error: "Reservation not found for this vehicle",
       });
     }
 
-    let updatedMovieIds = reservation.movie_ids.filter((id) => {
+    let updatedVehicleIds = reservation.vehicle_ids.filter((id) => {
       if (typeof id === "object" && id && id._bsontype) {
-        return id.toString() !== movieId;
+        return id.toString() !== vehicleId;
       }
-      return id !== movieId;
+      return id !== vehicleId;
     });
-    if (updatedMovieIds.length === 0) {
+    if (updatedVehicleIds.length === 0) {
       await db.collection("Reservations").updateOne(
         { _id: reservation._id },
         {
           $set: {
-            movie_ids: [],
+            vehicle_ids: [],
             status: "Complete",
             updated_at: new Date()
               .toISOString()
@@ -880,7 +824,7 @@ app.post("/api/return", requireLogin, async (req, res) => {
         { _id: reservation._id },
         {
           $set: {
-            movie_ids: updatedMovieIds,
+            vehicle_ids: updatedVehicleIds,
             updated_at: new Date()
               .toISOString()
               .replace("T", " ")
@@ -890,11 +834,13 @@ app.post("/api/return", requireLogin, async (req, res) => {
       );
     }
 
-    let eqId = ObjectId.isValid(movieId) ? new ObjectId(movieId) : movieId;
-    const movie = await db.collection("Movies").findOne({ _id: eqId });
-    if (movie) {
-      const newQty = (movie.quantity_available || 0) + 1;
-      await db.collection("Movies").updateOne(
+    let eqId = ObjectId.isValid(vehicleId)
+      ? new ObjectId(vehicleId)
+      : vehicleId;
+    const vehicle = await db.collection("Vehicles").findOne({ _id: eqId });
+    if (vehicle) {
+      const newQty = (vehicle.quantity_available || 0) + 1;
+      await db.collection("Vehicles").updateOne(
         { _id: eqId },
         {
           $set: {
@@ -918,7 +864,7 @@ app.post("/api/return", requireLogin, async (req, res) => {
 setInterval(async () => {
   try {
     const now = new Date();
-    await db.collection("Movies").updateMany(
+    await db.collection("Vehicles").updateMany(
       {
         unavailable_until: { $lte: now },
         availability: false,
@@ -927,7 +873,7 @@ setInterval(async () => {
       { $set: { availability: true }, $unset: { unavailable_until: "" } },
     );
   } catch (err) {
-    console.error("Error updating movie availability:", err);
+    console.error("Error updating vehicle availability:", err);
   }
 }, 60 * 1000);
 
@@ -969,22 +915,22 @@ app.get("/api/myrentals", async (req, res) => {
       .collection("Reservations")
       .find({ user_id: user._id })
       .toArray();
-    const movieIdSet = new Set();
+    const vehicleIdSet = new Set();
     reservations.forEach((resv) => {
-      if (Array.isArray(resv.movie_ids)) {
-        resv.movie_ids.forEach((id) => {
+      if (Array.isArray(resv.vehicle_ids)) {
+        resv.vehicle_ids.forEach((id) => {
           if (typeof id === "object" && id && id._bsontype) {
-            movieIdSet.add(id.toString());
+            vehicleIdSet.add(id.toString());
           } else if (typeof id === "string") {
-            movieIdSet.add(id);
+            vehicleIdSet.add(id);
           }
         });
       }
     });
-    if (movieIdSet.size === 0) {
+    if (vehicleIdSet.size === 0) {
       return res.json([]);
     }
-    const movieIds = Array.from(movieIdSet)
+    const vehicleIds = Array.from(vehicleIdSet)
       .map((id) => {
         try {
           return ObjectId.isValid(id) ? new ObjectId(id) : null;
@@ -993,13 +939,13 @@ app.get("/api/myrentals", async (req, res) => {
         }
       })
       .filter(Boolean);
-    const movies = await db
-      .collection("Movies")
-      .find({ _id: { $in: movieIds } })
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ _id: { $in: vehicleIds } })
       .toArray();
-    const result = movies.map((eq) => ({
+    const result = vehicles.map((eq) => ({
       id: eq._id,
-      name: eq.name || eq.movieName || "Movies",
+      name: eq.name || eq.vehicleName || "Vehicles",
       description: eq.description || "",
       image: eq.image || "",
     }));
@@ -1025,30 +971,33 @@ app.get("/api/myreservations", async (req, res) => {
       .toArray();
     if (reservations.length === 0) return res.json([]);
 
-    const allMovieIds = reservations.flatMap((r) => r.history_movie_ids || []);
-    const uniqueIds = [...new Set(allMovieIds.map((id) => id.toString()))];
+    const allVehicleIds = reservations.flatMap(
+      (r) => r.history_vehicle_ids || [],
+    );
+    const uniqueIds = [...new Set(allVehicleIds.map((id) => id.toString()))];
     const objectIds = uniqueIds
       .map((id) => (ObjectId.isValid(id) ? new ObjectId(id) : null))
       .filter(Boolean);
 
-    const movieMap = {};
-    const movieDocs = await db
-      .collection("Movies")
+    const vehicleMap = {};
+    const vehicleDocs = await db
+      .collection("Vehicles")
       .find({ _id: { $in: objectIds } })
       .toArray();
-    movieDocs.forEach((eq) => {
-      movieMap[eq._id.toString()] = eq.name || eq.movieName || "Movies";
+    vehicleDocs.forEach((eq) => {
+      vehicleMap[eq._id.toString()] = eq.name || eq.vehicleName || "Vehicles";
     });
 
     const result = reservations.map((r) => ({
       order_id: r.orderId || "N/A",
       order_date: r.order_date,
+      start_date: r.start_date,
       end_date: r.end_date,
       status: r.status || "Renting",
       location: r.location || "",
       total_cost: r.total_cost || 0,
-      items: (r.history_movie_ids || []).map(
-        (id) => movieMap[id.toString()] || "Unknown",
+      items: (r.history_vehicle_ids || []).map(
+        (id) => vehicleMap[id.toString()] || "Unknown",
       ),
     }));
 
@@ -1173,74 +1122,78 @@ app.delete("/api/delete-address", async (req, res) => {
   }
 });
 
-app.post("/api/movie", upload.single("image"), async (req, res) => {
+app.post("/api/vehicle", upload.single("image"), async (req, res) => {
   try {
     const {
       name,
       category,
       description,
       rental_rate_per_day,
-      quantity_available,
+      make,
+      year,
     } = req.body;
 
-    if (!name || !category || !rental_rate_per_day || !quantity_available) {
+    if (!name || !category || !rental_rate_per_day) {
       return res.status(400).json({
-        error: "Name, category, rental rate, and quantity are required",
+        error: "Name, category, and rental rate are required",
       });
     }
 
     let imagePath = "";
     if (req.file) {
-      imagePath = "assets/img/movies/" + req.file.filename;
+      imagePath = "assets/img/vehicles/" + req.file.filename;
     }
 
-    const movieData = {
+    const vehicleData = {
       name: name.trim(),
       category: category.trim(),
       description: description ? description.trim() : "",
       rental_rate_per_day: parseFloat(rental_rate_per_day),
-      quantity_available: parseInt(quantity_available),
-      availability: parseInt(quantity_available) > 0,
+      make: make ? make.trim() : "",
+      year: year ? parseInt(year) : null,
+      quantity_available: 1,
+      availability: true,
+      host_username: req.session?.user_name || null,
       image_url: imagePath,
       created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
     };
 
-    const result = await db.collection("Movies").insertOne(movieData);
+    const result = await db.collection("Vehicles").insertOne(vehicleData);
     res.json({
-      message: "Movie added successfully",
-      movie: { _id: result.insertedId, ...movieData },
+      message: "Vehicle added successfully",
+      vehicle: { _id: result.insertedId, ...vehicleData },
     });
   } catch (err) {
-    console.error("Add movie error:", err);
-    res.status(500).json({ error: "Failed to add movie" });
+    console.error("Add vehicle error:", err);
+    res.status(500).json({ error: "Failed to add vehicle" });
   }
 });
 
-app.delete("/api/movie/:id", requireLogin, async (req, res) => {
+app.delete("/api/vehicle/:id", requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid movie ID" });
+      return res.status(400).json({ error: "Invalid vehicle ID" });
     }
 
     const result = await db
-      .collection("Movies")
+      .collection("Vehicles")
       .deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount > 0) {
-      res.json({ success: true, message: "Movie deleted successfully" });
+      res.json({ success: true, message: "Vehicle deleted successfully" });
     } else {
-      res.json({ success: false, error: "Movie not found" });
+      res.json({ success: false, error: "Vehicle not found" });
     }
   } catch (err) {
-    console.error("Delete movie error:", err);
-    res.status(500).json({ error: "Failed to delete movie" });
+    console.error("Delete vehicle error:", err);
+    res.status(500).json({ error: "Failed to delete vehicle" });
   }
 });
 
 app.put(
-  "/api/movie/:id",
+  "/api/vehicle/:id",
   requireLogin,
   upload.single("image"),
   async (req, res) => {
@@ -1251,21 +1204,17 @@ app.put(
         category,
         description,
         rental_rate_per_day,
-        quantity_available,
+        make,
+        year,
       } = req.body;
 
       if (!ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid movie ID" });
+        return res.status(400).json({ error: "Invalid vehicle ID" });
       }
 
-      if (
-        !name ||
-        !category ||
-        !rental_rate_per_day ||
-        quantity_available === undefined
-      ) {
+      if (!name || !category || !rental_rate_per_day) {
         return res.status(400).json({
-          error: "Name, category, rental rate, and quantity are required",
+          error: "Name, category, and rental rate are required",
         });
       }
 
@@ -1274,30 +1223,30 @@ app.put(
         category: category.trim(),
         description: description ? description.trim() : "",
         rental_rate_per_day: parseFloat(rental_rate_per_day),
-        quantity_available: parseInt(quantity_available),
-        availability: parseInt(quantity_available) > 0,
+        make: make ? make.trim() : "",
+        year: year ? parseInt(year) : null,
         updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
       };
 
       if (req.file) {
-        updateData.image_url = "assets/img/movies/" + req.file.filename;
+        updateData.image_url = "assets/img/vehicles/" + req.file.filename;
       }
 
       const result = await db
-        .collection("Movies")
+        .collection("Vehicles")
         .updateOne({ _id: new ObjectId(id) }, { $set: updateData });
 
       if (result.modifiedCount > 0) {
-        res.json({ success: true, message: "Movie updated successfully" });
+        res.json({ success: true, message: "Vehicle updated successfully" });
       } else {
         res.json({
           success: false,
-          error: "Movie not found or no changes made",
+          error: "Vehicle not found or no changes made",
         });
       }
     } catch (err) {
-      console.error("Update Movie error:", err);
-      res.status(500).json({ error: "Failed to update Movie" });
+      console.error("Update Vehicle error:", err);
+      res.status(500).json({ error: "Failed to update Vehicle" });
     }
   },
 );
