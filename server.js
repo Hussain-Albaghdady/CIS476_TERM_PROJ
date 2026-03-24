@@ -213,6 +213,23 @@ async function connectToDB() {
       `Synced counters — userId: ${finalUserId?.sequence_value}, adminId: ${finalAdminId?.sequence_value}, orderId: ${finalOrderId?.sequence_value}, hostId: ${finalHostId?.sequence_value}`,
     );
 
+    // Migrate old concatenated location values to spaced versions
+    const locationMigrations = [
+      { from: "annArbor",       to: "Ann Arbor" },
+      { from: "AnnArbor",       to: "Ann Arbor" },
+      { from: "DearbornHeights",to: "DTW Airport" },
+      { from: "dearbornHeights",to: "DTW Airport" },
+      { from: "Dearborn Heights", to: "DTW Airport" },
+      { from: "GrandRapids",    to: "Grand Rapids" },
+      { from: "grandRapids",    to: "Grand Rapids" },
+    ];
+    for (const { from, to } of locationMigrations) {
+      await db.collection("Vehicles").updateMany(
+        { pickup_location: from },
+        { $set: { pickup_location: to } }
+      );
+    }
+
     app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
   } catch (err) {
     console.error(`MongoDB connection failed to the ${dbname} database`, err);
