@@ -8,7 +8,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-const dbname="RentFlicks"
+const dbname="DriveShare"
 let db;
 
 async function connectToDB() {
