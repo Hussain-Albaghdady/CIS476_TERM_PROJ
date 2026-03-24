@@ -128,7 +128,7 @@
                     <div class="form-group">
                       <label for="vehicle-year">Vehicle Year *</label>
                       <select id="vehicle-year" name="year" class="form-control" required>
-                        <option value="">-- Select Year --</option>
+                        <option value="" disabled selected>-- Select Year --</option>
                       </select>
                     </div>
                   </div>
@@ -142,7 +142,7 @@
                   <div class="col-md-4">
                     <div class="form-group">
                       <label for="vehicle-name">Vehicle Model *</label>
-                      <input type="text" id="vehicle-name" name="name" class="form-control" required
+                      <input type="text" id="vehicle-name" name="model" class="form-control" required
                              placeholder="e.g., Camry">
                     </div>
                   </div>
@@ -173,7 +173,7 @@
                     <div class="form-group">
                       <label for="rental-rate">Rental Rate (per day) *</label>
                       <input type="number" id="rental-rate" name="rental_rate_per_day" class="form-control"
-                             step="0.01" min="0" required placeholder="1.50">
+                             step="0.01" min="0" required placeholder="$69.00">
                     </div>
                   </div>
                 </div>
@@ -278,7 +278,7 @@
               <div class="form-group">
                 <label for="edit-vehicle-year">Vehicle Year *</label>
                 <select id="edit-vehicle-year" class="form-control" required>
-                  <option value="">-- Select Year --</option>
+                  <option value="" disabled selected>-- Select Year --</option>
                 </select>
               </div>
             </div>
@@ -521,12 +521,12 @@
 
         const formData = new FormData(vehicleForm);
         
-        const name = formData.get('name');
+        const model = formData.get('model');
         const category = formData.get('category');
         const rental_rate_per_day = formData.get('rental_rate_per_day');
         const make = formData.get('make');
         const year = formData.get('year');
-        if (!name || !category || !rental_rate_per_day || !make || !year) {
+        if (!model || !category || !rental_rate_per_day || !make || !year) {
           showMessage('add-vehicle-error', 'Please fill in all required fields.');
           return;
         }
@@ -575,7 +575,7 @@
             row.innerHTML = `
               <td>${vehicle.year || 'N/A'}</td>
               <td>${vehicle.make || 'N/A'}</td>
-              <td>${vehicle.name || 'N/A'}</td>
+              <td>${vehicle.model || 'N/A'}</td>
               <td>${vehicle.category || 'N/A'}</td>
               <td>$${vehicle.rental_rate_per_day ? Number(vehicle.rental_rate_per_day).toFixed(2) : '0.00'}</td>
               <td>
@@ -587,7 +587,7 @@
                 <button class="btn btn-sm btn-primary edit-vehicle-btn" data-id="${vehicle._id}">
                   <i class="icofont-edit"></i> Edit
                 </button>
-                <button class="btn btn-sm btn-danger delete-vehicle-btn" data-id="${vehicle._id}" data-name="${vehicle.name}">
+                <button class="btn btn-sm btn-danger delete-vehicle-btn" data-id="${vehicle._id}" data-name="${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}">
                   <i class="icofont-trash"></i> Delete
                 </button>
               </td>
@@ -622,7 +622,7 @@
           const vehicle = vehicles.find(eq => eq._id === vehicleId);
           if (vehicle) {
             document.getElementById('edit-vehicle-id').value = vehicle._id;
-            document.getElementById('edit-vehicle-name').value = vehicle.name || '';
+            document.getElementById('edit-vehicle-name').value = vehicle.model || '';
             document.getElementById('edit-vehicle-category').value = vehicle.category || '';
             document.getElementById('edit-vehicle-description').value = vehicle.description || '';
             document.getElementById('edit-rental-rate').value = vehicle.rental_rate_per_day || '';
@@ -647,7 +647,7 @@
         const vehicleId = document.getElementById('edit-vehicle-id').value;
         const formData = new FormData();
         
-        formData.append('name', document.getElementById('edit-vehicle-name').value);
+        formData.append('model', document.getElementById('edit-vehicle-name').value);
         formData.append('category', document.getElementById('edit-vehicle-category').value);
         formData.append('description', document.getElementById('edit-vehicle-description').value);
         formData.append('rental_rate_per_day', document.getElementById('edit-rental-rate').value);
@@ -798,9 +798,9 @@
                 $container.append(`
                   <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
                     <div class="card">
-                      <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category}" />
+                      <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category}" />
                       <div class="card-text">
-                        <h2>${item.name || item.category}</h2>
+                        <h2>${[item.year, item.make, item.model].filter(Boolean).join(' ') || item.category}</h2>
                         <h3>${item.availability ? 'Available' : 'Unavailable'}</h3>
                         <p class="hosted-by">Hosted By ${item.host_fname || 'Unknown'}</p>
                         <p>${item.description || ""}</p>

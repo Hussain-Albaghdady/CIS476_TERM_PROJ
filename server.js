@@ -463,14 +463,27 @@ app.get("/userdetail", requireLogin, (req, res) => {
     user_type: user.user_type,
   });
 });
+
 app.get("/api/vehicles", async (req, res) => {
   try {
     const vehicles = await db.collection("Vehicles").find({}).toArray();
-    const hostUsernames = [...new Set(vehicles.filter(v => v.host_username).map(v => v.host_username))];
-    const hosts = await db.collection("HostUsers").find({ username: { $in: hostUsernames } }).toArray();
+    const hostUsernames = [
+      ...new Set(
+        vehicles.filter((v) => v.host_username).map((v) => v.host_username),
+      ),
+    ];
+    const hosts = await db
+      .collection("HostUsers")
+      .find({ username: { $in: hostUsernames } })
+      .toArray();
     const hostMap = {};
-    hosts.forEach(h => { hostMap[h.username] = h.fname; });
-    const enriched = vehicles.map(v => ({ ...v, host_fname: v.host_username ? (hostMap[v.host_username] || null) : null }));
+    hosts.forEach((h) => {
+      hostMap[h.username] = h.fname;
+    });
+    const enriched = vehicles.map((v) => ({
+      ...v,
+      host_fname: v.host_username ? hostMap[v.host_username] || null : null,
+    }));
     res.json(enriched);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch vehicles" });
@@ -480,10 +493,13 @@ app.get("/api/vehicles", async (req, res) => {
 app.get("/api/my-vehicles", requireLogin, async (req, res) => {
   try {
     const username = req.session.user_name;
-    const vehicles = await db.collection("Vehicles").find({ host_username: username }).toArray();
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ host_username: username })
+      .toArray();
     const host = await db.collection("HostUsers").findOne({ username });
     const host_fname = host ? host.fname : null;
-    const enriched = vehicles.map(v => ({ ...v, host_fname }));
+    const enriched = vehicles.map((v) => ({ ...v, host_fname }));
     res.json(enriched);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch vehicles" });
@@ -556,7 +572,6 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
         hostId = host._id;
       }
     }
-
 
     const orderId = await getNextSequence("orderId");
     const data = {
@@ -748,7 +763,6 @@ app.post("/addresses", requireLogin, async (req, res) => {
     return res.redirect(`vehicle-reservation.html`);
   }
 });
-
 
 app.post("/api/return", requireLogin, async (req, res) => {
   try {
@@ -1124,18 +1138,12 @@ app.delete("/api/delete-address", async (req, res) => {
 
 app.post("/api/vehicle", upload.single("image"), async (req, res) => {
   try {
-    const {
-      name,
-      category,
-      description,
-      rental_rate_per_day,
-      make,
-      year,
-    } = req.body;
+    const { year, make, model, category, description, rental_rate_per_day } =
+      req.body;
 
-    if (!name || !category || !rental_rate_per_day) {
+    if (!year || !make || !model || !category || !rental_rate_per_day) {
       return res.status(400).json({
-        error: "Name, category, and rental rate are required",
+        error: "Year, make, model, category, and rental rate are required",
       });
     }
 
@@ -1145,12 +1153,13 @@ app.post("/api/vehicle", upload.single("image"), async (req, res) => {
     }
 
     const vehicleData = {
-      name: name.trim(),
+      year: year ? parseInt(year) : null,
+      make: make ? make.trim() : "",
+      model: model.trim(),
       category: category.trim(),
       description: description ? description.trim() : "",
       rental_rate_per_day: parseFloat(rental_rate_per_day),
-      make: make ? make.trim() : "",
-      year: year ? parseInt(year) : null,
+
       quantity_available: 1,
       availability: true,
       host_username: req.session?.user_name || null,
@@ -1199,32 +1208,26 @@ app.put(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const {
-        name,
-        category,
-        description,
-        rental_rate_per_day,
-        make,
-        year,
-      } = req.body;
+      const { model, category, description, rental_rate_per_day, make, year } =
+        req.body;
 
       if (!ObjectId.isValid(id)) {
         return res.status(400).json({ error: "Invalid vehicle ID" });
       }
 
-      if (!name || !category || !rental_rate_per_day) {
+      if (!model || !category || !rental_rate_per_day || !make || !year) {
         return res.status(400).json({
-          error: "Name, category, and rental rate are required",
+          error: "Year, make, model, category, and rental rate are required",
         });
       }
 
       const updateData = {
-        name: name.trim(),
+        year: year ? parseInt(year) : null,
+        make: make ? make.trim() : "",
+        model: model.trim(),
         category: category.trim(),
         description: description ? description.trim() : "",
         rental_rate_per_day: parseFloat(rental_rate_per_day),
-        make: make ? make.trim() : "",
-        year: year ? parseInt(year) : null,
         updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
       };
 

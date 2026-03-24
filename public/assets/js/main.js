@@ -306,9 +306,9 @@ $(document).ready(function () {
         $container.append(`
           <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
             <div class="card">
-              <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category || 'Vehicle'}" />
+              <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category || 'Vehicle'}" />
               <div class="card-text">
-                <h2>${item.name || item.category || 'Vehicle'}</h2>
+                <h2>${[item.year, item.make, item.model].filter(Boolean).join(' ') || item.category || 'Vehicle'}</h2>
                 <h3>${item.availability ? 'Available' : 'Unavailable'}</h3>
                 <p class="hosted-by">Hosted By ${item.host_fname || 'Unknown'}</p>
                 <p class="desc">${item.description || ""}</p>
