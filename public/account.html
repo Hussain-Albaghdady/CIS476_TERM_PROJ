@@ -136,7 +136,8 @@
                     <th>Start Date</th>
                     <th>Return Date</th>
                     <th>Status</th>
-                    <th>Vehicles</th>
+                    <th>Vehicle</th>
+                    <th>Mileage</th>
                     <th>Pick-Up Location</th>
                     <th>Total</th>
                   </tr>
@@ -208,6 +209,21 @@
             </select>
             <small id="vehicleHelp" class="form-text text-muted"
               >Select the vehicle you wish to return.</small
+            >
+          </div>
+          <div class="form-group" id="mileage-group" style="display: none">
+            <label for="returnMileage">Current Mileage at Return *</label>
+            <input
+              type="number"
+              id="returnMileage"
+              class="form-control"
+              min="0"
+              required
+              placeholder="Enter current odometer reading"
+            />
+            <small class="form-text text-muted"
+              >Must be equal to or greater than the mileage when you
+              rented.</small
             >
           </div>
           <button id="submit" type="submit" class="btn btn-primary">
@@ -374,6 +390,7 @@
             <td data-label="Return Date">${new Date(r.end_date).toLocaleDateString()}</td>
             <td data-label="Status">${r.status}</td>
             <td data-label="Items">${r.items.join(", ")}</td>
+            <td data-label="Mileage">${r.mileage && r.mileage.length ? r.mileage.map((m) => Number(m).toLocaleString() + " mi").join(", ") : "N/A"}</td>
             <td data-label="Pick-Up Location">${r.location}</td>
             <td data-label="Total">$${r.total_cost}</td>
           `;
@@ -541,6 +558,7 @@
             const vehicleHelp = document.getElementById("vehicleHelp");
             const submit = document.getElementById("submit");
             const subtext = document.getElementById("section-subtext");
+            const mileageGroup = document.getElementById("mileage-group");
 
             select.innerHTML = "";
             if (Array.isArray(data) && data.length > 0) {
@@ -556,11 +574,13 @@
               submit.style.display = "";
               msg.style.display = "";
               subtext.style.display = "";
+              mileageGroup.style.display = "";
               noMsg.style.display = "none";
             } else {
               select.style.display = "none";
               vehicleHelp.style.display = "none";
               submit.style.display = "none";
+              mileageGroup.style.display = "none";
               noMsg.textContent = "You have no vehicles to return.";
               msg.style.display = "none";
               subtext.style.display = "none";
@@ -573,10 +593,12 @@
             const msg = document.getElementById("form-header");
             const vehicleHelp = document.getElementById("vehicleHelp");
             const subtext = document.getElementById("section-subtext");
+            const mileageGroup = document.getElementById("mileage-group");
 
             select.style.display = "none";
             vehicleHelp.style.display = "none";
             submit.style.display = "none";
+            mileageGroup.style.display = "none";
             msg.style.display = "none";
             subtext.style.display = "none";
             noMsg.textContent =
@@ -592,6 +614,7 @@
           e.preventDefault();
           const select = document.getElementById("vehicleSelect");
           const vehicleId = select.value;
+          const returnMileage = document.getElementById("returnMileage").value;
           document.getElementById("return-success").style.display = "none";
           document.getElementById("return-error").style.display = "none";
           if (!vehicleId) {
@@ -600,10 +623,16 @@
             document.getElementById("return-error").style.display = "block";
             return;
           }
+          if (!returnMileage) {
+            document.getElementById("return-error").textContent =
+              "Please enter the current odometer reading.";
+            document.getElementById("return-error").style.display = "block";
+            return;
+          }
           fetch("/api/return", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ vehicleId }),
+            body: JSON.stringify({ vehicleId, returnMileage }),
           })
             .then((res) => res.json())
             .then((data) => {

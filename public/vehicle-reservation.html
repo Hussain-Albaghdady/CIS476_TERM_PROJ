@@ -125,82 +125,233 @@
     </div>
     <main id="main" class="hidden-page">
       <!-- Reservation Section -->
-      <section class="reservation-section" style="padding-bottom: 0;">
-        <div class="container" style="max-width: 1400px; width: 95%; margin: 0 auto; padding-bottom: 0;">
-          <div class="reservation-form-container" style="max-width: none; width: 100%; padding-bottom: 0; margin-bottom: 0;">
+      <section class="reservation-section" style="padding-bottom: 0">
+        <div
+          class="container"
+          style="
+            max-width: 1400px;
+            width: 95%;
+            margin: 0 auto;
+            padding-bottom: 0;
+          "
+        >
+          <div
+            class="reservation-form-container"
+            style="
+              max-width: none;
+              width: 100%;
+              padding-bottom: 0;
+              margin-bottom: 0;
+            "
+          >
             <form
               id="reservation-form"
               action="/api/reservations"
               method="post"
-              style="width: 100%; text-align: left;"
+              style="width: 100%; text-align: left"
             >
-              <h3 style="margin-bottom: 12px;">Reservation</h3>
+              <h3 style="margin-bottom: 12px">Reservation</h3>
               <!-- Row 1: all fields + submit -->
-              <div style="display: flex; align-items: stretch; gap: 16px; flex-wrap: wrap;">
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 140px;">
-                  <label for="customer_name" style="margin-bottom: 4px;">Name</label>
-                  <input type="text" name="customer_name" id="customer_name" required style="height: 42px; box-sizing: border-box;" />
+              <div
+                style="
+                  display: flex;
+                  align-items: stretch;
+                  gap: 16px;
+                  flex-wrap: wrap;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    min-width: 140px;
+                  "
+                >
+                  <label for="customer_name" style="margin-bottom: 4px"
+                    >Name</label
+                  >
+                  <input
+                    type="text"
+                    name="customer_name"
+                    id="customer_name"
+                    required
+                    style="height: 42px; box-sizing: border-box"
+                  />
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 140px;">
-                  <label for="start_date" style="margin-bottom: 4px;">Start Date</label>
-                  <input type="date" name="start_date" id="start_date" required style="height: 42px; box-sizing: border-box;" />
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    min-width: 140px;
+                  "
+                >
+                  <label for="start_date" style="margin-bottom: 4px"
+                    >Start Date</label
+                  >
+                  <input
+                    type="date"
+                    name="start_date"
+                    id="start_date"
+                    required
+                    style="height: 42px; box-sizing: border-box"
+                  />
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 140px;">
-                  <label for="end_date" style="margin-bottom: 4px;">Return Date</label>
-                  <input type="date" name="end_date" id="end_date" required style="height: 42px; box-sizing: border-box;" />
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    min-width: 140px;
+                  "
+                >
+                  <label for="end_date" style="margin-bottom: 4px"
+                    >Return Date</label
+                  >
+                  <input
+                    type="date"
+                    name="end_date"
+                    id="end_date"
+                    required
+                    style="height: 42px; box-sizing: border-box"
+                  />
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 160px;">
-                  <label for="location" style="margin-bottom: 4px;">Pickup Location</label>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    min-width: 160px;
+                  "
+                >
+                  <label for="location" style="margin-bottom: 4px">Pickup Location</label>
                   <select id="location" name="location" required style="height: 42px; box-sizing: border-box;">
                     <option value="" disabled selected>-- Choose Location --</option>
-                        <option value="Dearborn">Dearborn</option>
+                    <option value="Dearborn">Dearborn</option>
                     <option value="Warren">Warren</option>
                     <option value="DearbornHeights">Dearborn Heights</option>
-                    <option value="annArbor">Ann Arbor</option>
+                    <option value="AnnArbor">Ann Arbor</option>
                     <option value="GrandRapids">Grand Rapids</option>
                     <option value="Lansing">Lansing</option>
                   </select>
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 160px;">
-                  <label for="address" style="margin-bottom: 4px;">Billing Address</label>
-                  <select id="address" name="address" required style="height: 42px; box-sizing: border-box;">
-                    <option value="" disabled selected>-- Choose Address --</option>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    min-width: 160px;
+                  "
+                >
+                  <label for="address" style="margin-bottom: 4px"
+                    >Billing Address</label
+                  >
+                  <select
+                    id="address"
+                    name="address"
+                    required
+                    style="height: 42px; box-sizing: border-box"
+                  >
+                    <option value="" disabled selected>
+                      -- Choose Address --
+                    </option>
                   </select>
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 160px;">
-                  <label for="payment" style="margin-bottom: 4px;">Payment Method</label>
-                  <select id="payment" name="payment" required style="height: 42px; box-sizing: border-box;">
-                    <option value="" disabled selected>-- Choose Payment --</option>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    min-width: 160px;
+                  "
+                >
+                  <label for="payment" style="margin-bottom: 4px"
+                    >Payment Method</label
+                  >
+                  <select
+                    id="payment"
+                    name="payment"
+                    required
+                    style="height: 42px; box-sizing: border-box"
+                  >
+                    <option value="" disabled selected>
+                      -- Choose Payment --
+                    </option>
                   </select>
                 </div>
               </div>
               <!-- Row 2: action buttons + reserve -->
-              <div id="reservation-actions-row" style="display: flex; gap: 12px; margin-top: 10px; justify-content: flex-start; align-items: center;">
-                <div style="display: flex; gap: 12px; flex: 0 0 50%;">
+              <div
+                id="reservation-actions-row"
+                style="
+                  display: flex;
+                  gap: 12px;
+                  margin-top: 10px;
+                  justify-content: flex-start;
+                  align-items: center;
+                "
+              >
+                <div style="display: flex; gap: 12px; flex: 0 0 50%">
                   <button
                     type="button"
                     id="add-address-btn"
-                    style="padding: 5px 12px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;"
-                  >+ Add New Address</button>
+                    style="
+                      padding: 5px 12px;
+                      background: #007bff;
+                      color: white;
+                      border: none;
+                      border-radius: 3px;
+                      font-size: 0.9em;
+                      cursor: pointer;
+                    "
+                  >
+                    + Add New Address
+                  </button>
                   <button
                     type="button"
                     id="add-payment-btn"
-                    style="padding: 5px 12px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;"
-                  >+ Add New Payment Method</button>
+                    style="
+                      padding: 5px 12px;
+                      background: #28a745;
+                      color: white;
+                      border: none;
+                      border-radius: 3px;
+                      font-size: 0.9em;
+                      cursor: pointer;
+                    "
+                  >
+                    + Add New Payment Method
+                  </button>
                 </div>
                 <input
                   type="submit"
                   name="submit"
                   value="Reserve Selected Vehicles"
                   class="form-btn"
-                  style="height: 42px; line-height: 42px; padding: 0 15px; white-space: nowrap; margin-left: auto; box-sizing: border-box; text-align: center; flex: 0 0 25%;"
+                  style="
+                    height: 42px;
+                    line-height: 42px;
+                    padding: 0 15px;
+                    white-space: nowrap;
+                    margin-left: auto;
+                    box-sizing: border-box;
+                    text-align: center;
+                    flex: 0 0 25%;
+                  "
                 />
               </div>
               <!-- Hidden inputs -->
               <input type="hidden" name="vehicle_ids" id="selected-vehicle" />
               <input type="hidden" name="total_cost" id="total-cost" />
-              <div id="reservation-error" style="color: red; font-weight: bold; margin-top: 10px"></div>
-              <div id="reservation-success" style="color: green; font-weight: bold; margin-top: 10px"></div>
+              <div
+                id="reservation-error"
+                style="color: red; font-weight: bold; margin-top: 10px"
+              ></div>
+              <div
+                id="reservation-success"
+                style="color: green; font-weight: bold; margin-top: 10px"
+              ></div>
             </form>
           </div>
         </div>
@@ -426,19 +577,31 @@
       <section id="vehicle" class="vehicle-section py-4">
         <div class="container">
           <h3 class="mb-4">Available Vehicles</h3>
-          <div class="mb-3">
-            <label for="vehicle-category" class="form-label">Select Vehicle Type:</label>
-            <select id="vehicle-category" class="form-control" style="max-width: 350px">
-              <option value="">-- Choose Vehicle Type --</option>
-              <option value="Compact SUV">Compact SUV</option>
-              <option value="Minivan">Minivan</option>
-              <option value="Passenger Van">Passenger Van</option>
-              <option value="Pickup">Pickup</option>
-              <option value="Sedan">Sedan</option>
-              <option value="Sports Car">Sports Car</option>
-              <option value="SUV">SUV</option>
-            </select>
+          <div class="d-flex flex-wrap mb-3" style="gap: 16px; align-items: flex-end">
+            <div>
+              <label for="vehicle-category" class="form-label">Filter by Vehicle Type:</label>
+              <select id="vehicle-category" class="form-control" style="min-width: 180px">
+                <option value="">-- All Types --</option>
+                <option value="Compact SUV">Compact SUV</option>
+                <option value="Minivan">Minivan</option>
+                <option value="Passenger Van">Passenger Van</option>
+                <option value="Pickup">Pickup</option>
+                <option value="Sedan">Sedan</option>
+                <option value="Sports Car">Sports Car</option>
+                <option value="SUV">SUV</option>
+              </select>
+            </div>
           </div>
+          <div
+            id="date-filter-msg"
+            class="alert alert-info"
+            style="
+              display: none;
+              max-width: 500px;
+              padding: 6px 12px;
+              font-size: 0.9em;
+            "
+          ></div>
           <div id="vehicle-list" class="row">
             <!-- Vehicle cards will be loaded here -->
           </div>

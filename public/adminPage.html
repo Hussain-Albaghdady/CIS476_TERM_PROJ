@@ -122,6 +122,8 @@
                   <th>Make</th>
                   <th>Model</th>
                   <th>Category</th>
+                  <th>Mileage</th>
+                  <th>Range (mi)</th>
                   <th>Host Username</th>
                   <th>Rate/Day</th>
                   <th>Status</th>
@@ -137,6 +139,80 @@
 
       </div>
     </section><!-- End Vehicle Management Section -->
+
+    <!-- ======= Financial Management Section ======= -->
+    <section id="financial-management" class="vehicle-management section-bg">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="management-header-box">
+          <div class="section-title">
+            <h2>Financial Management</h2>
+            <p>Platform-wide revenue and vehicle performance overview</p>
+          </div>
+          <div class="row mb-4 justify-content-center">
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="view-financials-btn" class="btn btn-success btn-lg">
+                <i class="icofont-chart-bar-graph"></i> View Financial Report
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="financial-section" class="management-form" style="display: none;">
+
+          <!-- Summary Cards -->
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-money" style="font-size:2rem; color:#28a745;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Platform Revenue</h4>
+                <p id="stat-total-revenue" style="font-size:1.8rem; font-weight:700; margin:0; color:#28a745;">$0</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-car" style="font-size:2rem; color:#007bff;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Rentals</h4>
+                <p id="stat-total-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#007bff;">0</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-star" style="font-size:2rem; color:#ffc107;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Top Grossing Vehicle</h4>
+                <p id="stat-top-vehicle" style="font-size:1rem; font-weight:700; margin:0; color:#ffc107;">—</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-clock-time" style="font-size:2rem; color:#17a2b8;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Active Rentals</h4>
+                <p id="stat-active-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#17a2b8;">0</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-Vehicle Breakdown Table -->
+          <h3 style="margin-bottom: 16px;">All Vehicle Performance</h3>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Vehicle</th>
+                  <th>Host</th>
+                  <th>Category</th>
+                  <th>Rate/Day</th>
+                  <th>Total Rentals</th>
+                  <th>Active</th>
+                  <th>Total Revenue</th>
+                  <th>Avg. Days/Rental</th>
+                </tr>
+              </thead>
+              <tbody id="financial-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section><!-- End Financial Management Section -->
 
     <!-- ======= Avaliablity Section ======= -->
     <section id="avaliablity" class="avaliablity section-bg">
@@ -318,7 +394,7 @@
           tbody.innerHTML = '';
 
           if (!vehicles || vehicles.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center">No vehicle found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center">No vehicle found</td></tr>';
             return;
           }
 
@@ -329,6 +405,8 @@
               <td>${vehicle.make || 'N/A'}</td>
               <td>${vehicle.model || 'N/A'}</td>
               <td>${vehicle.category || 'N/A'}</td>
+              <td>${vehicle.mileage !== undefined && vehicle.mileage !== null ? Number(vehicle.mileage).toLocaleString() + ' mi' : 'N/A'}</td>
+              <td>${vehicle.range ? vehicle.range + ' mi' : 'N/A'}</td>
               <td>${vehicle.host_username || 'N/A'}</td>
               <td>$${vehicle.rental_rate_per_day ? Number(vehicle.rental_rate_per_day).toFixed(2) : '0.00'}</td>
               <td>
@@ -475,9 +553,9 @@
                       <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category}" />
                       <div class="card-text">
                         <h2>${[item.year, item.make, item.model].filter(Boolean).join(' ') || item.category}</h2>
-                        <h3>${item.availability ? 'Available' : 'Unavailable'}</h3>
                         <p class="hosted-by">Hosted By ${item.host_fname || 'Unknown'}</p>
                         <p>${item.description || ""}</p>
+                        ${item.range ? `<p><b>Range:</b> ${item.range} mi</p>` : ''}
                         <p>Rate: $${item.rental_rate_per_day} / day</p>
                       </div>
                     </div>
@@ -494,6 +572,52 @@
               console.error("Error refreshing vehicles:", err);
             });
         }
+      }
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const viewFinancialsBtn = document.getElementById('view-financials-btn');
+      const financialSection = document.getElementById('financial-section');
+
+      viewFinancialsBtn.addEventListener('click', function() {
+        const isVisible = financialSection.style.display !== 'none';
+        financialSection.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) loadFinancials();
+      });
+
+      function loadFinancials() {
+        fetch('/api/admin-financials')
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById('stat-total-revenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
+            document.getElementById('stat-total-rentals').textContent = data.totalRentals || 0;
+            document.getElementById('stat-active-rentals').textContent = data.activeRentals || 0;
+            document.getElementById('stat-top-vehicle').textContent = data.topVehicle || '—';
+
+            const tbody = document.getElementById('financial-body');
+            tbody.innerHTML = '';
+            if (!data.vehicles || data.vehicles.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="8" class="text-center">No rental data yet</td></tr>';
+              return;
+            }
+            data.vehicles.forEach(v => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${v.label}</td>
+                <td>${v.hostUsername || 'N/A'}</td>
+                <td>${v.category || 'N/A'}</td>
+                <td>$${Number(v.rate).toFixed(2)}</td>
+                <td>${v.totalRentals}</td>
+                <td><span class="badge ${v.activeRentals > 0 ? 'badge-success' : 'badge-secondary'}">${v.activeRentals}</span></td>
+                <td><strong>$${Number(v.totalRevenue).toFixed(2)}</strong></td>
+                <td>${v.avgDays.toFixed(1)} days</td>
+              `;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch(err => console.error('Failed to load financials:', err));
       }
     });
   </script>

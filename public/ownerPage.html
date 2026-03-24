@@ -148,6 +148,21 @@
                   </div>
                 </div>
 
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="vehicle-mileage">Current Mileage *</label>
+                      <input type="number" id="vehicle-mileage" name="mileage" class="form-control" required min="0" placeholder="e.g., 12000">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="vehicle-range">Range (miles) *</label>
+                      <input type="number" id="vehicle-range" name="range" class="form-control" required min="0" placeholder="e.g., 350">
+                    </div>
+                  </div>
+                </div>
+
                 <div class="form-group">
                   <label for="vehicle-category">Vehicle Type *</label>
                   <select id="vehicle-category" name="category" class="form-control" required>
@@ -169,6 +184,19 @@
                 </div>
 
                 <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="vehicle-pickup-location">Pickup Location *</label>
+                      <select id="vehicle-pickup-location" name="pickup_location" class="form-control" required>
+                        <option value="" disabled selected>-- Select Location --</option>
+                        <option value="Dearborn">Dearborn</option>
+                        <option value="Warren">Warren</option>
+                        <option value="DearbornHeights">Dearborn Heights</option>
+                        <option value="annArbor">Ann Arbor</option>
+                        <option value="GrandRapids">Grand Rapids</option>
+                      </select>
+                    </div>
+                  </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="rental-rate">Rental Rate (per day) *</label>
@@ -211,7 +239,9 @@
                   <th>Year</th>
                   <th>Make</th>
                   <th>Model</th>
-                  <th>Category</th>
+                  <th>Vehicle Class</th>
+                  <th>Mileage</th>
+                  <th>Range (mi)</th>
                   <th>Rate/Day</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -226,6 +256,80 @@
 
       </div>
     </section><!-- End Vehicle Management Section -->
+
+    <!-- ======= Financial Management Section ======= -->
+    <section id="financial-management" class="vehicle-management section-bg">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="management-header-box">
+          <div class="section-title">
+            <h2>Financial Management</h2>
+            <p>Track your revenue and vehicle performance</p>
+          </div>
+          <div class="row mb-4 justify-content-center">
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="view-financials-btn" class="btn btn-success btn-lg">
+                <i class="icofont-chart-bar-graph"></i> View Financial Report
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="financial-section" class="management-form" style="display: none;">
+
+          <!-- Summary Cards -->
+          <div class="row mb-4" id="financial-summary-cards">
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-money" style="font-size:2rem; color:#28a745;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Revenue</h4>
+                <p id="stat-total-revenue" style="font-size:1.8rem; font-weight:700; margin:0; color:#28a745;">$0</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-car" style="font-size:2rem; color:#007bff;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Rentals</h4>
+                <p id="stat-total-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#007bff;">0</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-star" style="font-size:2rem; color:#ffc107;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Top Grossing Vehicle</h4>
+                <p id="stat-top-vehicle" style="font-size:1rem; font-weight:700; margin:0; color:#ffc107;">—</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="icofont-clock-time" style="font-size:2rem; color:#17a2b8;"></i>
+                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Active Rentals</h4>
+                <p id="stat-active-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#17a2b8;">0</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-Vehicle Breakdown Table -->
+          <h3 style="margin-bottom: 16px;">Vehicle Performance Breakdown</h3>
+          <div class="table-responsive">
+            <table class="table table-striped" id="financial-table">
+              <thead>
+                <tr>
+                  <th>Vehicle</th>
+                  <th>Category</th>
+                  <th>Rate/Day</th>
+                  <th>Total Rentals</th>
+                  <th>Active</th>
+                  <th>Total Revenue</th>
+                  <th>Avg. Days/Rental</th>
+                </tr>
+              </thead>
+              <tbody id="financial-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section><!-- End Financial Management Section -->
 
     <!-- ======= Avaliablity Section ======= -->
     <section id="avaliablity" class="avaliablity section-bg">
@@ -316,6 +420,34 @@
           </div>
 
           <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-vehicle-mileage">Current Mileage *</label>
+                <input type="number" id="edit-vehicle-mileage" class="form-control" min="0" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-vehicle-range">Range (miles) *</label>
+                <input type="number" id="edit-vehicle-range" class="form-control" min="0" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-pickup-location">Pickup Location *</label>
+                <select id="edit-pickup-location" class="form-control" required>
+                  <option value="" disabled selected>-- Select Location --</option>
+                  <option value="Dearborn">Dearborn</option>
+                  <option value="Warren">Warren</option>
+                  <option value="DearbornHeights">Dearborn Heights</option>
+                  <option value="annArbor">Ann Arbor</option>
+                  <option value="GrandRapids">Grand Rapids</option>
+                </select>
+              </div>
+            </div>
             <div class="col-md-6">
               <div class="form-group">
                 <label for="edit-rental-rate">Rental Rate (per day) *</label>
@@ -526,7 +658,10 @@
         const rental_rate_per_day = formData.get('rental_rate_per_day');
         const make = formData.get('make');
         const year = formData.get('year');
-        if (!model || !category || !rental_rate_per_day || !make || !year) {
+        const mileage = formData.get('mileage');
+        const range = formData.get('range');
+        const pickup_location = formData.get('pickup_location');
+        if (!model || !category || !rental_rate_per_day || !make || !year || !mileage || !range || !pickup_location) {
           showMessage('add-vehicle-error', 'Please fill in all required fields.');
           return;
         }
@@ -566,7 +701,7 @@
           tbody.innerHTML = '';
 
           if (!vehicles || vehicles.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No vehicle found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">No vehicle found</td></tr>';
             return;
           }
 
@@ -577,6 +712,8 @@
               <td>${vehicle.make || 'N/A'}</td>
               <td>${vehicle.model || 'N/A'}</td>
               <td>${vehicle.category || 'N/A'}</td>
+              <td>${vehicle.mileage !== undefined && vehicle.mileage !== null ? Number(vehicle.mileage).toLocaleString() + ' mi' : 'N/A'}</td>
+              <td>${vehicle.range ? vehicle.range + ' mi' : 'N/A'}</td>
               <td>$${vehicle.rental_rate_per_day ? Number(vehicle.rental_rate_per_day).toFixed(2) : '0.00'}</td>
               <td>
                 <span class="badge ${vehicle.availability ? 'badge-success' : 'badge-danger'}">
@@ -584,6 +721,9 @@
                 </span>
               </td>
               <td>
+                <button class="btn btn-sm ${vehicle.availability ? 'btn-warning' : 'btn-success'} toggle-availability-btn" data-id="${vehicle._id}" data-available="${vehicle.availability}">
+                  ${vehicle.availability ? 'Mark Unavailable' : 'Mark Available'}
+                </button>
                 <button class="btn btn-sm btn-primary edit-vehicle-btn" data-id="${vehicle._id}">
                   <i class="icofont-edit"></i> Edit
                 </button>
@@ -609,6 +749,24 @@
               openDeleteModal(vehicleId, vehicleName);
             });
           });
+
+          document.querySelectorAll('.toggle-availability-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const vehicleId = this.getAttribute('data-id');
+              const currentAvail = this.getAttribute('data-available') === 'true';
+              const newAvail = !currentAvail;
+              fetch(`/api/vehicle/${vehicleId}/availability`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ availability: newAvail })
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) loadVehicleForManagement();
+              })
+              .catch(err => console.error('Toggle availability error:', err));
+            });
+          });
         })
         .catch(err => {
           console.error('Failed to load vehicle:', err);
@@ -628,6 +786,9 @@
             document.getElementById('edit-rental-rate').value = vehicle.rental_rate_per_day || '';
             document.getElementById('edit-vehicle-make').value = vehicle.make || '';
             document.getElementById('edit-vehicle-year').value = vehicle.year || '';
+            document.getElementById('edit-vehicle-mileage').value = vehicle.mileage || '';
+            document.getElementById('edit-vehicle-range').value = vehicle.range || '';
+            document.getElementById('edit-pickup-location').value = vehicle.pickup_location || '';
             document.getElementById('edit-vehicle-image').value = '';
             editModal.style.display = 'block';
           }
@@ -653,6 +814,9 @@
         formData.append('rental_rate_per_day', document.getElementById('edit-rental-rate').value);
         formData.append('make', document.getElementById('edit-vehicle-make').value);
         formData.append('year', document.getElementById('edit-vehicle-year').value);
+        formData.append('mileage', document.getElementById('edit-vehicle-mileage').value);
+        formData.append('range', document.getElementById('edit-vehicle-range').value);
+        formData.append('pickup_location', document.getElementById('edit-pickup-location').value);
         
         const imageFile = document.getElementById('edit-vehicle-image').files[0];
         if (imageFile) {
@@ -801,9 +965,9 @@
                       <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category}" />
                       <div class="card-text">
                         <h2>${[item.year, item.make, item.model].filter(Boolean).join(' ') || item.category}</h2>
-                        <h3>${item.availability ? 'Available' : 'Unavailable'}</h3>
                         <p class="hosted-by">Hosted By ${item.host_fname || 'Unknown'}</p>
                         <p>${item.description || ""}</p>
+                        ${item.range ? `<p><b>Range:</b> ${item.range} mi</p>` : ''}
                         <p>Rate: $${item.rental_rate_per_day} / day</p>
                       </div>
                     </div>
@@ -820,6 +984,53 @@
               console.error("Error refreshing vehicles:", err);
             });
         }
+      }
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const viewFinancialsBtn = document.getElementById('view-financials-btn');
+      const financialSection = document.getElementById('financial-section');
+
+      viewFinancialsBtn.addEventListener('click', function() {
+        const isVisible = financialSection.style.display !== 'none';
+        financialSection.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) loadFinancials();
+      });
+
+      function loadFinancials() {
+        fetch('/api/host-financials')
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById('stat-total-revenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
+            document.getElementById('stat-total-rentals').textContent = data.totalRentals || 0;
+            document.getElementById('stat-active-rentals').textContent = data.activeRentals || 0;
+            document.getElementById('stat-top-vehicle').textContent = data.topVehicle || '—';
+
+            const tbody = document.getElementById('financial-body');
+            tbody.innerHTML = '';
+            if (!data.vehicles || data.vehicles.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="7" class="text-center">No rental data yet</td></tr>';
+              return;
+            }
+            data.vehicles.forEach(v => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${v.label}</td>
+                <td>${v.category || 'N/A'}</td>
+                <td>$${Number(v.rate).toFixed(2)}</td>
+                <td>${v.totalRentals}</td>
+                <td><span class="badge ${v.activeRentals > 0 ? 'badge-success' : 'badge-secondary'}">${v.activeRentals}</span></td>
+                <td><strong>$${Number(v.totalRevenue).toFixed(2)}</strong></td>
+                <td>${v.avgDays.toFixed(1)} days</td>
+              `;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch(err => {
+            console.error('Failed to load financials:', err);
+          });
       }
     });
   </script>

@@ -128,6 +128,41 @@
           <h2>Vehicle Availability</h2>
         </div>
 
+        <!-- Search Filter Card -->
+        <div class="row justify-content-center mb-4">
+          <div class="col-lg-10">
+            <div style="background:#fff; border-radius:10px; box-shadow:0 2px 16px #0001; padding:24px 32px;">
+              <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end;">
+                <div style="flex:1; min-width:150px;">
+                  <label for="home-start-date" style="font-weight:600; margin-bottom:4px; display:block;">Start Date</label>
+                  <input type="date" id="home-start-date" class="form-control" style="height:42px;" />
+                </div>
+                <div style="flex:1; min-width:150px;">
+                  <label for="home-end-date" style="font-weight:600; margin-bottom:4px; display:block;">Return Date</label>
+                  <input type="date" id="home-end-date" class="form-control" style="height:42px;" />
+                </div>
+                <div style="flex:1; min-width:180px;">
+                  <label for="home-location" style="font-weight:600; margin-bottom:4px; display:block;">Pickup Location</label>
+                  <select id="home-location" class="form-control" style="height:42px;">
+                    <option value="">-- All Locations --</option>
+                    <option value="Dearborn">Dearborn</option>
+                    <option value="Warren">Warren</option>
+                    <option value="DearbornHeights">Dearborn Heights</option>
+                    <option value="AnnArbor">Ann Arbor</option>
+                    <option value="GrandRapids">Grand Rapids</option>
+                    <option value="Lansing">Lansing</option>
+                  </select>
+                </div>
+                <div style="flex:0 0 auto;">
+                  <button id="home-search-btn" class="btn btn-primary" style="height:42px; padding:0 28px; font-weight:600;">Search</button>
+                  <button id="home-clear-btn" class="btn btn-outline-secondary" style="height:42px; padding:0 16px; margin-left:8px;">Clear</button>
+                </div>
+              </div>
+              <div id="home-search-msg" style="margin-top:10px; font-size:0.9em; color:#555; display:none;"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-lg-12">
             <ul id="event-flters">

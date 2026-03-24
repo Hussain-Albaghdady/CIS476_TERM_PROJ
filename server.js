@@ -424,16 +424,19 @@ app.post("/login", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
 function requireLogin(req, res, next) {
   if (!req.session?.user) {
     return res.redirect("/loginform.html");
   }
   next();
 }
+
 app.get("/", (req, res) => {
   res.set({ "Access-control-Allow-Origin": "*" });
   return res.redirect("Home.html");
 });
+
 app.get("/logout", requireLogin, (req, res) => {
   const user = req.session.userData;
   if (user) {
@@ -450,6 +453,7 @@ app.get("/logout", requireLogin, (req, res) => {
     res.redirect("/Home.html");
   });
 });
+
 app.get("/userdetail", requireLogin, (req, res) => {
   const user = req.session.user || req.session.userData;
 
@@ -462,6 +466,42 @@ app.get("/userdetail", requireLogin, (req, res) => {
     username: user.username,
     user_type: user.user_type,
   });
+});
+
+app.get("/api/vehicles/available", async (req, res) => {
+  try {
+    const { start_date, end_date } = req.query;
+    const vehicles = await db.collection("Vehicles").find({}).toArray();
+
+    let bookedVehicleIds = new Set();
+    if (start_date && end_date) {
+      // Find reservations that overlap the requested period (not Complete/Cancelled)
+      const overlapping = await db.collection("Reservations").find({
+        status: { $nin: ["Complete", "Cancelled"] },
+        start_date: { $lte: end_date },
+        end_date: { $gte: start_date },
+      }).toArray();
+      overlapping.forEach((r) => {
+        (r.history_vehicle_ids || r.vehicle_ids || []).forEach((id) => {
+          bookedVehicleIds.add(id.toString());
+        });
+      });
+    }
+
+    const hostUsernames = [...new Set(vehicles.filter((v) => v.host_username).map((v) => v.host_username))];
+    const hosts = await db.collection("HostUsers").find({ username: { $in: hostUsernames } }).toArray();
+    const hostMap = {};
+    hosts.forEach((h) => { hostMap[h.username] = h.fname; });
+
+    const enriched = vehicles
+      .filter((v) => v.availability !== false) // host hasn't marked it unavailable
+      .filter((v) => !bookedVehicleIds.has(v._id.toString())) // not booked for requested dates
+      .map((v) => ({ ...v, host_fname: v.host_username ? hostMap[v.host_username] || null : null }));
+
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch available vehicles" });
+  }
 });
 
 app.get("/api/vehicles", async (req, res) => {
@@ -487,6 +527,214 @@ app.get("/api/vehicles", async (req, res) => {
     res.json(enriched);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch vehicles" });
+  }
+});
+
+app.get("/api/admin-financials", requireLogin, async (_req, res) => {
+  try {
+    const vehicles = await db.collection("Vehicles").find({}).toArray();
+    if (vehicles.length === 0)
+      return res.json({
+        totalRevenue: 0,
+        totalRentals: 0,
+        activeRentals: 0,
+        topVehicle: "—",
+        vehicles: [],
+      });
+
+    const vehicleIdStrings = vehicles.map((v) => v._id.toString());
+    const vehicleMap = {};
+    vehicles.forEach((v) => {
+      vehicleMap[v._id.toString()] = v;
+    });
+
+    const allReservations = await db
+      .collection("Reservations")
+      .find({})
+      .toArray();
+    const stats = {};
+    vehicleIdStrings.forEach((id) => {
+      stats[id] = {
+        totalRentals: 0,
+        activeRentals: 0,
+        totalRevenue: 0,
+        totalDays: 0,
+      };
+    });
+
+    allReservations.forEach((r) => {
+      const ids = (r.history_vehicle_ids || [])
+        .map((id) => id.toString())
+        .filter((id) => vehicleIdStrings.includes(id));
+      const perVehicleCost =
+        ids.length > 0 ? (r.total_cost || 0) / ids.length : 0;
+      let days = 0;
+      if (r.start_date && r.end_date) {
+        const diff = new Date(r.end_date) - new Date(r.start_date);
+        days = Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      }
+      ids.forEach((id) => {
+        stats[id].totalRentals++;
+        stats[id].totalRevenue += perVehicleCost;
+        stats[id].totalDays += days;
+        if (r.status === "Renting") stats[id].activeRentals++;
+      });
+    });
+
+    let totalRevenue = 0,
+      totalRentals = 0,
+      activeRentals = 0,
+      topVehicle = "—",
+      topRevenue = -1;
+    const vehicleRows = vehicles.map((v) => {
+      const id = v._id.toString();
+      const s = stats[id];
+      const label =
+        [v.year, v.make, v.model].filter(Boolean).join(" ") ||
+        v.name ||
+        "Unknown";
+      totalRevenue += s.totalRevenue;
+      totalRentals += s.totalRentals;
+      activeRentals += s.activeRentals;
+      if (s.totalRevenue > topRevenue) {
+        topRevenue = s.totalRevenue;
+        topVehicle = label;
+      }
+      return {
+        label,
+        hostUsername: v.host_username || "N/A",
+        category: v.category,
+        rate: v.rental_rate_per_day,
+        totalRentals: s.totalRentals,
+        activeRentals: s.activeRentals,
+        totalRevenue: s.totalRevenue,
+        avgDays: s.totalRentals > 0 ? s.totalDays / s.totalRentals : 0,
+      };
+    });
+
+    vehicleRows.sort((a, b) => b.totalRevenue - a.totalRevenue);
+    res.json({
+      totalRevenue,
+      totalRentals,
+      activeRentals,
+      topVehicle,
+      vehicles: vehicleRows,
+    });
+  } catch (err) {
+    console.error("Admin financials error:", err);
+    res.status(500).json({ error: "Failed to fetch financials" });
+  }
+});
+
+app.get("/api/host-financials", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+
+    // Get all vehicles owned by this host
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ host_username: username })
+      .toArray();
+    if (vehicles.length === 0)
+      return res.json({
+        totalRevenue: 0,
+        totalRentals: 0,
+        activeRentals: 0,
+        topVehicle: "—",
+        vehicles: [],
+      });
+
+    const vehicleIdStrings = vehicles.map((v) => v._id.toString());
+    const vehicleMap = {};
+    vehicles.forEach((v) => {
+      vehicleMap[v._id.toString()] = v;
+    });
+
+    // Get all reservations that include any of these vehicles
+    const allReservations = await db
+      .collection("Reservations")
+      .find({})
+      .toArray();
+    const relevant = allReservations.filter((r) =>
+      (r.history_vehicle_ids || []).some((id) =>
+        vehicleIdStrings.includes(id.toString()),
+      ),
+    );
+
+    // Per-vehicle stats
+    const stats = {};
+    vehicleIdStrings.forEach((id) => {
+      stats[id] = {
+        totalRentals: 0,
+        activeRentals: 0,
+        totalRevenue: 0,
+        totalDays: 0,
+      };
+    });
+
+    relevant.forEach((r) => {
+      const ids = (r.history_vehicle_ids || [])
+        .map((id) => id.toString())
+        .filter((id) => vehicleIdStrings.includes(id));
+      const perVehicleCost =
+        ids.length > 0 ? (r.total_cost || 0) / ids.length : 0;
+      let days = 0;
+      if (r.start_date && r.end_date) {
+        const diff = new Date(r.end_date) - new Date(r.start_date);
+        days = Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      }
+      ids.forEach((id) => {
+        stats[id].totalRentals++;
+        stats[id].totalRevenue += perVehicleCost;
+        stats[id].totalDays += days;
+        if (r.status === "Renting") stats[id].activeRentals++;
+      });
+    });
+
+    // Build response
+    let totalRevenue = 0,
+      totalRentals = 0,
+      activeRentals = 0,
+      topVehicle = "—",
+      topRevenue = -1;
+    const vehicleRows = vehicles.map((v) => {
+      const id = v._id.toString();
+      const s = stats[id];
+      const label =
+        [v.year, v.make, v.model].filter(Boolean).join(" ") ||
+        v.name ||
+        "Unknown";
+      totalRevenue += s.totalRevenue;
+      totalRentals += s.totalRentals;
+      activeRentals += s.activeRentals;
+      if (s.totalRevenue > topRevenue) {
+        topRevenue = s.totalRevenue;
+        topVehicle = label;
+      }
+      return {
+        label,
+        category: v.category,
+        rate: v.rental_rate_per_day,
+        totalRentals: s.totalRentals,
+        activeRentals: s.activeRentals,
+        totalRevenue: s.totalRevenue,
+        avgDays: s.totalRentals > 0 ? s.totalDays / s.totalRentals : 0,
+      };
+    });
+
+    // Sort by revenue descending
+    vehicleRows.sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+    res.json({
+      totalRevenue,
+      totalRentals,
+      activeRentals,
+      topVehicle,
+      vehicles: vehicleRows,
+    });
+  } catch (err) {
+    console.error("Host financials error:", err);
+    res.status(500).json({ error: "Failed to fetch financials" });
   }
 });
 
@@ -573,6 +821,23 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       }
     }
 
+    // Check for overlapping reservations on each vehicle
+    const conflicts = await db.collection("Reservations").find({
+      status: { $nin: ["Complete", "Cancelled"] },
+      start_date: { $lte: end_date },
+      end_date: { $gte: start_date },
+      $or: [
+        { history_vehicle_ids: { $in: objectIds } },
+        { vehicle_ids: { $in: objectIds } },
+      ],
+    }).toArray();
+    if (conflicts.length > 0) {
+      return res.status(409).json({ error: "One or more selected vehicles are already booked for the requested dates. Please choose different dates or a different vehicle." });
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    const reservationStatus = start_date <= today ? "Renting" : "Reserved";
+
     const orderId = await getNextSequence("orderId");
     const data = {
       orderId,
@@ -584,7 +849,7 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       location,
       address,
       payment,
-      status: "Renting",
+      status: reservationStatus,
       history_vehicle_ids: vehicleIds,
       vehicle_ids: vehicleIds,
       ...(user_id && { user_id }),
@@ -602,31 +867,12 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
 
     console.log("Valid ObjectIds for update:", validObjectIds);
 
-    if (validObjectIds.length > 0) {
-      const vehicles = await db
-        .collection("Vehicles")
-        .find({ _id: { $in: validObjectIds } })
-        .toArray();
-      for (const eq of vehicles) {
-        if (
-          typeof eq.quantity_available === "number" &&
-          eq.quantity_available > 0
-        ) {
-          const newQty = eq.quantity_available - 1;
-          await db.collection("Vehicles").updateOne(
-            { _id: eq._id },
-            {
-              $set: {
-                quantity_available: newQty,
-                availability: newQty > 0,
-                unavailable_until: new Date(end_date),
-              },
-            },
-          );
-        }
-      }
-    } else {
-      console.log("No valid Vehicle IDs to update availability.");
+    // Only mark vehicle unavailable immediately if reservation starts today
+    if (validObjectIds.length > 0 && reservationStatus === "Renting") {
+      await db.collection("Vehicles").updateMany(
+        { _id: { $in: validObjectIds } },
+        { $set: { availability: false, unavailable_until: new Date(end_date) } }
+      );
     }
 
     res.json({ message: "Reservation created successfully", ...data });
@@ -769,11 +1015,20 @@ app.post("/api/return", requireLogin, async (req, res) => {
     if (!req.session || !req.session.user_name) {
       return res.status(401).json({ success: false, error: "Not logged in" });
     }
-    const { vehicleId } = req.body;
+    const { vehicleId, returnMileage } = req.body;
     if (!vehicleId) {
       return res
         .status(400)
         .json({ success: false, error: "No vehicle ID provided" });
+    }
+    if (
+      returnMileage === undefined ||
+      returnMileage === null ||
+      returnMileage === ""
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Return mileage is required" });
     }
     const user = await db
       .collection("RentalUsers")
@@ -853,6 +1108,13 @@ app.post("/api/return", requireLogin, async (req, res) => {
       : vehicleId;
     const vehicle = await db.collection("Vehicles").findOne({ _id: eqId });
     if (vehicle) {
+      const returnMileageInt = parseInt(returnMileage);
+      if (vehicle.mileage !== undefined && returnMileageInt < vehicle.mileage) {
+        return res.status(400).json({
+          success: false,
+          error: `Return mileage (${returnMileageInt}) cannot be less than the vehicle's starting mileage (${vehicle.mileage})`,
+        });
+      }
       const newQty = (vehicle.quantity_available || 0) + 1;
       await db.collection("Vehicles").updateOne(
         { _id: eqId },
@@ -860,6 +1122,7 @@ app.post("/api/return", requireLogin, async (req, res) => {
           $set: {
             quantity_available: newQty,
             availability: newQty > 0,
+            mileage: returnMileageInt,
           },
           $unset: { unavailable_until: "" },
         },
@@ -959,7 +1222,10 @@ app.get("/api/myrentals", async (req, res) => {
       .toArray();
     const result = vehicles.map((eq) => ({
       id: eq._id,
-      name: [eq.year, eq.make, eq.model].filter(Boolean).join(' ') || eq.name || "Unknown Vehicle",
+      name:
+        [eq.year, eq.make, eq.model].filter(Boolean).join(" ") ||
+        eq.name ||
+        "Unknown Vehicle",
       description: eq.description || "",
       image: eq.image || "",
     }));
@@ -999,21 +1265,34 @@ app.get("/api/myreservations", async (req, res) => {
       .find({ _id: { $in: objectIds } })
       .toArray();
     vehicleDocs.forEach((eq) => {
-      vehicleMap[eq._id.toString()] = [eq.year, eq.make, eq.model].filter(Boolean).join(' ') || eq.name || "Unknown Vehicle";
+      vehicleMap[eq._id.toString()] = {
+        name:
+          [eq.year, eq.make, eq.model].filter(Boolean).join(" ") ||
+          eq.name ||
+          "Unknown Vehicle",
+        mileage: eq.mileage,
+      };
     });
 
-    const result = reservations.map((r) => ({
-      order_id: r.orderId || "N/A",
-      order_date: r.order_date,
-      start_date: r.start_date,
-      end_date: r.end_date,
-      status: r.status || "Renting",
-      location: r.location || "",
-      total_cost: r.total_cost || 0,
-      items: (r.history_vehicle_ids || []).map(
-        (id) => vehicleMap[id.toString()] || "Unknown",
-      ),
-    }));
+    const result = reservations.map((r) => {
+      const vehicleEntries = (r.history_vehicle_ids || []).map(
+        (id) =>
+          vehicleMap[id.toString()] || { name: "Unknown", mileage: undefined },
+      );
+      return {
+        order_id: r.orderId || "N/A",
+        order_date: r.order_date,
+        start_date: r.start_date,
+        end_date: r.end_date,
+        status: r.status || "Renting",
+        location: r.location || "",
+        total_cost: r.total_cost || 0,
+        items: vehicleEntries.map((v) => v.name),
+        mileage: vehicleEntries
+          .map((v) => v.mileage)
+          .filter((m) => m !== undefined),
+      };
+    });
 
     res.json(result);
   } catch (err) {
@@ -1138,12 +1417,31 @@ app.delete("/api/delete-address", async (req, res) => {
 
 app.post("/api/vehicle", upload.single("image"), async (req, res) => {
   try {
-    const { year, make, model, category, description, rental_rate_per_day } =
-      req.body;
+    const {
+      year,
+      make,
+      model,
+      category,
+      description,
+      rental_rate_per_day,
+      mileage,
+      range,
+      pickup_location,
+    } = req.body;
 
-    if (!year || !make || !model || !category || !rental_rate_per_day) {
+    if (
+      !year ||
+      !make ||
+      !model ||
+      !category ||
+      !rental_rate_per_day ||
+      !mileage ||
+      !range ||
+      !pickup_location
+    ) {
       return res.status(400).json({
-        error: "Year, make, model, category, and rental rate are required",
+        error:
+          "Year, make, model, category, rental rate, mileage, range, and pickup location are required",
       });
     }
 
@@ -1158,6 +1456,9 @@ app.post("/api/vehicle", upload.single("image"), async (req, res) => {
       model: model.trim(),
       category: category.trim(),
       description: description ? description.trim() : "",
+      mileage: parseInt(mileage),
+      range: parseInt(range),
+      pickup_location: pickup_location.trim(),
       rental_rate_per_day: parseFloat(rental_rate_per_day),
       quantity_available: 1,
       availability: true,
@@ -1174,6 +1475,22 @@ app.post("/api/vehicle", upload.single("image"), async (req, res) => {
   } catch (err) {
     console.error("Add vehicle error:", err);
     res.status(500).json({ error: "Failed to add vehicle" });
+  }
+});
+
+app.patch("/api/vehicle/:id/availability", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { availability } = req.body;
+    if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid vehicle ID" });
+    await db.collection("Vehicles").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { availability: !!availability } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update availability" });
   }
 });
 
@@ -1207,8 +1524,17 @@ app.put(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { model, category, description, rental_rate_per_day, make, year } =
-        req.body;
+      const {
+        model,
+        category,
+        description,
+        rental_rate_per_day,
+        make,
+        year,
+        mileage,
+        range,
+        pickup_location,
+      } = req.body;
 
       if (!ObjectId.isValid(id)) {
         return res.status(400).json({ error: "Invalid vehicle ID" });
@@ -1226,6 +1552,9 @@ app.put(
         model: model.trim(),
         category: category.trim(),
         description: description ? description.trim() : "",
+        ...(mileage !== undefined && { mileage: parseInt(mileage) }),
+        ...(range !== undefined && { range: parseInt(range) }),
+        ...(pickup_location && { pickup_location: pickup_location.trim() }),
         rental_rate_per_day: parseFloat(rental_rate_per_day),
         updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
       };

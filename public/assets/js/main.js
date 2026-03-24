@@ -1,106 +1,132 @@
-document.addEventListener('DOMContentLoaded', function() {
-  if (window.location.pathname.endsWith('vehicle-reservation.html')) {
-    fetch('/api/userinfo')
-      .then(res => res.json())
-      .then(data => {
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.location.pathname.endsWith("vehicle-reservation.html")) {
+    fetch("/api/userinfo")
+      .then((res) => res.json())
+      .then((data) => {
         if (data && data.name) {
-          var cardholderField = document.getElementById('payment_cardholder_name');
+          var cardholderField = document.getElementById(
+            "payment_cardholder_name",
+          );
           if (cardholderField) cardholderField.value = data.name;
         }
       });
   }
 });
-!(function($) {
+!(function ($) {
   "use strict";
 
-  $(window).scroll(function() {
+  $(window).scroll(function () {
     if ($(this).scrollTop() > 100) {
-      $('#header').addClass('header-scrolled');
+      $("#header").addClass("header-scrolled");
     } else {
-      $('#header').removeClass('header-scrolled');
+      $("#header").removeClass("header-scrolled");
     }
   });
 
   if ($(window).scrollTop() > 100) {
-    $('#header').addClass('header-scrolled');
+    $("#header").addClass("header-scrolled");
   }
 
   $("#header").sticky({
     topSpacing: 0,
-    zIndex: '50'
+    zIndex: "50",
   });
 
-  var scrolltoOffset = $('#header').outerHeight() - 2;
-  $(document).on('click', '.nav-menu a, .mobile-nav a, .scrollto', function(e) {
-    if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
-      var target = $(this.hash);
-      if (target.length) {
-        e.preventDefault();
+  var scrolltoOffset = $("#header").outerHeight() - 2;
+  $(document).on(
+    "click",
+    ".nav-menu a, .mobile-nav a, .scrollto",
+    function (e) {
+      if (
+        location.pathname.replace(/^\//, "") ==
+          this.pathname.replace(/^\//, "") &&
+        location.hostname == this.hostname
+      ) {
+        var target = $(this.hash);
+        if (target.length) {
+          e.preventDefault();
 
-        var scrollto = target.offset().top - scrolltoOffset;
+          var scrollto = target.offset().top - scrolltoOffset;
 
-        if ($(this).attr("href") == '#header') {
-          scrollto = 0;
+          if ($(this).attr("href") == "#header") {
+            scrollto = 0;
+          }
+
+          $("html, body").animate(
+            {
+              scrollTop: scrollto,
+            },
+            1500,
+            "easeInOutExpo",
+          );
+
+          if ($(this).parents(".nav-menu, .mobile-nav").length) {
+            $(".nav-menu .active, .mobile-nav .active").removeClass("active");
+            $(this).closest("li").addClass("active");
+          }
+
+          if ($("body").hasClass("mobile-nav-active")) {
+            $("body").removeClass("mobile-nav-active");
+            $(".mobile-nav-toggle i").toggleClass(
+              "icofont-navigation-menu icofont-close",
+            );
+            $(".mobile-nav-overly").fadeOut();
+          }
+          return false;
         }
-
-        $('html, body').animate({
-          scrollTop: scrollto
-        }, 1500, 'easeInOutExpo');
-
-        if ($(this).parents('.nav-menu, .mobile-nav').length) {
-          $('.nav-menu .active, .mobile-nav .active').removeClass('active');
-          $(this).closest('li').addClass('active');
-        }
-
-        if ($('body').hasClass('mobile-nav-active')) {
-          $('body').removeClass('mobile-nav-active');
-          $('.mobile-nav-toggle i').toggleClass('icofont-navigation-menu icofont-close');
-          $('.mobile-nav-overly').fadeOut();
-        }
-        return false;
       }
-    }
-  });
+    },
+  );
 
-  $(document).ready(function() {
+  $(document).ready(function () {
     if (window.location.hash) {
       var initial_nav = window.location.hash;
       if ($(initial_nav).length) {
         var scrollto = $(initial_nav).offset().top - scrolltoOffset;
-        $('html, body').animate({
-          scrollTop: scrollto
-        }, 1500, 'easeInOutExpo');
+        $("html, body").animate(
+          {
+            scrollTop: scrollto,
+          },
+          1500,
+          "easeInOutExpo",
+        );
       }
     }
   });
 
-  if ($('.nav-menu').length) {
-    var $mobile_nav = $('.nav-menu').clone().prop({
-      class: 'mobile-nav d-lg-none'
+  if ($(".nav-menu").length) {
+    var $mobile_nav = $(".nav-menu").clone().prop({
+      class: "mobile-nav d-lg-none",
     });
-    $('body').append($mobile_nav);
-    $('body').prepend('<button type="button" class="mobile-nav-toggle d-lg-none"><i class="icofont-navigation-menu"></i></button>');
-    $('body').append('<div class="mobile-nav-overly"></div>');
+    $("body").append($mobile_nav);
+    $("body").prepend(
+      '<button type="button" class="mobile-nav-toggle d-lg-none"><i class="icofont-navigation-menu"></i></button>',
+    );
+    $("body").append('<div class="mobile-nav-overly"></div>');
 
-    $(document).on('click', '.mobile-nav-toggle', function(e) {
-      $('body').toggleClass('mobile-nav-active');
-      $('.mobile-nav-toggle i').toggleClass('icofont-navigation-menu icofont-close');
-      $('.mobile-nav-overly').toggle();
+    $(document).on("click", ".mobile-nav-toggle", function () {
+      $("body").toggleClass("mobile-nav-active");
+      $(".mobile-nav-toggle i").toggleClass(
+        "icofont-navigation-menu icofont-close",
+      );
+      $(".mobile-nav-overly").toggle();
     });
 
-    $(document).on('click', '.mobile-nav .drop-down > a', function(e) {
+    $(document).on("click", ".mobile-nav .drop-down > a", function (e) {
       e.preventDefault();
       $(this).next().slideToggle(300);
-      $(this).parent().toggleClass('active');
+      $(this).parent().toggleClass("active");
     });
 
-    $(document).click(function(e) {
+    $(document).click(function (e) {
       var container = $(".mobile-nav, .mobile-nav-toggle");
       if (!container.is(e.target) && container.has(e.target).length === 0) {
-        if ($('body').hasClass('mobile-nav-active')) {
-          $('body').removeClass('mobile-nav-active');
-          $('.mobile-nav-toggle i').toggleClass('icofont-navigation-menu icofont-close');
-          $('.mobile-nav-overly').fadeOut();
+        if ($("body").hasClass("mobile-nav-active")) {
+          $("body").removeClass("mobile-nav-active");
+          $(".mobile-nav-toggle i").toggleClass(
+            "icofont-navigation-menu icofont-close",
+          );
+          $(".mobile-nav-overly").fadeOut();
         }
       }
     });
@@ -110,15 +136,17 @@ document.addEventListener('DOMContentLoaded', function() {
   function markRouteActive() {
     const path = location.pathname.split("/").pop() || "index.html";
     const lists = document.querySelectorAll(".nav-menu, .mobile-nav ul");
-    lists.forEach(list => {
+    lists.forEach((list) => {
       if (!list) return;
-      list.querySelectorAll(".route-active").forEach(li => li.classList.remove("route-active","active"));
-      list.querySelectorAll("a[href]").forEach(a => {
+      list
+        .querySelectorAll(".route-active")
+        .forEach((li) => li.classList.remove("route-active", "active"));
+      list.querySelectorAll("a[href]").forEach((a) => {
         const href = a.getAttribute("href");
         if (!href || href.startsWith("#")) return;
         const file = href.split("/").pop();
         if (file === path) {
-          a.closest("li")?.classList.add("route-active","active");
+          a.closest("li")?.classList.add("route-active", "active");
         }
       });
     });
@@ -138,87 +166,93 @@ document.addEventListener('DOMContentLoaded', function() {
 
     nav_sections.each(function () {
       var top = $(this).offset().top,
-          bottom = top + $(this).outerHeight();
+        bottom = top + $(this).outerHeight();
 
       if (cur_pos >= top && cur_pos <= bottom) {
-        main_nav.find('a[href="#' + $(this).attr("id") + '"]').parent("li").addClass("active");
+        main_nav
+          .find('a[href="#' + $(this).attr("id") + '"]')
+          .parent("li")
+          .addClass("active");
       }
     });
-
   });
 
-  $(window).scroll(function() {
+  $(window).scroll(function () {
     if ($(this).scrollTop() > 100) {
-      $('.back-to-top').fadeIn('slow');
+      $(".back-to-top").fadeIn("slow");
     } else {
-      $('.back-to-top').fadeOut('slow');
+      $(".back-to-top").fadeOut("slow");
     }
   });
 
-  $('.back-to-top').click(function() {
-    $('html, body').animate({
-      scrollTop: 0
-    }, 1500, 'easeInOutExpo');
+  $(".back-to-top").click(function () {
+    $("html, body").animate(
+      {
+        scrollTop: 0,
+      },
+      1500,
+      "easeInOutExpo",
+    );
     return false;
   });
 
-  $(window).on('load', function() {
-    $('.venobox').venobox();
+  $(window).on("load", function () {
+    $(".venobox").venobox();
   });
 
   $('[data-toggle="counter-up"]').counterUp({
     delay: 10,
-    time: 1000
+    time: 1000,
   });
 
   $(".event-details-carousel").owlCarousel({
     autoplay: true,
     dots: true,
     loop: true,
-    items: 1
+    items: 1,
   });
 
   function aos_init() {
     AOS.init({
       duration: 1000,
       easing: "ease-in-out-back",
-      once: true
+      once: true,
     });
   }
-  $(window).on('load', function() {
+  $(window).on("load", function () {
     aos_init();
   });
-  var $grid = $('.event-container').isotope({
-    itemSelector: '.event-item'
+  var $grid = $(".event-container").isotope({
+    itemSelector: ".event-item",
   });
 
   var filters = {
-    event: '*', 
-    type: ''    
+    event: "*",
+    type: "",
   };
 
-  $('#event-flters').on('click', 'li', function() {
+  $("#event-flters").on("click", "li", function () {
     var $this = $(this);
-    var filterValue = $this.attr('data-filter');
-    
-    filters['event'] = filterValue;
+    var filterValue = $this.attr("data-filter");
+
+    filters["event"] = filterValue;
 
     var combinedFilter = concatValues(filters);
     $grid.isotope({ filter: combinedFilter });
 
-    $this.addClass('filter-active').siblings().removeClass('filter-active');
+    $this.addClass("filter-active").siblings().removeClass("filter-active");
   });
 
-  $('#type-flters').on('click', 'li', function() {
+  $("#type-flters").on("click", "li", function () {
     var $this = $(this);
-    var filterValue = $this.attr('data-filter');
+    var filterValue = $this.attr("data-filter");
 
-    if ($this.hasClass('filter-active')) {
-      filters['type'] = '';
-      $this.removeClass('filter-active');
+    if ($this.hasClass("filter-active")) {
+      filters["type"] = "";
+      $this.removeClass("filter-active");
     } else {
-      filters['type'] = filterValue;
-      $this.addClass('filter-active').siblings().removeClass('filter-active');
+      filters["type"] = filterValue;
+      $this.addClass("filter-active").siblings().removeClass("filter-active");
     }
 
     var combinedFilter = concatValues(filters);
@@ -228,65 +262,48 @@ document.addEventListener('DOMContentLoaded', function() {
   function concatValues(obj) {
     var allFilters = [];
     for (var key in obj) {
-      if (obj[key] && obj[key] !== '*') {
+      if (obj[key] && obj[key] !== "*") {
         allFilters.push(obj[key]);
       }
     }
-    return allFilters.length ? allFilters.join('') : '*';
+    return allFilters.length ? allFilters.join("") : "*";
   }
-$(document).ready(function () {
-  const $container = $('.event-container');
-  if (!$container.length) return;
+  $(document).ready(function () {
+    const $container = $(".event-container");
+    if (!$container.length) return;
 
-  fetch('/api/vehicles', { credentials: 'include' })
-    .then(res => {
-      console.log('GET /api/vehicles status:', res.status);
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          throw new Error('NOT_LOGGED_IN');
-        }
-        return res.text().then(text => {
-          throw new Error('HTTP ' + res.status + ' – ' + text);
-        });
-      }
-      return res.json();
-    })
-    .then(data => {
-      console.log("Fetched vehicle data:", data);
+    function renderHomeVehicles(data, locationFilter) {
       $container.empty();
 
       if (!Array.isArray(data) || data.length === 0) {
-        $container.append(
-          '<div class="col-12"><p style="color:red;font-weight:bold;">No vehicles found. Check your API or database.</p></div>'
-        );
+        $container.append('<div class="col-12"><p style="color:#888;text-align:center;">No vehicles found for the selected filters.</p></div>');
+        if ($container.data("isotope")) $container.isotope("destroy");
         return;
       }
 
-      data.sort((a, b) => {
-        const categoryPriority = {
-          "Compact SUV": 0,
-          "Minivan": 1,
-          "Passenger Van": 2,
-          "Pickup": 3,
-          "Sedan": 4,
-          "Sports Car": 5,
-          "SUV": 6,
-        };
+      let filtered = data;
+      if (locationFilter) {
+        filtered = data.filter((v) =>
+          (v.pickup_location || "").toLowerCase() === locationFilter.toLowerCase()
+        );
+      }
 
-        if (a.category !== b.category) {
-          const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
-          const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
-          return priorityA - priorityB;
-        }
-        return (a.name || '').localeCompare(b.name || '');
+      if (!filtered.length) {
+        $container.append('<div class="col-12"><p style="color:#888;text-align:center;">No vehicles available at the selected location.</p></div>');
+        if ($container.data("isotope")) $container.isotope("destroy");
+        return;
+      }
+
+      filtered.sort((a, b) => {
+        const p = { "Compact SUV": 0, Minivan: 1, "Passenger Van": 2, Pickup: 3, Sedan: 4, "Sports Car": 5, SUV: 6 };
+        if (a.category !== b.category) return (p[a.category] ?? 999) - (p[b.category] ?? 999);
+        return (a.name || "").localeCompare(b.name || "");
       });
 
-      data.forEach(item => {
+      filtered.forEach((item) => {
         const filters = [];
         if (item.quantity_available > 0) filters.push("filter-Available");
         else filters.push("filter-Booked");
-
         if (item.category === "Compact SUV") filters.push("filter-CompactSUV");
         if (item.category === "Minivan") filters.push("filter-Minivan");
         if (item.category === "Passenger Van") filters.push("filter-PassengerVan");
@@ -295,23 +312,17 @@ $(document).ready(function () {
         if (item.category === "Sports Car") filters.push("filter-SportsCar");
         if (item.category === "SUV") filters.push("filter-SUV");
 
-
-        const imgUrl =
-          (item.image && item.image.trim() !== "")
-            ? item.image
-            : (item.image_url && item.image_url.trim() !== ""
-                ? item.image_url
-                : "assets/img/no-image.png");
-
+        const imgUrl = item.image?.trim() || item.image_url?.trim() || "assets/img/no-image.png";
         $container.append(`
-          <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
+          <div class="col-lg-4 col-md-6 event-item ${filters.join(" ")}">
             <div class="card">
-              <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category || 'Vehicle'}" />
+              <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category || "Vehicle"}" />
               <div class="card-text">
-                <h2>${[item.year, item.make, item.model].filter(Boolean).join(' ') || item.category || 'Vehicle'}</h2>
-                <h3>${item.availability ? 'Available' : 'Unavailable'}</h3>
-                <p class="hosted-by">Hosted By ${item.host_fname || 'Unknown'}</p>
+                <h2>${[item.year, item.make, item.model].filter(Boolean).join(" ") || item.category || "Vehicle"}</h2>
+                <h3>${item.availability ? "Available" : "Unavailable"}</h3>
+                <p class="hosted-by">Hosted By ${item.host_fname || "Unknown"}</p>
                 <p class="desc">${item.description || ""}</p>
+                ${item.range ? `<p class="range"><b>Range:</b> ${item.range} mi</p>` : ""}
                 <p class="rate">Rate: $${item.rental_rate_per_day} / day</p>
               </div>
             </div>
@@ -319,76 +330,118 @@ $(document).ready(function () {
         `);
       });
 
-      if ($container.data('isotope')) {
-        $container.isotope('reloadItems').isotope();
+      if ($container.data("isotope")) {
+        $container.isotope("reloadItems").isotope();
       } else if (typeof Isotope !== "undefined") {
-        $container.isotope({ itemSelector: '.event-item' });
+        $container.isotope({ itemSelector: ".event-item" });
       }
-    })
-    .catch(err => {
-      console.error("Error fetching /api/vehicles:", err);
+    }
 
-      $container.empty();
+    function fetchHomeVehicles() {
+      const startDate = document.getElementById("home-start-date")?.value || "";
+      const endDate = document.getElementById("home-end-date")?.value || "";
+      const location = document.getElementById("home-location")?.value || "";
+      const msg = document.getElementById("home-search-msg");
 
-      if (err.message === 'NOT_LOGGED_IN') {
-        $container.append(
-          '<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>'
-        );
-      } else {
-        $container.append(
-          '<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Failed to load vehicles. Please try again later.</p></div>'
-        );
+      let url = startDate && endDate
+        ? `/api/vehicles/available?start_date=${startDate}&end_date=${endDate}`
+        : "/api/vehicles";
+
+      if (msg) {
+        if (startDate && endDate) {
+          msg.textContent = `Showing vehicles available ${startDate} – ${endDate}${location ? " in " + document.getElementById("home-location").options[document.getElementById("home-location").selectedIndex].text : ""}.`;
+          msg.style.display = "";
+        } else {
+          msg.style.display = "none";
+        }
       }
-    });
-});
 
-  document.addEventListener('DOMContentLoaded', function() {
-  fetch('/userdetail')
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.name) {
-        document.getElementById('user-welcome-name').textContent = data.name;
-      }
-    })
-    .catch(() => {
-    });
-  });
-  
-document.addEventListener('DOMContentLoaded', function () {
-  fetch('/userdetail', {credentials: 'include'})
-    .then(res => res.json())
-    .then(data => {
-      const userType=data?.user_type;
-      const loginLink = document.getElementById('login-link');
-      const loginLink2 = document.getElementById('login-link-2');
-      
-      if (loginLink) {
-        loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
-        loginLink.href = '/logout';
-      }
-      if (loginLink2) {
-        loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
-        loginLink2.href = '/logout';
-      }
-      
-      const navTargets = [
-        document.getElementById('main-navbar-list'),
-        document.querySelector('.mobile-nav ul')
-      ];
-
-      navTargets.forEach(nav => {
-        if (!nav) return;
-
-        ['customer-page-link', 'return-page-link', 'account-dropdown','admin-page','owner-page'].forEach(id => {
-          const old = nav.querySelector(`#${id}`);
-          if (old) old.remove();
+      fetch(url, { credentials: "include" })
+        .then(async (res) => {
+          if (!res.ok) throw new Error("fetch error");
+          return res.json();
+        })
+        .then((data) => renderHomeVehicles(data, location))
+        .catch(() => {
+          $container.empty().append('<div class="col-12"><p style="color:red;font-weight:bold;text-align:center;">Failed to load vehicles.</p></div>');
         });
-        if(userType==="customer")
-        {
-          const dropdownLi = document.createElement('li');
-          dropdownLi.classList.add('drop-down');
-          dropdownLi.id = 'account-dropdown';
-          dropdownLi.innerHTML = `
+    }
+
+    // Search & Clear buttons
+    document.getElementById("home-search-btn")?.addEventListener("click", function () {
+      const s = document.getElementById("home-start-date").value;
+      const e = document.getElementById("home-end-date").value;
+      if (s && e && e <= s) {
+        document.getElementById("home-search-msg").textContent = "Return date must be after start date.";
+        document.getElementById("home-search-msg").style.display = "";
+        return;
+      }
+      fetchHomeVehicles();
+    });
+    document.getElementById("home-clear-btn")?.addEventListener("click", function () {
+      document.getElementById("home-start-date").value = "";
+      document.getElementById("home-end-date").value = "";
+      document.getElementById("home-location").value = "";
+      const msg = document.getElementById("home-search-msg");
+      if (msg) msg.style.display = "none";
+      fetchHomeVehicles();
+    });
+
+    fetchHomeVehicles();
+
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/userdetail")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.name) {
+          document.getElementById("user-welcome-name").textContent = data.name;
+        }
+      })
+      .catch(() => {});
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/userdetail", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        const userType = data?.user_type;
+        const loginLink = document.getElementById("login-link");
+        const loginLink2 = document.getElementById("login-link-2");
+
+        if (loginLink) {
+          loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+          loginLink.href = "/logout";
+        }
+        if (loginLink2) {
+          loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
+          loginLink2.href = "/logout";
+        }
+
+        const navTargets = [
+          document.getElementById("main-navbar-list"),
+          document.querySelector(".mobile-nav ul"),
+        ];
+
+        navTargets.forEach((nav) => {
+          if (!nav) return;
+
+          [
+            "customer-page-link",
+            "return-page-link",
+            "account-dropdown",
+            "admin-page",
+            "owner-page",
+          ].forEach((id) => {
+            const old = nav.querySelector(`#${id}`);
+            if (old) old.remove();
+          });
+          if (userType === "customer") {
+            const dropdownLi = document.createElement("li");
+            dropdownLi.classList.add("drop-down");
+            dropdownLi.id = "account-dropdown";
+            dropdownLi.innerHTML = `
             <a href="#" class="account-toggle">My Account<i class="icofont-simple-down dropdown-arrow"></i></a>
             <ul>
               <li id="dashboard-page-link">
@@ -403,506 +456,628 @@ document.addEventListener('DOMContentLoaded', function () {
             </ul>
           `;
 
-          const logoutLi = nav.querySelector('#login-link-li');
-          if (logoutLi) {
-            nav.insertBefore(dropdownLi, logoutLi);
-          } else {
-            nav.appendChild(dropdownLi);
-          }
-        }
-        else if(userType === "admin")
-        {
-          const dropdownLi = document.createElement('li');
-          dropdownLi.id = 'admin-page';
-          dropdownLi.innerHTML = `
-            <a href="adminPage.html">Admin</a>
+            const logoutLi = nav.querySelector("#login-link-li");
+            if (logoutLi) {
+              nav.insertBefore(dropdownLi, logoutLi);
+            } else {
+              nav.appendChild(dropdownLi);
+            }
+          } else if (userType === "admin") {
+            const dropdownLi = document.createElement("li");
+            dropdownLi.id = "admin-page";
+            dropdownLi.innerHTML = `
+            <a href="adminPage.html">Admin Portal</a>
           `;
 
-          const logoutLi = nav.querySelector('#login-link-li');
-          if (logoutLi) {
-            nav.insertBefore(dropdownLi, logoutLi);
-          } else {
-            nav.appendChild(dropdownLi);
-          }
-        }
-        else if(userType === "host")
-        {
-          const dropdownLi = document.createElement('li');
-          dropdownLi.id = 'owner-page';
-          dropdownLi.innerHTML = `
-            <a href="ownerPage.html">Owner Portal</a>
+            const logoutLi = nav.querySelector("#login-link-li");
+            if (logoutLi) {
+              nav.insertBefore(dropdownLi, logoutLi);
+            } else {
+              nav.appendChild(dropdownLi);
+            }
+          } else if (userType === "host") {
+            const dropdownLi = document.createElement("li");
+            dropdownLi.id = "owner-page";
+            dropdownLi.innerHTML = `
+            <a href="ownerPage.html">Host Portal</a>
           `;
 
-          const logoutLi = nav.querySelector('#login-link-li');
-          if (logoutLi) {
-            nav.insertBefore(dropdownLi, logoutLi);
-          } else {
-            nav.appendChild(dropdownLi);
+            const logoutLi = nav.querySelector("#login-link-li");
+            if (logoutLi) {
+              nav.insertBefore(dropdownLi, logoutLi);
+            } else {
+              nav.appendChild(dropdownLi);
+            }
           }
+        });
+        const current = window.location.pathname + window.location.hash;
+        if (current.endsWith("account.html")) {
+          document
+            .querySelectorAll("#dashboard-page-link-anchor")
+            .forEach((a) => a.parentElement.classList.add("active"));
+        }
+        if (current.endsWith("vehicle-reservation.html")) {
+          document
+            .querySelectorAll("#customer-page-link-anchor")
+            .forEach((a) => a.parentElement.classList.add("active"));
+        }
+        if (current.endsWith("account.html#return")) {
+          document
+            .querySelectorAll("#return-page-link-anchor")
+            .forEach((a) => a.parentElement.classList.add("active"));
+        }
+        if (current.endsWith("adminPage.html")) {
+          document
+            .querySelectorAll('a[href$="adminPage.html"]')
+            .forEach((a) => a.parentElement.classList.add("active"));
+        }
+        if (current.endsWith("maintainancePage.html")) {
+          document
+            .querySelectorAll('a[href$="maintainancePage.html"]')
+            .forEach((a) => a.parentElement.classList.add("active"));
         }
       });
-      const current = window.location.pathname+ window.location.hash;
-      if (current.endsWith('account.html')) {
-        document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+  });
+  fetch("/userdetail", { credentials: "include" })
+    .then((res) => {
+      if (!res.ok) throw new Error("Not Logged in");
+      return res.json();
+    })
+    .then((data) => {
+      if (data?.name) {
+        const heroLoginBtn = document.getElementById("login-link-3");
+        if (heroLoginBtn) heroLoginBtn.style.display = "none";
       }
-      if (current.endsWith('vehicle-reservation.html')) {
-        document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-      }
-      if (current.endsWith('account.html#return')) {
-        document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-      }
-      if (current.endsWith('adminPage.html')) {
-        document.querySelectorAll('a[href$="adminPage.html"]').forEach(a => a.parentElement.classList.add('active'));
-      }
-      if (current.endsWith('maintainancePage.html')) {
-        document.querySelectorAll('a[href$="maintainancePage.html"]').forEach(a => a.parentElement.classList.add('active'));
-      }
+    })
+    .catch(() => {
+      /* not logged in, do nothing */
     });
-});
-  fetch('/userdetail', {credentials:"include"})
-  .then(res => {if(!res.ok)throw new Error("Not Logged in"); return res.json();})
-  .then(data => {
-    if (data?.name) {
-      const heroLoginBtn = document.getElementById('login-link-3');
-      if (heroLoginBtn) heroLoginBtn.style.display = 'none';
-    }
-  })
-  .catch(() => { /* not logged in, do nothing */ });
   let allVehicle = [];
   let selectedVehicleSet = new Set();
+  let selectedLocation = "";
 
   function renderVehicle(category) {
-    const list = document.getElementById('vehicle-list');
-    let filtered = allVehicle.filter(eq => (eq.quantity_available || 0) > 0);
+    const list = document.getElementById("vehicle-list");
+    let filtered = allVehicle.filter((eq) => (eq.quantity_available || 0) > 0);
     if (category) {
-      filtered = filtered.filter(eq =>
-        (eq.category || eq.type || '').toLowerCase() === category.toLowerCase()
+      filtered = filtered.filter(
+        (eq) =>
+          (eq.category || eq.type || "").toLowerCase() ===
+          category.toLowerCase(),
       );
     }
-    
+    if (selectedLocation) {
+      filtered = filtered.filter(
+        (eq) =>
+          (eq.pickup_location || "").toLowerCase() ===
+          selectedLocation.toLowerCase(),
+      );
+    }
+
     filtered.sort((a, b) => {
       const categoryPriority = {
         "Compact SUV": 0,
-        "Minivan": 1,
+        Minivan: 1,
         "Passenger Van": 2,
-        "Pickup": 3,
-        "Sedan": 4,
+        Pickup: 3,
+        Sedan: 4,
         "Sports Car": 5,
-        "SUV": 6,
+        SUV: 6,
       };
-      
+
       if (a.category !== b.category) {
-        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
-        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+        const priorityA =
+          categoryPriority[a.category] !== undefined
+            ? categoryPriority[a.category]
+            : 999;
+        const priorityB =
+          categoryPriority[b.category] !== undefined
+            ? categoryPriority[b.category]
+            : 999;
         return priorityA - priorityB;
       }
-      return a.name.localeCompare(b.name);
+      const nameA = [a.year, a.make, a.model].filter(Boolean).join(" ") || a.category || "";
+      const nameB = [b.year, b.make, b.model].filter(Boolean).join(" ") || b.category || "";
+      return nameA.localeCompare(nameB);
     });
-    
+
     if (!filtered.length) {
-      list.innerHTML = '<div class="col-12"><p>No vehicles available for this category.</p></div>';
+      list.innerHTML =
+        '<div class="col-12"><p>No vehicles available for this category.</p></div>';
       return;
     }
-    list.innerHTML = filtered.map(eq => {
-      const imgUrl = (eq.image && eq.image.trim() !== "")
-        ? eq.image
-        : (eq.image_url && eq.image_url.trim() !== ""
-          ? eq.image_url
-          : "assets/img/no-image.png");
-      return `
+    list.innerHTML = filtered
+      .map((eq) => {
+        const imgUrl =
+          eq.image && eq.image.trim() !== ""
+            ? eq.image
+            : eq.image_url && eq.image_url.trim() !== ""
+              ? eq.image_url
+              : "assets/img/no-image.png";
+        return `
       <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
-          <img src="${imgUrl}" class="card-img-top" alt="${eq.name || eq.vehicleName || 'Vehicle'}">
+          <img src="${imgUrl}" class="card-img-top" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}">
           <div class="card-body">
-            <h5 class="card-title">${eq.name || eq.vehicleName || 'Vehicle'}</h5>
-            <p class="card-text">${eq.description || ''}</p>
+            <h5 class="card-title">${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h5>
+            <p class="card-text">${eq.description || ""}</p>
             <div style="font-weight:bold;margin-bottom:5px;">
-              Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : 'N/A'} per day
+              Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : "N/A"} per day
             </div>
+            ${eq.range ? `<div style="font-size:0.98em;margin-bottom:3px;"><b>Range:</b> ${eq.range} mi</div>` : ""}
+            ${eq.pickup_location ? `<div style="font-size:0.98em;margin-bottom:5px;"><b>Pick-Up:</b> ${eq.pickup_location}</div>` : ""}
             <div style="font-size:0.98em;margin-bottom:5px;">
               <b>Quantity Available:</b> ${eq.quantity_available || 0}
             </div>
             <div>
-              <input type="checkbox" class="vehicle-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedVehicleSet.has(eq._id) ? 'checked' : ''}>
+              <input type="checkbox" class="vehicle-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedVehicleSet.has(eq._id) ? "checked" : ""}>
               <label for="equip_${eq._id}">Select this Vehicle</label>
             </div>
           </div>
         </div>
       </div>
       `;
-    }).join('');
+      })
+      .join("");
 
-  document.querySelectorAll('.vehicle-checkbox').forEach(cb => {
-    cb.addEventListener('change', function() {
-      if (this.checked) {
-        selectedVehicleSet.clear();
-        selectedVehicleSet.add(this.value);
-        // Gray out all other vehicle cards
-        document.querySelectorAll('.vehicle-checkbox').forEach(other => {
-          if (other !== this) {
-            other.checked = false;
-            other.disabled = true;
-            other.closest('.col-md-4').style.opacity = '0.4';
-            other.closest('.col-md-4').style.pointerEvents = 'none';
+    document.querySelectorAll(".vehicle-checkbox").forEach((cb) => {
+      cb.addEventListener("change", function () {
+        if (this.checked) {
+          selectedVehicleSet.clear();
+          selectedVehicleSet.add(this.value);
+          // Set pickup location from selected vehicle
+          const vehicle = allVehicle.find((v) => v._id == this.value);
+          const locationInput = document.getElementById("location");
+          const locationDisplay = document.getElementById("pickup-location-display");
+          if (vehicle && vehicle.pickup_location) {
+            if (locationInput) locationInput.value = vehicle.pickup_location;
+            if (locationDisplay) locationDisplay.value = vehicle.pickup_location;
+          } else {
+            if (locationInput) locationInput.value = "";
+            if (locationDisplay) locationDisplay.value = "No location set";
           }
-        });
-      } else {
-        selectedVehicleSet.delete(this.value);
-        // Restore all other vehicle cards
-        document.querySelectorAll('.vehicle-checkbox').forEach(other => {
-          other.disabled = false;
-          other.closest('.col-md-4').style.opacity = '';
-          other.closest('.col-md-4').style.pointerEvents = '';
-        });
-      }
+          // Gray out all other vehicle cards
+          document.querySelectorAll(".vehicle-checkbox").forEach((other) => {
+            if (other !== this) {
+              other.checked = false;
+              other.disabled = true;
+              other.closest(".col-md-4").style.opacity = "0.4";
+              other.closest(".col-md-4").style.pointerEvents = "none";
+            }
+          });
+        } else {
+          selectedVehicleSet.delete(this.value);
+          // Clear pickup location
+          const locationInput = document.getElementById("location");
+          const locationDisplay = document.getElementById("pickup-location-display");
+          if (locationInput) locationInput.value = "";
+          if (locationDisplay) locationDisplay.value = "Select a vehicle below";
+          // Restore all other vehicle cards
+          document.querySelectorAll(".vehicle-checkbox").forEach((other) => {
+            other.disabled = false;
+            other.closest(".col-md-4").style.opacity = "";
+            other.closest(".col-md-4").style.pointerEvents = "";
+          });
+        }
+      });
     });
-  });
-}
+  }
 
-fetch('/api/vehicles')
-  .then(res => res.json())
-  .then(data => {
-    data.sort((a, b) => {
-      const categoryPriority = {
-        "Compact SUV": 0,
-        "Minivan": 1,
-        "Passenger Van": 2,
-        "Pickup": 3,
-        "Sedan": 4,
-        "Sports Car": 5,
-        "SUV": 6,
-      };
-      
-      if (a.category !== b.category) {
-        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
-        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
-        return priorityA - priorityB;
-      }
-      return a.name.localeCompare(b.name);
+  function fetchAndRenderVehicles() {
+    const startDate = document.getElementById("filter-start-date")?.value || "";
+    const endDate = document.getElementById("filter-end-date")?.value || "";
+    const dateMsg = document.getElementById("date-filter-msg");
+
+    let url = "/api/vehicles/available";
+    if (startDate && endDate) {
+      url += `?start_date=${startDate}&end_date=${endDate}`;
+      if (dateMsg) { dateMsg.textContent = `Showing vehicles available from ${startDate} to ${endDate}.`; dateMsg.style.display = ""; }
+    } else {
+      if (dateMsg) dateMsg.style.display = "none";
+    }
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        allVehicle = data;
+        renderVehicle(document.getElementById("vehicle-category").value);
+      })
+      .catch(() => {
+        document.getElementById("vehicle-list").innerHTML =
+          '<div class="col-12"><p style="color:red;">Failed to load vehicles. Please try again.</p></div>';
+      });
+  }
+
+  fetchAndRenderVehicles();
+
+  document
+    .getElementById("vehicle-category")
+    .addEventListener("change", function () {
+      renderVehicle(this.value);
     });
-    
-    allVehicle = data;
-    renderVehicle("");
-  })
-  .catch(() => {
-    document.getElementById('vehicle-list').innerHTML = '<div class="col-12"><p>Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>';
-  });
 
-document.getElementById('vehicle-category').addEventListener('change', function() {
-  renderVehicle(this.value);
-});
+  const formLocation = document.getElementById("location");
+  if (formLocation) {
+    formLocation.addEventListener("change", function () {
+      selectedLocation = this.value;
+      renderVehicle(document.getElementById("vehicle-category").value);
+    });
+  }
 
-function calculateDays(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  return Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
-}
+  // Date filter inputs — re-fetch vehicles and sync with reservation form
+  const filterStartDate = document.getElementById("filter-start-date");
+  const filterEndDate = document.getElementById("filter-end-date");
+  if (filterStartDate) {
+    filterStartDate.addEventListener("change", function () {
+      const formStart = document.getElementById("start_date");
+      if (formStart) formStart.value = this.value;
+      fetchAndRenderVehicles();
+    });
+  }
+  if (filterEndDate) {
+    filterEndDate.addEventListener("change", function () {
+      const formEnd = document.getElementById("end_date");
+      if (formEnd) formEnd.value = this.value;
+      fetchAndRenderVehicles();
+    });
+  }
 
-function showPaymentModal(totalPrice, onConfirm) {
-  const taxRate = 0.06;
-  const taxAmount = totalPrice * taxRate;
-  const totalWithTax = totalPrice + taxAmount;
-  document.getElementById('reservation-modal-title').textContent = "Reservation Summary";
-  document.getElementById('reservation-modal-body').innerHTML = `
+  // Sync reservation form dates back to filter inputs
+  const formStartDate = document.getElementById("start_date");
+  const formEndDate = document.getElementById("end_date");
+  if (formStartDate) {
+    formStartDate.addEventListener("change", function () {
+      const f = document.getElementById("filter-start-date");
+      if (f) f.value = this.value;
+      fetchAndRenderVehicles();
+    });
+  }
+  if (formEndDate) {
+    formEndDate.addEventListener("change", function () {
+      const f = document.getElementById("filter-end-date");
+      if (f) f.value = this.value;
+      fetchAndRenderVehicles();
+    });
+  }
+
+
+  function calculateDays(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+  }
+
+  function showPaymentModal(totalPrice, onConfirm) {
+    const taxRate = 0.06;
+    const taxAmount = totalPrice * taxRate;
+    const totalWithTax = totalPrice + taxAmount;
+    document.getElementById("reservation-modal-title").textContent =
+      "Reservation Summary";
+    document.getElementById("reservation-modal-body").innerHTML = `
     <p style="font-size:1.2em;">Subtotal: <b>$${totalPrice.toFixed(2)}</b></p>
     <p style="font-size:1.1em;">Tax (6%): <b>$${taxAmount.toFixed(2)}</b></p>
     <p style="font-size:1.2em;">Total Price: <b>$${totalWithTax.toFixed(2)}</b></p>
     <p style="margin-top:10px;">Please proceed to payment to complete your reservation.</p>
     <button id="pay-now-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#28a745; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Pay Now</button>
   `;
-  document.getElementById('reservation-modal').style.display = 'flex';
-  document.getElementById('pay-now-btn').onclick = function() {
-    document.getElementById('reservation-modal').style.display = 'none';
-    onConfirm();
-    localStorage.setItem('showReservationModal', '1');
-    window.location.reload();
-  };
+    document.getElementById("reservation-modal").style.display = "flex";
+    document.getElementById("pay-now-btn").onclick = function () {
+      document.getElementById("reservation-modal").style.display = "none";
+      onConfirm();
+      localStorage.setItem("showReservationModal", "1");
+      window.location.reload();
+    };
   }
 
-  document.getElementById('reservation-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    document.getElementById('reservation-error').textContent = '';
-    document.getElementById('reservation-success').textContent = '';
-    document.getElementById('selected-vehicle').value = JSON.stringify(Array.from(selectedVehicleSet));
-    if (selectedVehicleSet.size === 0) {
-      document.getElementById('reservation-error').textContent = "Please select at least one vehicle to reserve.";
-      return;
-    }
-    const selectedIds = Array.from(selectedVehicleSet);
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
-    if (!startDate) {
-      document.getElementById('reservation-error').textContent = "Please select a start date.";
-      return;
-    }
-    if (!endDate) {
-      document.getElementById('reservation-error').textContent = "Please select a return date.";
-      return;
-    }
-    if (endDate <= startDate) {
-      document.getElementById('reservation-error').textContent = "Return date must be after start date.";
-      return;
-    }
-    const days = calculateDays(startDate, endDate);
-    let totalPrice = 0;
-    selectedIds.forEach(id => {
-      const eq = allVehicle.find(eq => eq._id == id);
-      if (eq && eq.rental_rate_per_day) {
-        totalPrice += Number(eq.rental_rate_per_day) * days;
+  document
+    .getElementById("reservation-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      document.getElementById("reservation-error").textContent = "";
+      document.getElementById("reservation-success").textContent = "";
+      document.getElementById("selected-vehicle").value = JSON.stringify(
+        Array.from(selectedVehicleSet),
+      );
+      if (selectedVehicleSet.size === 0) {
+        document.getElementById("reservation-error").textContent =
+          "Please select at least one vehicle to reserve.";
+        return;
       }
-    });
-    const taxRate = 0.06;
-    const taxAmount = totalPrice * taxRate;
-    const totalWithTax = totalPrice + taxAmount;
-    document.getElementById('total-cost').value = totalWithTax.toFixed(2);
-    showPaymentModal(totalPrice, () => {
-      const form = document.getElementById('reservation-form');
-      const formData = new FormData(form);
-      fetch(form.action, {
-        method: 'POST',
-        body: new URLSearchParams([...formData])
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          document.getElementById('reservation-error').textContent = data.error;
-          document.getElementById('reservation-success').textContent = '';
-        } else {
-          let msg = "";
-          if (data.unavailable_vehicle_ids && data.unavailable_vehicle_ids.length > 0) {
-            msg = `<div style="color:green;font-weight:bold;">Reservation successful for available vehicles only.</div>
+      const selectedIds = Array.from(selectedVehicleSet);
+      const startDate = document.getElementById("start_date").value;
+      const endDate = document.getElementById("end_date").value;
+      if (!startDate) {
+        document.getElementById("reservation-error").textContent =
+          "Please select a start date.";
+        return;
+      }
+      if (!endDate) {
+        document.getElementById("reservation-error").textContent =
+          "Please select a return date.";
+        return;
+      }
+      if (endDate <= startDate) {
+        document.getElementById("reservation-error").textContent =
+          "Return date must be after start date.";
+        return;
+      }
+      const days = calculateDays(startDate, endDate);
+      let totalPrice = 0;
+      selectedIds.forEach((id) => {
+        const eq = allVehicle.find((eq) => eq._id == id);
+        if (eq && eq.rental_rate_per_day) {
+          totalPrice += Number(eq.rental_rate_per_day) * days;
+        }
+      });
+      const taxRate = 0.06;
+      const taxAmount = totalPrice * taxRate;
+      const totalWithTax = totalPrice + taxAmount;
+      document.getElementById("total-cost").value = totalWithTax.toFixed(2);
+      showPaymentModal(totalPrice, () => {
+        const form = document.getElementById("reservation-form");
+        const formData = new FormData(form);
+        fetch(form.action, {
+          method: "POST",
+          body: new URLSearchParams([...formData]),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              document.getElementById("reservation-error").textContent =
+                data.error;
+              document.getElementById("reservation-success").textContent = "";
+            } else {
+              let msg = "";
+              if (
+                data.unavailable_vehicle_ids &&
+                data.unavailable_vehicle_ids.length > 0
+              ) {
+                msg = `<div style="color:green;font-weight:bold;">Reservation successful for available vehicles only.</div>
                     <div style="color:red;font-weight:bold;">Some vehicles was already booked and not reserved.</div>`;
-          } else {
-            msg = `<div style="color:green;font-weight:bold;">Reservation successful!</div>`;
-          }
-          document.getElementById('reservation-modal-title').textContent = "Reservation successful!";
-          document.getElementById('reservation-modal_body').innerHTML = `
+              } else {
+                msg = `<div style="color:green;font-weight:bold;">Reservation successful!</div>`;
+              }
+              document.getElementById("reservation-modal-title").textContent =
+                "Reservation successful!";
+              document.getElementById("reservation-modal_body").innerHTML = `
             ${msg}
             <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
           `;
-          document.getElementById('reservation-modal').style.display = 'flex';
-          document.getElementById('close-modal-btn').onclick = function() {
-            document.getElementById('reservation-modal').style.display = 'none';
-            window.location.reload();
-          };
-          document.getElementById('reservation-success').textContent = '';
-          document.getElementById('reservation-error').textContent = '';
-          selectedVehicleSet.clear();
-          renderVehicle(document.getElementById('vehicle-category').value);
-        }
-      })
-      .catch(() => {
-        document.getElementById('reservation-error').textContent = "Reservation failed. Please try again.";
-        document.getElementById('reservation-success').textContent = '';
+              document.getElementById("reservation-modal").style.display =
+                "flex";
+              document.getElementById("close-modal-btn").onclick = function () {
+                document.getElementById("reservation-modal").style.display =
+                  "none";
+                window.location.reload();
+              };
+              document.getElementById("reservation-success").textContent = "";
+              document.getElementById("reservation-error").textContent = "";
+              selectedVehicleSet.clear();
+              renderVehicle(document.getElementById("vehicle-category").value);
+            }
+          })
+          .catch(() => {
+            document.getElementById("reservation-error").textContent =
+              "Reservation failed. Please try again.";
+            document.getElementById("reservation-success").textContent = "";
+          });
       });
     });
-  });
 
   function populatePaymentDropdown() {
-    fetch('/api/mypayments')
-      .then(res => res.json())
-      .then(payments => {
-        const paymentSelect = document.getElementById('payment');
+    fetch("/api/mypayments")
+      .then((res) => res.json())
+      .then((payments) => {
+        const paymentSelect = document.getElementById("payment");
         if (paymentSelect && payments && payments.length > 0) {
-          paymentSelect.innerHTML = '<option value="" disabled selected>-- Choose Payment --</option>';
-          
+          paymentSelect.innerHTML =
+            '<option value="" disabled selected>-- Choose Payment --</option>';
+
           payments.forEach((payment, index) => {
-            const option = document.createElement('option');
+            const option = document.createElement("option");
             option.value = payment.payment_nickname || `payment_${index}`;
-            option.textContent = `${payment.card_type} ending in ${payment.last4} (${payment.payment_nickname || 'Card ' + (index + 1)})`;
+            option.textContent = `${payment.card_type} ending in ${payment.last4} (${payment.payment_nickname || "Card " + (index + 1)})`;
             paymentSelect.appendChild(option);
           });
         }
       })
-      .catch(err => {
-        console.log('Could not load payment methods:', err);
+      .catch((err) => {
+        console.log("Could not load payment methods:", err);
       });
   }
 
   function populateAddressDropdown() {
-    fetch('/api/myaddress')
-      .then(res => res.json())
-      .then(addresses => {
-        const addressSelect = document.getElementById('address');
+    fetch("/api/myaddress")
+      .then((res) => res.json())
+      .then((addresses) => {
+        const addressSelect = document.getElementById("address");
         if (addressSelect && addresses && addresses.length > 0) {
-          addressSelect.innerHTML = '<option value="" disabled selected>-- Choose Billing address--</option>';
-          
+          addressSelect.innerHTML =
+            '<option value="" disabled selected>-- Choose Billing address--</option>';
+
           addresses.forEach((address, index) => {
-            const option = document.createElement('option');
+            const option = document.createElement("option");
             option.value = address.address_nickname || `address_${index}`;
-            option.textContent = `${address.address_line1}, ${address.city}, ${address.state} ${address.zip_code} (${address.address_nickname || 'Address ' + (index + 1)})`;
+            option.textContent = `${address.address_line1}, ${address.city}, ${address.state} ${address.zip_code} (${address.address_nickname || "Address " + (index + 1)})`;
             addressSelect.appendChild(option);
           });
         }
       })
-      .catch(err => {
-        console.log('Could not load addresses:', err);
+      .catch((err) => {
+        console.log("Could not load addresses:", err);
       });
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/userinfo')
-      .then(res => res.json())
-      .then(data => {
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/api/userinfo")
+      .then((res) => res.json())
+      .then((data) => {
         if (data && data.name) {
-          const customerNameField = document.getElementById('customer_name');
-          const welcomeNameField = document.getElementById('user-welcome-name');
+          const customerNameField = document.getElementById("customer_name");
+          const welcomeNameField = document.getElementById("user-welcome-name");
           if (customerNameField) customerNameField.value = data.name;
           if (welcomeNameField) welcomeNameField.textContent = data.name;
         }
       })
-      .catch(() => {
-      });
+      .catch(() => {});
 
-    if (window.location.pathname.endsWith('vehicle-reservation.html')) {
+    if (window.location.pathname.endsWith("vehicle-reservation.html")) {
       populatePaymentDropdown();
       populateAddressDropdown();
-      
-      const addPaymentBtn = document.getElementById('add-payment-btn');
-      const addAddressBtn = document.getElementById('add-address-btn');
-      const paymentForm = document.getElementById('Payment-form');
-      const addressForm = document.getElementById('Address-form');
-      
+
+      const addPaymentBtn = document.getElementById("add-payment-btn");
+      const addAddressBtn = document.getElementById("add-address-btn");
+      const paymentForm = document.getElementById("Payment-form");
+      const addressForm = document.getElementById("Address-form");
+
       if (addPaymentBtn && paymentForm) {
-        addPaymentBtn.addEventListener('click', function() {
-          paymentForm.classList.toggle('hidden-form');
-          addPaymentBtn.textContent = paymentForm.classList.contains('hidden-form') 
-            ? '+ Add New Payment Method' 
-            : '- Hide Payment Form';
+        addPaymentBtn.addEventListener("click", function () {
+          paymentForm.classList.toggle("hidden-form");
+          addPaymentBtn.textContent = paymentForm.classList.contains(
+            "hidden-form",
+          )
+            ? "+ Add New Payment Method"
+            : "- Hide Payment Form";
         });
       }
-      
+
       if (addAddressBtn && addressForm) {
-        addAddressBtn.addEventListener('click', function() {
-          addressForm.classList.toggle('hidden-form');
-          addAddressBtn.textContent = addressForm.classList.contains('hidden-form') 
-            ? '+ Add New Address' 
-            : '- Hide Address Form';
+        addAddressBtn.addEventListener("click", function () {
+          addressForm.classList.toggle("hidden-form");
+          addAddressBtn.textContent = addressForm.classList.contains(
+            "hidden-form",
+          )
+            ? "+ Add New Address"
+            : "- Hide Address Form";
         });
       }
-            const cardField = document.getElementById('card_number');
+      const cardField = document.getElementById("card_number");
       if (cardField) {
-        cardField.addEventListener('input', function () {
-          let digits = this.value.replace(/\D/g, '').substring(0, 16);
-          let formatted = digits.match(/.{1,4}/g)?.join('-') || '';      
+        cardField.addEventListener("input", function () {
+          let digits = this.value.replace(/\D/g, "").substring(0, 16);
+          let formatted = digits.match(/.{1,4}/g)?.join("-") || "";
           this.value = formatted;
         });
       }
-      ['payment_zip_code', 'cvv'].forEach(function (fieldId) {
+      ["payment_zip_code", "cvv"].forEach(function (fieldId) {
         const field = document.getElementById(fieldId);
         if (field) {
-          field.addEventListener('input', function () {
-            this.value = this.value.replace(/[^\d]/g, '');
+          field.addEventListener("input", function () {
+            this.value = this.value.replace(/[^\d]/g, "");
           });
         }
       });
-      
-       if (paymentForm) {
-        paymentForm.addEventListener('submit', function (e) {
-          e.preventDefault();
-          
-          const cardNumberFormatted = paymentForm.card_number.value.trim();
-          const rawCardNumber       = cardNumberFormatted.replace(/\D/g, '');
-          const zipCode             = paymentForm.payment_zip_code.value.trim();
-          const cvv                 = paymentForm.cvv.value.trim();
 
-          let errorMsg = '';
+      if (paymentForm) {
+        paymentForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const cardNumberFormatted = paymentForm.card_number.value.trim();
+          const rawCardNumber = cardNumberFormatted.replace(/\D/g, "");
+          const zipCode = paymentForm.payment_zip_code.value.trim();
+          const cvv = paymentForm.cvv.value.trim();
+
+          let errorMsg = "";
           if (!/^\d{16}$/.test(rawCardNumber)) {
-            errorMsg = 'Card number must be exactly 16 digits.';
+            errorMsg = "Card number must be exactly 16 digits.";
           } else if (!/^\d{5}$/.test(zipCode)) {
-            errorMsg = 'Zip code must be exactly 5 digits.';
+            errorMsg = "Zip code must be exactly 5 digits.";
           } else if (!/^\d{3,4}$/.test(cvv)) {
-            errorMsg = 'CVV must be 3 or 4 digits.';
+            errorMsg = "CVV must be 3 or 4 digits.";
           }
 
           if (errorMsg) {
-            document.getElementById('payments-error').textContent = errorMsg;
-            document.getElementById('payments-success').textContent = '';
+            document.getElementById("payments-error").textContent = errorMsg;
+            document.getElementById("payments-success").textContent = "";
             return;
           }
 
           const formData = new FormData(paymentForm);
-          formData.set('card_number', rawCardNumber);
+          formData.set("card_number", rawCardNumber);
 
-          fetch('/payments', {
-            method: 'POST',
-            body: new URLSearchParams([...formData])
+          fetch("/payments", {
+            method: "POST",
+            body: new URLSearchParams([...formData]),
           })
-          .then(res => res.json())
-          .then(data => {
-            if (data.message || data.success || !data.error) {
-              document.getElementById('payments-success').textContent =
-                'Payment method added successfully!';
-              document.getElementById('payments-error').textContent = '';
-              paymentForm.reset();
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.message || data.success || !data.error) {
+                document.getElementById("payments-success").textContent =
+                  "Payment method added successfully!";
+                document.getElementById("payments-error").textContent = "";
+                paymentForm.reset();
 
-              setTimeout(() => {
-                populatePaymentDropdown();
-                paymentForm.classList.add('hidden-form');
-                if (addPaymentBtn) {
-                  addPaymentBtn.textContent = '+ Add New Payment Method';
-                }
-              }, 1000);
-            } else {
-              document.getElementById('payments-error').textContent =
-                data.error || 'Failed to add payment method';
-              document.getElementById('payments-success').textContent = '';
-            }
-          })
-          .catch(err => {
-            console.error('Payment submit error:', err);
-            document.getElementById('payments-error').textContent =
-              'Failed to add payment method';
-            document.getElementById('payments-success').textContent = '';
-          });
+                setTimeout(() => {
+                  populatePaymentDropdown();
+                  paymentForm.classList.add("hidden-form");
+                  if (addPaymentBtn) {
+                    addPaymentBtn.textContent = "+ Add New Payment Method";
+                  }
+                }, 1000);
+              } else {
+                document.getElementById("payments-error").textContent =
+                  data.error || "Failed to add payment method";
+                document.getElementById("payments-success").textContent = "";
+              }
+            })
+            .catch((err) => {
+              console.error("Payment submit error:", err);
+              document.getElementById("payments-error").textContent =
+                "Failed to add payment method";
+              document.getElementById("payments-success").textContent = "";
+            });
         });
       }
-      
+
       if (addressForm) {
-        addressForm.addEventListener('submit', function(e) {
+        addressForm.addEventListener("submit", function (e) {
           e.preventDefault();
           const formData = new FormData(addressForm);
-          
-          fetch('/addresses', {
-            method: 'POST',
-            body: new URLSearchParams([...formData])
+
+          fetch("/addresses", {
+            method: "POST",
+            body: new URLSearchParams([...formData]),
           })
-          .then(res => res.json())
-          .then(data => {
-            if (data.message || data.success || !data.error) {
-              document.getElementById('address-success').textContent = 'Address added successfully!';
-              document.getElementById('address-error').textContent = '';
-              addressForm.reset();
-              setTimeout(() => {
-                populateAddressDropdown();
-                addressForm.classList.add('hidden-form');
-                addAddressBtn.textContent = '+ Add New Address';
-              }, 1000);
-            } else {
-              document.getElementById('address-error').textContent = data.error || 'Failed to add address';
-              document.getElementById('address-success').textContent = '';
-            }
-          })
-          .catch(err => {
-            document.getElementById('address-error').textContent = 'Failed to add address';
-            document.getElementById('address-success').textContent = '';
-          });
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.message || data.success || !data.error) {
+                document.getElementById("address-success").textContent =
+                  "Address added successfully!";
+                document.getElementById("address-error").textContent = "";
+                addressForm.reset();
+                setTimeout(() => {
+                  populateAddressDropdown();
+                  addressForm.classList.add("hidden-form");
+                  addAddressBtn.textContent = "+ Add New Address";
+                }, 1000);
+              } else {
+                document.getElementById("address-error").textContent =
+                  data.error || "Failed to add address";
+                document.getElementById("address-success").textContent = "";
+              }
+            })
+            .catch(() => {
+              document.getElementById("address-error").textContent =
+                "Failed to add address";
+              document.getElementById("address-success").textContent = "";
+            });
         });
       }
     }
 
-    if (localStorage.getItem('showReservationModal') === '1') {
-      document.getElementById('reservation-modal-title').textContent = "Reservation successful!";
-      document.getElementById('reservation-modal-body').innerHTML = `
+    if (localStorage.getItem("showReservationModal") === "1") {
+      document.getElementById("reservation-modal-title").textContent =
+        "Reservation successful!";
+      document.getElementById("reservation-modal-body").innerHTML = `
         <div style="color:green;font-weight:bold;">Reservation successful!</div>
         <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
       `;
-      document.getElementById('reservation-modal').style.display = 'flex';
-      document.getElementById('close-modal-btn').onclick = function() {
-        document.getElementById('reservation-modal').style.display = 'none';
+      document.getElementById("reservation-modal").style.display = "flex";
+      document.getElementById("close-modal-btn").onclick = function () {
+        document.getElementById("reservation-modal").style.display = "none";
         window.location.reload();
       };
-      localStorage.removeItem('showReservationModal');
+      localStorage.removeItem("showReservationModal");
     }
-  });    
+  });
 })(jQuery);
