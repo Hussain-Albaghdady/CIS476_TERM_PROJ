@@ -276,27 +276,42 @@ document.addEventListener("DOMContentLoaded", function () {
       $container.empty();
 
       if (!Array.isArray(data) || data.length === 0) {
-        $container.append('<div class="col-12"><p style="color:#888;text-align:center;">No vehicles found for the selected filters.</p></div>');
+        $container.append(
+          '<div class="col-12"><p style="color:#888;text-align:center;">No vehicles found for the selected filters.</p></div>',
+        );
         if ($container.data("isotope")) $container.isotope("destroy");
         return;
       }
 
       let filtered = data;
       if (locationFilter) {
-        filtered = data.filter((v) =>
-          (v.pickup_location || "").toLowerCase() === locationFilter.toLowerCase()
+        filtered = data.filter(
+          (v) =>
+            (v.pickup_location || "").toLowerCase() ===
+            locationFilter.toLowerCase(),
         );
       }
 
       if (!filtered.length) {
-        $container.append('<div class="col-12"><p style="color:#888;text-align:center;">No vehicles available at the selected location.</p></div>');
+        $container.append(
+          '<div class="col-12"><p style="color:#888;text-align:center;">No vehicles available at the selected location.</p></div>',
+        );
         if ($container.data("isotope")) $container.isotope("destroy");
         return;
       }
 
       filtered.sort((a, b) => {
-        const p = { "Compact SUV": 0, Minivan: 1, "Passenger Van": 2, Pickup: 3, Sedan: 4, "Sports Car": 5, SUV: 6 };
-        if (a.category !== b.category) return (p[a.category] ?? 999) - (p[b.category] ?? 999);
+        const p = {
+          "Compact SUV": 0,
+          Minivan: 1,
+          "Passenger Van": 2,
+          Pickup: 3,
+          Sedan: 4,
+          "Sports Car": 5,
+          SUV: 6,
+        };
+        if (a.category !== b.category)
+          return (p[a.category] ?? 999) - (p[b.category] ?? 999);
         return (a.name || "").localeCompare(b.name || "");
       });
 
@@ -306,20 +321,23 @@ document.addEventListener("DOMContentLoaded", function () {
         else filters.push("filter-Booked");
         if (item.category === "Compact SUV") filters.push("filter-CompactSUV");
         if (item.category === "Minivan") filters.push("filter-Minivan");
-        if (item.category === "Passenger Van") filters.push("filter-PassengerVan");
+        if (item.category === "Passenger Van")
+          filters.push("filter-PassengerVan");
         if (item.category === "Pickup") filters.push("filter-Pickup");
         if (item.category === "Sedan") filters.push("filter-Sedan");
         if (item.category === "Sports Car") filters.push("filter-SportsCar");
         if (item.category === "SUV") filters.push("filter-SUV");
 
-        const imgUrl = item.image?.trim() || item.image_url?.trim() || "assets/img/no-image.png";
+        const imgUrl =
+          item.image?.trim() ||
+          item.image_url?.trim() ||
+          "assets/img/no-image.png";
         $container.append(`
           <div class="col-lg-4 col-md-6 event-item ${filters.join(" ")}">
             <div class="card">
               <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category || "Vehicle"}" />
               <div class="card-text">
                 <h2>${[item.year, item.make, item.model].filter(Boolean).join(" ") || item.category || "Vehicle"}</h2>
-                <h3>${item.availability ? "Available" : "Unavailable"}</h3>
                 <p class="hosted-by">Hosted By ${item.host_fname || "Unknown"}</p>
                 <p class="desc">${item.description || ""}</p>
                 ${item.range ? `<p class="range"><b>Range:</b> ${item.range} mi</p>` : ""}
@@ -343,9 +361,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const location = document.getElementById("home-location")?.value || "";
       const msg = document.getElementById("home-search-msg");
 
-      let url = startDate && endDate
-        ? `/api/vehicles/available?start_date=${startDate}&end_date=${endDate}`
-        : "/api/vehicles";
+      let url =
+        startDate && endDate
+          ? `/api/vehicles/available?start_date=${startDate}&end_date=${endDate}`
+          : "/api/vehicles";
 
       if (msg) {
         if (startDate && endDate) {
@@ -363,32 +382,40 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then((data) => renderHomeVehicles(data, location))
         .catch(() => {
-          $container.empty().append('<div class="col-12"><p style="color:red;font-weight:bold;text-align:center;">Failed to load vehicles.</p></div>');
+          $container
+            .empty()
+            .append(
+              '<div class="col-12"><p style="color:red;font-weight:bold;text-align:center;">Failed to load vehicles.</p></div>',
+            );
         });
     }
 
     // Search & Clear buttons
-    document.getElementById("home-search-btn")?.addEventListener("click", function () {
-      const s = document.getElementById("home-start-date").value;
-      const e = document.getElementById("home-end-date").value;
-      if (s && e && e <= s) {
-        document.getElementById("home-search-msg").textContent = "Return date must be after start date.";
-        document.getElementById("home-search-msg").style.display = "";
-        return;
-      }
-      fetchHomeVehicles();
-    });
-    document.getElementById("home-clear-btn")?.addEventListener("click", function () {
-      document.getElementById("home-start-date").value = "";
-      document.getElementById("home-end-date").value = "";
-      document.getElementById("home-location").value = "";
-      const msg = document.getElementById("home-search-msg");
-      if (msg) msg.style.display = "none";
-      fetchHomeVehicles();
-    });
+    document
+      .getElementById("home-search-btn")
+      ?.addEventListener("click", function () {
+        const s = document.getElementById("home-start-date").value;
+        const e = document.getElementById("home-end-date").value;
+        if (s && e && e <= s) {
+          document.getElementById("home-search-msg").textContent =
+            "Return date must be after start date.";
+          document.getElementById("home-search-msg").style.display = "";
+          return;
+        }
+        fetchHomeVehicles();
+      });
+    document
+      .getElementById("home-clear-btn")
+      ?.addEventListener("click", function () {
+        document.getElementById("home-start-date").value = "";
+        document.getElementById("home-end-date").value = "";
+        document.getElementById("home-location").value = "";
+        const msg = document.getElementById("home-search-msg");
+        if (msg) msg.style.display = "none";
+        fetchHomeVehicles();
+      });
 
     fetchHomeVehicles();
-
   });
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -576,8 +603,10 @@ document.addEventListener("DOMContentLoaded", function () {
             : 999;
         return priorityA - priorityB;
       }
-      const nameA = [a.year, a.make, a.model].filter(Boolean).join(" ") || a.category || "";
-      const nameB = [b.year, b.make, b.model].filter(Boolean).join(" ") || b.category || "";
+      const nameA =
+        [a.year, a.make, a.model].filter(Boolean).join(" ") || a.category || "";
+      const nameB =
+        [b.year, b.make, b.model].filter(Boolean).join(" ") || b.category || "";
       return nameA.localeCompare(nameB);
     });
 
@@ -628,10 +657,13 @@ document.addEventListener("DOMContentLoaded", function () {
           // Set pickup location from selected vehicle
           const vehicle = allVehicle.find((v) => v._id == this.value);
           const locationInput = document.getElementById("location");
-          const locationDisplay = document.getElementById("pickup-location-display");
+          const locationDisplay = document.getElementById(
+            "pickup-location-display",
+          );
           if (vehicle && vehicle.pickup_location) {
             if (locationInput) locationInput.value = vehicle.pickup_location;
-            if (locationDisplay) locationDisplay.value = vehicle.pickup_location;
+            if (locationDisplay)
+              locationDisplay.value = vehicle.pickup_location;
           } else {
             if (locationInput) locationInput.value = "";
             if (locationDisplay) locationDisplay.value = "No location set";
@@ -649,7 +681,9 @@ document.addEventListener("DOMContentLoaded", function () {
           selectedVehicleSet.delete(this.value);
           // Clear pickup location
           const locationInput = document.getElementById("location");
-          const locationDisplay = document.getElementById("pickup-location-display");
+          const locationDisplay = document.getElementById(
+            "pickup-location-display",
+          );
           if (locationInput) locationInput.value = "";
           if (locationDisplay) locationDisplay.value = "Select a vehicle below";
           // Restore all other vehicle cards
@@ -671,7 +705,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let url = "/api/vehicles/available";
     if (startDate && endDate) {
       url += `?start_date=${startDate}&end_date=${endDate}`;
-      if (dateMsg) { dateMsg.textContent = `Showing vehicles available from ${startDate} to ${endDate}.`; dateMsg.style.display = ""; }
+      if (dateMsg) {
+        dateMsg.textContent = `Showing vehicles available from ${startDate} to ${endDate}.`;
+        dateMsg.style.display = "";
+      }
     } else {
       if (dateMsg) dateMsg.style.display = "none";
     }
@@ -739,7 +776,6 @@ document.addEventListener("DOMContentLoaded", function () {
       fetchAndRenderVehicles();
     });
   }
-
 
   function calculateDays(startDate, endDate) {
     const start = new Date(startDate);
