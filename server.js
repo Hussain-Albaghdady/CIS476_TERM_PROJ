@@ -1159,7 +1159,6 @@ app.post("/api/vehicle", upload.single("image"), async (req, res) => {
       category: category.trim(),
       description: description ? description.trim() : "",
       rental_rate_per_day: parseFloat(rental_rate_per_day),
-
       quantity_available: 1,
       availability: true,
       host_username: req.session?.user_name || null,

@@ -99,92 +99,14 @@
         <div class="management-header-box">
           <div class="section-title">
             <h2>Vehicle Management</h2>
-            <p>Add new vehicles or manage existing vehicle inventory</p>
+            <p>Manage entire vehicle inventory</p>
           </div>
 
           <div class="row mb-4 justify-content-center">
             <div class="col-lg-4 col-md-5 text-center">
-              <button id="add-vehicle-btn" class="btn btn-success btn-lg me-2">
-                <i class="icofont-plus"></i> Add New Vehicle
-              </button>
-            </div>
-            <div class="col-lg-4 col-md-5 text-center">
-              <button id="manage-vehicle-btn" class="btn btn-primary btn-lg ms-2">
+              <button id="manage-vehicle-btn" class="btn btn-primary btn-lg">
                 <i class="icofont-gear"></i> Manage Existing Vehicle
               </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Add Vehicle Form -->
-        <div id="add-vehicle-form" class="management-form" style="display: none;">
-          <div class="row">
-            <div class="col-lg-8 mx-auto">
-              <form id="vehicle-form">
-                <h3>Add New Vehicle</h3>
-                
-                <div class="form-group">
-                  <label for="vehicle-name">Vehicle Model *</label>
-                  <input type="text" id="vehicle-name" name="name" class="form-control" required 
-                         placeholder="e.g., Zootopia">
-                </div>
-
-                <div class="form-group">
-                  <label for="vehicle-category">Vehicle Type *</label>
-                  <select id="vehicle-category" name="category" class="form-control" required>
-                    <option value="">-- Vehicle Type --</option>
-                    <option value="Compact SUV">Compact SUV</option>
-                    <option value="Minivan">Minivan</option>
-                    <option value="Passenger Van">Passenger Van</option>
-                    <option value="Pickup">Pickup</option>
-                    <option value="Sedan">Sedan</option>
-                    <option value="Sports Car">Sports Car</option>
-                    <option value="SUV">SUV</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label for="vehicle-description">Description</label>
-                  <textarea id="vehicle-description" name="description" class="form-control" rows="3"
-                            placeholder="Brief description of the vehicle"></textarea>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="rental-rate">Rental Rate (per day) *</label>
-                      <input type="number" id="rental-rate" name="rental_rate_per_day" class="form-control" 
-                             step="0.01" min="0" required placeholder="1.50">
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="quantity">Quantity Available *</label>
-                      <input type="number" id="quantity" name="quantity_available" class="form-control" 
-                             min="0" required placeholder="5">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="vehicle-image">Vehicle Image</label>
-                  <input type="file" id="vehicle-image" name="image" class="form-control" 
-                         accept="image/*" placeholder="Choose an image file">
-                  <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
-                </div>
-
-                <div class="form-buttons">
-                  <button type="submit" class="btn btn-success">
-                    <i class="icofont-check"></i> Add Vehicle
-                  </button>
-                  <button type="button" id="cancel-add" class="btn btn-secondary">
-                    <i class="icofont-close"></i> Cancel
-                  </button>
-                </div>
-
-                <div id="add-vehicle-success" class="alert alert-success mt-3" style="display: none;"></div>
-                <div id="add-vehicle-error" class="alert alert-danger mt-3" style="display: none;"></div>
-              </form>
             </div>
           </div>
         </div>
@@ -196,10 +118,12 @@
             <table class="table table-striped" id="vehicle-management-table">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Year</th>
+                  <th>Make</th>
+                  <th>Model</th>
                   <th>Category</th>
+                  <th>Host Username</th>
                   <th>Rate/Day</th>
-                  <th>Quantity</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -249,78 +173,6 @@
           <!-- Dynamic vehicle cards will be injected here by JS -->
         </div>
     </section><!-- End Avaliablity Section -->
-
-  <div id="edit-vehicle-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Edit Vehicle</h3>
-        <span class="close" id="close-edit-modal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <form id="edit-vehicle-form">
-          <input type="hidden" id="edit-vehicle-id">
-          
-          <div class="form-group">
-            <label for="edit-vehicle-name">Vehicle Name *</label>
-            <input type="text" id="edit-vehicle-name" class="form-control" required>
-          </div>
-
-          <div class="form-group">
-            <label for="edit-vehicle-category">Category *</label>
-            <select id="edit-vehicle-category" class="form-control" required>
-              <option value="">-- Select Category --</option>
-              <option value="Compact SUV">Compact SUV</option>
-              <option value="Minivan">Minivan</option>
-              <option value="Passenger Van">Passenger Van</option>
-              <option value="Pickup">Pickup</option>
-              <option value="Sedan">Sedan</option>
-              <option value="Sports Car">Sports Car</option>
-              <option value="SUV">SUV</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="edit-vehicle-description">Description</label>
-            <textarea id="edit-vehicle-description" class="form-control" rows="3"></textarea>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="edit-rental-rate">Rental Rate (per day) *</label>
-                <input type="number" id="edit-rental-rate" class="form-control" step="0.01" min="0" required>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="edit-quantity">Quantity Available *</label>
-                <input type="number" id="edit-quantity" class="form-control" min="0" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="edit-vehicle-image">Vehicle Cover</label>
-            <input type="file" id="edit-vehicle-image" class="form-control" 
-                   accept="image/*">
-            <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF) - leave empty to keep current cover</small>
-          </div>
-
-          <div class="form-buttons">
-            <button type="submit" class="btn btn-primary">
-              <i class="icofont-check"></i> Update Vehicle Info
-            </button>
-            <button type="button" id="cancel-edit" class="btn btn-secondary">
-              <i class="icofont-close"></i> Cancel
-            </button>
-          </div>
-
-          <div id="edit-vehicle-success" class="alert alert-success mt-3" style="display: none;"></div>
-          <div id="edit-vehicle-error" class="alert alert-danger mt-3" style="display: none;"></div>
-        </form>
-      </div>
-    </div>
-  </div>
 
   <div id="delete-vehicle-modal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -447,78 +299,15 @@
     document.addEventListener('DOMContentLoaded', function() {
       let currentVehicleToDelete = null;
 
-      const addVehicleBtn = document.getElementById('add-vehicle-btn');
       const manageVehicleBtn = document.getElementById('manage-vehicle-btn');
-      const addVehicleForm = document.getElementById('add-vehicle-form');
       const manageVehicleSection = document.getElementById('manage-vehicle-section');
-      const vehicleForm = document.getElementById('vehicle-form');
-      const editVehicleForm = document.getElementById('edit-vehicle-form');
-      const editModal = document.getElementById('edit-vehicle-modal');
       const deleteModal = document.getElementById('delete-vehicle-modal');
-
-      addVehicleBtn.addEventListener('click', function() {
-        addVehicleForm.style.display = addVehicleForm.style.display === 'none' ? 'block' : 'none';
-        manageVehicleSection.style.display = 'none';
-        if (addVehicleForm.style.display === 'block') {
-          loadVehicleForManagement();
-        }
-      });
 
       manageVehicleBtn.addEventListener('click', function() {
         manageVehicleSection.style.display = manageVehicleSection.style.display === 'none' ? 'block' : 'none';
-        addVehicleForm.style.display = 'none';
         if (manageVehicleSection.style.display === 'block') {
           loadVehicleForManagement();
         }
-      });
-
-      document.getElementById('cancel-add').addEventListener('click', function() {
-        addVehicleForm.style.display = 'none';
-        vehicleForm.reset();
-        clearMessages();
-      });
-
-      vehicleForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        clearMessages();
-
-        const formData = new FormData(vehicleForm);
-        
-        const name = formData.get('name');
-        const category = formData.get('category');
-        const rental_rate_per_day = formData.get('rental_rate_per_day');
-        const quantity_available = formData.get('quantity_available');
-        
-        if (!name || !category || !rental_rate_per_day || !quantity_available) {
-          showMessage('add-vehicle-error', 'Please fill in all required fields.');
-          return;
-        }
-
-        console.log('Sending vehicle data with FormData'); 
-        fetch('/api/vehicle', {
-          method: 'POST',
-          body: formData 
-        })
-        .then(res => {
-          console.log('Response status:', res.status); 
-          return res.json();
-        })
-        .then(data => {
-          console.log('Response data:', data); 
-          if (data.error) {
-            showMessage('add-vehicle-error', data.error);
-          } else {
-            showMessage('add-vehicle-success', 'Vehicle added successfully!');
-            vehicleForm.reset();
-            setTimeout(() => {
-              location.reload();
-            }, 1500);
-          }
-        })
-        .catch(err => {
-          console.error('Fetch error:', err);
-          showMessage('add-vehicle-error', 'Failed to add vehicle. Please check the console for details.');
-        });
       });
 
       function loadVehicleForManagement() {
@@ -529,39 +318,31 @@
           tbody.innerHTML = '';
 
           if (!vehicles || vehicles.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No vehicle found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">No vehicle found</td></tr>';
             return;
           }
 
           vehicles.forEach(vehicle => {
             const row = document.createElement('tr');
             row.innerHTML = `
-              <td>${vehicle.name || 'N/A'}</td>
+              <td>${vehicle.year || 'N/A'}</td>
+              <td>${vehicle.make || 'N/A'}</td>
+              <td>${vehicle.model || 'N/A'}</td>
               <td>${vehicle.category || 'N/A'}</td>
+              <td>${vehicle.host_username || 'N/A'}</td>
               <td>$${vehicle.rental_rate_per_day ? Number(vehicle.rental_rate_per_day).toFixed(2) : '0.00'}</td>
-              <td>${vehicle.quantity_available || 0}</td>
               <td>
                 <span class="badge ${vehicle.availability ? 'badge-success' : 'badge-danger'}">
                   ${vehicle.availability ? 'Available' : 'Unavailable'}
                 </span>
               </td>
               <td>
-                <button class="btn btn-sm btn-primary edit-vehicle-btn" data-id="${vehicle._id}">
-                  <i class="icofont-edit"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-danger delete-vehicle-btn" data-id="${vehicle._id}" data-name="${vehicle.name}">
+                <button class="btn btn-sm btn-danger delete-vehicle-btn" data-id="${vehicle._id}" data-name="${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}">
                   <i class="icofont-trash"></i> Delete
                 </button>
               </td>
             `;
             tbody.appendChild(row);
-          });
-
-          document.querySelectorAll('.edit-vehicle-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const vehicleId = this.getAttribute('data-id');
-              openEditModal(vehicleId);
-            });
           });
 
           document.querySelectorAll('.delete-vehicle-btn').forEach(btn => {
@@ -577,70 +358,12 @@
         });
       }
 
-      function openEditModal(vehicleId) {
-        fetch('/api/vehicles')
-        .then(res => res.json())
-        .then(vehicles => {
-          const vehicle = vehicles.find(eq => eq._id === vehicleId);
-          if (vehicle) {
-            document.getElementById('edit-vehicle-id').value = vehicle._id;
-            document.getElementById('edit-vehicle-name').value = vehicle.name || '';
-            document.getElementById('edit-vehicle-category').value = vehicle.category || '';
-            document.getElementById('edit-vehicle-description').value = vehicle.description || '';
-            document.getElementById('edit-rental-rate').value = vehicle.rental_rate_per_day || '';
-            document.getElementById('edit-quantity').value = vehicle.quantity_available || '';
-            document.getElementById('edit-vehicle-image').value = '';
-            
-            editModal.style.display = 'block';
-          }
-        });
-      }
-
       function openDeleteModal(vehicleId, vehicleName) {
         currentVehicleToDelete = vehicleId;
-        deleteModal.querySelector('.modal-body p').textContent = 
+        deleteModal.querySelector('.modal-body p').textContent =
           `Are you sure you want to delete "${vehicleName}"? This action cannot be undone.`;
         deleteModal.style.display = 'block';
       }
-
-      editVehicleForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const vehicleId = document.getElementById('edit-vehicle-id').value;
-        const formData = new FormData();
-        
-        formData.append('name', document.getElementById('edit-vehicle-name').value);
-        formData.append('category', document.getElementById('edit-vehicle-category').value);
-        formData.append('description', document.getElementById('edit-vehicle-description').value);
-        formData.append('rental_rate_per_day', document.getElementById('edit-rental-rate').value);
-        formData.append('quantity_available', document.getElementById('edit-quantity').value);
-        
-        const imageFile = document.getElementById('edit-vehicle-image').files[0];
-        if (imageFile) {
-          formData.append('image', imageFile);
-        }
-
-        fetch(`/api/vehicle/${vehicleId}`, {
-          method: 'PUT',
-          body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            showMessage('edit-vehicle-error', data.error);
-          } else {
-            showMessage('edit-vehicle-success', 'Vehicle updated successfully!');
-            setTimeout(() => {
-              editModal.style.display = 'none';
-              loadVehicleForManagement();
-              refreshMainVehicleDisplay();
-            }, 1500);
-          }
-        })
-        .catch(err => {
-          showMessage('edit-vehicle-error', 'Failed to update vehicle. Please try again.');
-        });
-      });
 
       document.getElementById('confirm-delete-vehicle').addEventListener('click', function() {
         if (currentVehicleToDelete) {
@@ -663,13 +386,6 @@
         }
       });
 
-      document.getElementById('close-edit-modal').addEventListener('click', function() {
-        editModal.style.display = 'none';
-      });
-
-      document.getElementById('cancel-edit').addEventListener('click', function() {
-        editModal.style.display = 'none';
-      });
 
       document.getElementById('close-delete-modal').addEventListener('click', function() {
         deleteModal.style.display = 'none';
@@ -680,9 +396,6 @@
       });
 
       window.addEventListener('click', function(e) {
-        if (e.target === editModal) {
-          editModal.style.display = 'none';
-        }
         if (e.target === deleteModal) {
           deleteModal.style.display = 'none';
         }
