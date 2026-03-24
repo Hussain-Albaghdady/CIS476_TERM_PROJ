@@ -637,9 +637,6 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             ${eq.range ? `<div style="font-size:0.98em;margin-bottom:3px;"><b>Range:</b> ${eq.range} mi</div>` : ""}
             ${eq.pickup_location ? `<div style="font-size:0.98em;margin-bottom:5px;"><b>Pick-Up:</b> ${eq.pickup_location}</div>` : ""}
-            <div style="font-size:0.98em;margin-bottom:5px;">
-              <b>Quantity Available:</b> ${eq.quantity_available || 0}
-            </div>
             <div>
               <input type="checkbox" class="vehicle-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedVehicleSet.has(eq._id) ? "checked" : ""}>
               <label for="equip_${eq._id}">Select this Vehicle</label>
@@ -663,10 +660,17 @@ document.addEventListener("DOMContentLoaded", function () {
             "pickup-location-display",
           );
           if (vehicle && vehicle.pickup_location) {
-            if (locationInput) { locationInput.value = vehicle.pickup_location; locationInput.disabled = true; }
-            if (locationDisplay) locationDisplay.value = vehicle.pickup_location;
+            if (locationInput) {
+              locationInput.value = vehicle.pickup_location;
+              locationInput.disabled = true;
+            }
+            if (locationDisplay)
+              locationDisplay.value = vehicle.pickup_location;
           } else {
-            if (locationInput) { locationInput.value = ""; locationInput.disabled = true; }
+            if (locationInput) {
+              locationInput.value = "";
+              locationInput.disabled = true;
+            }
             if (locationDisplay) locationDisplay.value = "No location set";
           }
           // Gray out all other vehicle cards
@@ -685,7 +689,10 @@ document.addEventListener("DOMContentLoaded", function () {
           const locationDisplay = document.getElementById(
             "pickup-location-display",
           );
-          if (locationInput) { locationInput.value = ""; locationInput.disabled = false; }
+          if (locationInput) {
+            locationInput.value = "";
+            locationInput.disabled = false;
+          }
           selectedLocation = "";
           if (locationDisplay) locationDisplay.value = "Select a vehicle below";
           // Restore all other vehicle cards
@@ -802,8 +809,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("pay-now-btn").onclick = function () {
       document.getElementById("reservation-modal").style.display = "none";
       onConfirm();
-      localStorage.setItem("showReservationModal", "1");
-      window.location.reload();
     };
   }
 
@@ -854,6 +859,11 @@ document.addEventListener("DOMContentLoaded", function () {
       showPaymentModal(totalPrice, () => {
         const form = document.getElementById("reservation-form");
         const formData = new FormData(form);
+        // Disabled fields aren't included in FormData — manually add location
+        const locationEl = document.getElementById("location");
+        if (locationEl && locationEl.disabled && locationEl.value) {
+          formData.set("location", locationEl.value);
+        }
         fetch(form.action, {
           method: "POST",
           body: new URLSearchParams([...formData]),
@@ -877,7 +887,7 @@ document.addEventListener("DOMContentLoaded", function () {
               }
               document.getElementById("reservation-modal-title").textContent =
                 "Reservation successful!";
-              document.getElementById("reservation-modal_body").innerHTML = `
+              document.getElementById("reservation-modal-body").innerHTML = `
             ${msg}
             <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
           `;
