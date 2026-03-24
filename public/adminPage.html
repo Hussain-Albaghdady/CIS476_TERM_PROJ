@@ -60,9 +60,9 @@
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
         <ul id="main-navbar-list">
-          <li><a href="home.html">Home</a></li>
-          <li><a href="home.html#about">About Us</a></li>
-          <li><a href="home.html#location">Locations</a></li>
+          <li><a href="Home.html">Home</a></li>
+          <li><a href="Home.html#about">About Us</a></li>
+          <li><a href="Home.html#location">Locations</a></li>
           <li><a href="Home.html#team">Team Members</a></li>
           <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
           <li id="login-link-li">
@@ -114,8 +114,8 @@
         <!-- Manage Vehicle Section -->
         <div id="manage-vehicle-section" class="management-form" style="display: none;">
           <h3>Manage Existing Vehicle Inventory</h3>
-          <div class="table-responsive">
-            <table class="table table-striped" id="vehicle-management-table">
+          <div class="table-wrapper">
+            <table class="responsive-table" id="vehicle-management-table">
               <thead>
                 <tr>
                   <th>Year</th>
@@ -316,7 +316,7 @@
           &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
         </div>
         <div class="credits">
-           Designed by <a href="home.html#team">Meaad Hassan</a>
+           Designed by <a href="Home.html#team">Meaad Hassan</a>
         </div>
       </div>
 
@@ -401,20 +401,20 @@
           vehicles.forEach(vehicle => {
             const row = document.createElement('tr');
             row.innerHTML = `
-              <td>${vehicle.year || 'N/A'}</td>
-              <td>${vehicle.make || 'N/A'}</td>
-              <td>${vehicle.model || 'N/A'}</td>
-              <td>${vehicle.category || 'N/A'}</td>
-              <td>${vehicle.mileage !== undefined && vehicle.mileage !== null ? Number(vehicle.mileage).toLocaleString() + ' mi' : 'N/A'}</td>
-              <td>${vehicle.range ? vehicle.range + ' mi' : 'N/A'}</td>
-              <td>${vehicle.host_username || 'N/A'}</td>
-              <td>$${vehicle.rental_rate_per_day ? Number(vehicle.rental_rate_per_day).toFixed(2) : '0.00'}</td>
-              <td>
+              <td data-label="Year">${vehicle.year || 'N/A'}</td>
+              <td data-label="Make">${vehicle.make || 'N/A'}</td>
+              <td data-label="Model">${vehicle.model || 'N/A'}</td>
+              <td data-label="Category">${vehicle.category || 'N/A'}</td>
+              <td data-label="Mileage">${vehicle.mileage !== undefined && vehicle.mileage !== null ? Number(vehicle.mileage).toLocaleString() + ' mi' : 'N/A'}</td>
+              <td data-label="Range">${vehicle.range ? vehicle.range + ' mi' : 'N/A'}</td>
+              <td data-label="Host">${vehicle.host_username || 'N/A'}</td>
+              <td data-label="Rate/Day">$${vehicle.rental_rate_per_day ? Number(vehicle.rental_rate_per_day).toFixed(2) : '0.00'}</td>
+              <td data-label="Status">
                 <span class="badge ${vehicle.availability ? 'badge-success' : 'badge-danger'}">
                   ${vehicle.availability ? 'Available' : 'Unavailable'}
                 </span>
               </td>
-              <td>
+              <td data-label="Actions">
                 <button class="btn btn-sm btn-danger delete-vehicle-btn" data-id="${vehicle._id}" data-name="${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}">
                   <i class="icofont-trash"></i> Delete
                 </button>
@@ -562,10 +562,22 @@
                   </div>
                 `);
               });
-              if ($container.data('isotope')) {
-                $container.isotope('reloadItems').isotope();
-              } else if (typeof Isotope !== "undefined") {
-                $container.isotope({ itemSelector: '.event-item' });
+              const initIsotope = () => {
+                if ($container.data('isotope')) {
+                  $container.isotope('reloadItems').isotope('layout');
+                } else if (typeof Isotope !== "undefined") {
+                  $container.isotope({ itemSelector: '.event-item' });
+                }
+              };
+              // Wait for images before laying out
+              const imgs = $container.find('img').toArray();
+              let loaded = 0;
+              if (!imgs.length) { initIsotope(); }
+              else {
+                imgs.forEach(img => {
+                  if (img.complete) { if (++loaded === imgs.length) initIsotope(); }
+                  else { img.onload = img.onerror = () => { if (++loaded === imgs.length) initIsotope(); }; }
+                });
               }
             })
             .catch(err => {

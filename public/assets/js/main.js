@@ -348,18 +348,35 @@ document.addEventListener("DOMContentLoaded", function () {
         `);
       });
 
-      if ($container.data("isotope")) {
-        $container.isotope("reloadItems").isotope();
-      } else if (typeof Isotope !== "undefined") {
-        $container.isotope({ itemSelector: ".event-item" });
+      const initIso = () => {
+        if ($container.data("isotope")) {
+          $container.isotope("reloadItems").isotope("layout");
+        } else if (typeof Isotope !== "undefined") {
+          $container.isotope({ itemSelector: ".event-item" });
+        }
+      };
+      const imgs = $container.find("img").toArray();
+      let loaded = 0;
+      if (!imgs.length) {
+        initIso();
+      } else {
+        imgs.forEach((img) => {
+          if (img.complete) {
+            if (++loaded === imgs.length) initIso();
+          } else {
+            img.onload = img.onerror = () => {
+              if (++loaded === imgs.length) initIso();
+            };
+          }
+        });
       }
     }
 
     function fetchHomeVehicles() {
-      const startDate = document.getElementById("home-start-date")?.value || "";
-      const endDate = document.getElementById("home-end-date")?.value || "";
-      const location = document.getElementById("home-location")?.value || "";
-      const msg = document.getElementById("home-search-msg");
+      const startDate = document.getElementById("Home-start-date")?.value || "";
+      const endDate = document.getElementById("Home-end-date")?.value || "";
+      const location = document.getElementById("Home-location")?.value || "";
+      const msg = document.getElementById("Home-search-msg");
 
       let url =
         startDate && endDate
@@ -368,7 +385,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (msg) {
         if (startDate && endDate) {
-          msg.textContent = `Showing vehicles available ${startDate} – ${endDate}${location ? " in " + document.getElementById("home-location").options[document.getElementById("home-location").selectedIndex].text : ""}.`;
+          const locEl = document.getElementById("Home-location");
+          const locText = locEl && locEl.selectedIndex > 0 ? locEl.options[locEl.selectedIndex].text : "";
+          msg.textContent = `Showing vehicles available ${startDate} – ${endDate}${locText ? " in " + locText : ""}.`;
           msg.style.display = "";
         } else {
           msg.style.display = "none";
@@ -392,25 +411,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Search & Clear buttons
     document
-      .getElementById("home-search-btn")
+      .getElementById("Home-search-btn")
       ?.addEventListener("click", function () {
-        const s = document.getElementById("home-start-date").value;
-        const e = document.getElementById("home-end-date").value;
+        const s = document.getElementById("Home-start-date").value;
+        const e = document.getElementById("Home-end-date").value;
         if (s && e && e <= s) {
-          document.getElementById("home-search-msg").textContent =
-            "Return date must be after start date.";
-          document.getElementById("home-search-msg").style.display = "";
+          const msg = document.getElementById("Home-search-msg");
+          if (msg) { msg.textContent = "Return date must be after start date."; msg.style.display = ""; }
           return;
         }
         fetchHomeVehicles();
       });
     document
-      .getElementById("home-clear-btn")
+      .getElementById("Home-clear-btn")
       ?.addEventListener("click", function () {
-        document.getElementById("home-start-date").value = "";
-        document.getElementById("home-end-date").value = "";
-        document.getElementById("home-location").value = "";
-        const msg = document.getElementById("home-search-msg");
+        document.getElementById("Home-start-date").value = "";
+        document.getElementById("Home-end-date").value = "";
+        document.getElementById("Home-location").value = "";
+        const msg = document.getElementById("Home-search-msg");
         if (msg) msg.style.display = "none";
         fetchHomeVehicles();
       });
