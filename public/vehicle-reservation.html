@@ -45,7 +45,7 @@
     <header id="header">
       <div class="container">
         <div class="logo float-left">
-          <a href="home.html"
+          <a href="Home.html"
             ><img
               src="assets/img/DriveShare_Full_Logo.png"
               alt="logo"
@@ -56,7 +56,7 @@
           <div class="login float-right">
             <h1>
               <a
-                href="home.html"
+                href="Home.html"
                 rel="noopener noreferrer"
                 target="_self"
                 class="btn-get-started"
@@ -67,9 +67,9 @@
         </div>
         <nav class="nav-menu float-right d-none d-lg-block">
           <ul id="main-navbar-list">
-            <li><a href="home.html">Home</a></li>
-            <li><a href="home.html#about">About Us</a></li>
-            <li><a href="home.html#location">Locations</a></li>
+            <li><a href="Home.html">Home</a></li>
+            <li><a href="Home.html#about">About Us</a></li>
+            <li><a href="Home.html#location">Locations</a></li>
             <li><a href="Home.html#contact">Contact Us</a></li>
             <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
             <li id="login-link-li">
@@ -225,14 +225,21 @@
                     min-width: 160px;
                   "
                 >
-                  <label for="location" style="margin-bottom: 4px">Pickup Location</label>
-                  <select id="location" name="location" required style="height: 42px; box-sizing: border-box;">
-                    <option value="" disabled selected>-- Choose Location --</option>
+                  <label for="location" style="margin-bottom: 4px"
+                    >Pickup Location</label
+                  >
+                  <select
+                    id="location"
+                    name="location"
+                    required
+                    style="height: 42px; box-sizing: border-box"
+                  >
+                    <option value="">-- All Location --</option>
                     <option value="Dearborn">Dearborn</option>
                     <option value="Warren">Warren</option>
-                    <option value="DearbornHeights">Dearborn Heights</option>
-                    <option value="AnnArbor">Ann Arbor</option>
-                    <option value="GrandRapids">Grand Rapids</option>
+                    <option value="Dearborn Heights">Dearborn Heights</option>
+                    <option value="Ann Arbor">Ann Arbor</option>
+                    <option value="Grand Rapids">Grand Rapids</option>
                     <option value="Lansing">Lansing</option>
                   </select>
                 </div>
@@ -577,10 +584,19 @@
       <section id="vehicle" class="vehicle-section py-4">
         <div class="container">
           <h3 class="mb-4">Available Vehicles</h3>
-          <div class="d-flex flex-wrap mb-3" style="gap: 16px; align-items: flex-end">
+          <div
+            class="d-flex flex-wrap mb-3"
+            style="gap: 16px; align-items: flex-end"
+          >
             <div>
-              <label for="vehicle-category" class="form-label">Filter by Vehicle Type:</label>
-              <select id="vehicle-category" class="form-control" style="min-width: 180px">
+              <label for="vehicle-category" class="form-label"
+                >Filter by Vehicle Type:</label
+              >
+              <select
+                id="vehicle-category"
+                class="form-control"
+                style="min-width: 180px"
+              >
                 <option value="">-- All Types --</option>
                 <option value="Compact SUV">Compact SUV</option>
                 <option value="Minivan">Minivan</option>
