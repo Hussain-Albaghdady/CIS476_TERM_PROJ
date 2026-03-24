@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
       navTargets.forEach(nav => {
         if (!nav) return;
 
-        ['customer-page-link', 'return-page-link', 'account-dropdown','managment','admin-page'].forEach(id => {
+        ['customer-page-link', 'return-page-link', 'account-dropdown','admin-page','owner-page'].forEach(id => {
           const old = nav.querySelector(`#${id}`);
           if (old) old.remove();
         });
@@ -410,12 +410,12 @@ document.addEventListener('DOMContentLoaded', function () {
             nav.appendChild(dropdownLi);
           }
         }
-        else if(userType === "maintenance")
+        else if(userType === "admin")
         {
           const dropdownLi = document.createElement('li');
-          dropdownLi.id = 'management';
+          dropdownLi.id = 'admin-page';
           dropdownLi.innerHTML = `
-            <a href="maintainancePage.html">Managment</a>
+            <a href="adminPage.html">Admin</a>
           `;
 
           const logoutLi = nav.querySelector('#login-link-li');
@@ -425,12 +425,12 @@ document.addEventListener('DOMContentLoaded', function () {
             nav.appendChild(dropdownLi);
           }
         }
-        else if(userType === "admin")
+        else if(userType === "host")
         {
           const dropdownLi = document.createElement('li');
-          dropdownLi.id = 'admin-page';
+          dropdownLi.id = 'owner-page';
           dropdownLi.innerHTML = `
-            <a href="adminPage.html">Admin</a>
+            <a href="ownerPage.html">Owner Portal</a>
           `;
 
           const logoutLi = nav.querySelector('#login-link-li');

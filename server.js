@@ -163,7 +163,7 @@ async function connectToDB() {
       ])
       .toArray();
     const [d] = await db
-      .collection("hostUsers")
+      .collection("HostUsers")
       .aggregate([
         { $group: { _id: null, maxHostIdFromHost: { $max: "$hostId" } } },
       ])
@@ -197,7 +197,7 @@ async function connectToDB() {
       .collection("counters")
       .updateOne(
         { _id: "hostId" },
-        { $max: { sequence_value: hostIdMax } },
+        { $set: { sequence_value: hostIdMax } },
         { upsert: true },
       );
 
@@ -959,7 +959,7 @@ app.get("/api/myrentals", async (req, res) => {
       .toArray();
     const result = vehicles.map((eq) => ({
       id: eq._id,
-      name: eq.name || eq.vehicleName || "Vehicles",
+      name: [eq.year, eq.make, eq.model].filter(Boolean).join(' ') || eq.name || "Unknown Vehicle",
       description: eq.description || "",
       image: eq.image || "",
     }));
@@ -999,7 +999,7 @@ app.get("/api/myreservations", async (req, res) => {
       .find({ _id: { $in: objectIds } })
       .toArray();
     vehicleDocs.forEach((eq) => {
-      vehicleMap[eq._id.toString()] = eq.name || eq.vehicleName || "Vehicles";
+      vehicleMap[eq._id.toString()] = [eq.year, eq.make, eq.model].filter(Boolean).join(' ') || eq.name || "Unknown Vehicle";
     });
 
     const result = reservations.map((r) => ({
