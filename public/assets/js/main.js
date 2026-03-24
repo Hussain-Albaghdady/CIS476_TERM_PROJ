@@ -597,9 +597,9 @@ document.addEventListener("DOMContentLoaded", function () {
         return `
       <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
-          <img src="${imgUrl}" class="card-img-top" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}">
+          <img src="${imgUrl}" class="card-img-top" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}" style="height:200px; object-fit:cover; width:100%;">
           <div class="card-body">
-            <h5 class="card-title">${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h5>
+            <h5 class="card-title" style="font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1;">${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h5>
             <p class="card-text">${eq.description || ""}</p>
             <div style="font-weight:bold;margin-bottom:5px;">
               Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : "N/A"} per day
