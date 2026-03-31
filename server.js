@@ -176,21 +176,21 @@ async function connectToDB() {
       .collection("counters")
       .updateOne(
         { _id: "userId" },
-        { $max: { sequence_value: userIdMax } },
+        { $set: { sequence_value: userIdMax } },
         { upsert: true },
       );
     await db
       .collection("counters")
       .updateOne(
         { _id: "adminId" },
-        { $max: { sequence_value: adminIdMax } },
+        { $set: { sequence_value: adminIdMax } },
         { upsert: true },
       );
     await db
       .collection("counters")
       .updateOne(
         { _id: "orderId" },
-        { $max: { sequence_value: orderIdMax } },
+        { $set: { sequence_value: orderIdMax } },
         { upsert: true },
       );
     await db
@@ -212,23 +212,6 @@ async function connectToDB() {
     console.log(
       `Synced counters — userId: ${finalUserId?.sequence_value}, adminId: ${finalAdminId?.sequence_value}, orderId: ${finalOrderId?.sequence_value}, hostId: ${finalHostId?.sequence_value}`,
     );
-
-    // Migrate old concatenated location values to spaced versions
-    const locationMigrations = [
-      { from: "annArbor",       to: "Ann Arbor" },
-      { from: "AnnArbor",       to: "Ann Arbor" },
-      { from: "DearbornHeights",to: "DTW Airport" },
-      { from: "dearbornHeights",to: "DTW Airport" },
-      { from: "Dearborn Heights", to: "DTW Airport" },
-      { from: "GrandRapids",    to: "Grand Rapids" },
-      { from: "grandRapids",    to: "Grand Rapids" },
-    ];
-    for (const { from, to } of locationMigrations) {
-      await db.collection("Vehicles").updateMany(
-        { pickup_location: from },
-        { $set: { pickup_location: to } }
-      );
-    }
 
     app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
   } catch (err) {
@@ -443,6 +426,86 @@ app.post("/reset_password", async (req, res) => {
   }
 });
 
+app.post("/add_admin", async (req, res) => {
+  const { fname, lname, email, username, password } = req.body;
+
+  try {
+    if (!fname || !lname || !email || !username || !password) {
+      return res.json({ success: false, error: "All fields are required." });
+    }
+
+    const existing = await db.collection("AdminUsers").findOne({ username });
+    if (existing) {
+      return res.json({ success: false, error: "Username already exists." });
+    }
+
+    const hash = crypto.createHash("sha256").update(password).digest("hex");
+    const adminId = await getNextSequence("adminId");
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+    await db.collection("AdminUsers").insertOne({
+      adminId,
+      fname,
+      lname,
+      email,
+      username,
+      password: hash,
+      user_type: "admin",
+      security_questions: [],
+      force_password_change: true,
+      created_at: now,
+      updated_at: now,
+    });
+
+    console.log(`New admin created: ${username} (adminId: ${adminId})`);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Add admin error:", err);
+    return res.json({ success: false, error: "Failed to create admin: " + err.message });
+  }
+});
+
+app.post("/admin_setup", async (req, res) => {
+  if (!req.session?.user || req.session.user.user_type !== "admin") {
+    return res.redirect("/loginform.html");
+  }
+
+  const { new_password, confirm_password,
+          security1, answer1, security2, answer2, security3, answer3 } = req.body;
+
+  const err_redirect = (msg) =>
+    res.redirect("/admin-setup.html?error=" + encodeURIComponent(msg));
+
+  try {
+    if (!new_password || !confirm_password) return err_redirect("All fields are required.");
+    if (new_password !== confirm_password)   return err_redirect("Passwords do not match.");
+    if (!security1 || !security2 || !security3) return err_redirect("Please select all three security questions.");
+    if (!answer1 || !answer2 || !answer3)        return err_redirect("Please answer all three security questions.");
+    if (new Set([security1, security2, security3]).size < 3) return err_redirect("Please choose three different security questions.");
+
+    const hash = crypto.createHash("sha256").update(new_password).digest("hex");
+    const now  = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+    const security_questions = [
+      { question: security1, answer: (answer1 || "").trim().toLowerCase() },
+      { question: security2, answer: (answer2 || "").trim().toLowerCase() },
+      { question: security3, answer: (answer3 || "").trim().toLowerCase() },
+    ];
+
+    await db.collection("AdminUsers").updateOne(
+      { username: req.session.user.username },
+      { $set: { password: hash, security_questions, force_password_change: false, updated_at: now } }
+    );
+
+    req.session.user.force_password_change = false;
+    console.log(`Admin '${req.session.user.username}' completed first-time setup.`);
+    return res.redirect("/adminPage.html");
+  } catch (err) {
+    console.error("Admin setup error:", err);
+    return err_redirect("Setup failed: " + err.message);
+  }
+});
+
 async function findUser(db, username, hashedPass) {
   const collections = ["AdminUsers", "RentalUsers", "HostUsers"];
   for (const coll of collections) {
@@ -484,6 +547,7 @@ app.post("/login", async (req, res) => {
       lname: user.lname,
       user_type: user.user_type,
       source: user._collection,
+      force_password_change: user.force_password_change || false,
     };
     req.session.user_name = user.username;
     req.session.userData = {
@@ -494,6 +558,9 @@ app.post("/login", async (req, res) => {
     };
 
     if (user.user_type === "admin") {
+      if (user.force_password_change) {
+        return res.redirect("/admin-setup.html");
+      }
       return res.redirect("/adminPage.html");
     } else if (user.user_type === "customer") {
       return res.redirect("/vehicle-reservation.html");
@@ -548,6 +615,7 @@ app.get("/userdetail", requireLogin, (req, res) => {
     name: [user.fname, user.lname].filter(Boolean).join(" "),
     username: user.username,
     user_type: user.user_type,
+    force_password_change: user.force_password_change || false,
   });
 });
 

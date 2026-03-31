@@ -214,6 +214,74 @@
       </div>
     </section><!-- End Financial Management Section -->
 
+    <!-- ======= Admin User Management Section ======= -->
+    <section id="admin-user-management" class="vehicle-management">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="management-header-box">
+          <div class="section-title">
+            <h2>Admin User Management</h2>
+            <p>Add a new administrator account</p>
+          </div>
+          <div class="row mb-4 justify-content-center">
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="add-admin-btn" class="btn btn-primary btn-lg">
+                <i class="icofont-ui-user-group"></i> Add New Admin
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="add-admin-section" class="management-form" style="display: none;">
+          <div class="register-card" style="margin: 24px auto;">
+
+            <div class="form-error" id="admin-inline-error"></div>
+            <div id="add-admin-success" class="alert alert-success" style="display:none; margin-bottom:12px;"></div>
+
+            <form id="add-admin-form">
+              <h3>New Administrator Account</h3>
+
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="admin-fname">First Name</label>
+                  <input type="text" id="admin-fname" placeholder="Jane">
+                </div>
+                <div class="field-group">
+                  <label for="admin-lname">Last Name</label>
+                  <input type="text" id="admin-lname" placeholder="Doe">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="admin-email">Email Address</label>
+                <input type="email" id="admin-email" placeholder="admin@example.com">
+              </div>
+
+              <div class="field-group">
+                <label for="admin-username">Username</label>
+                <input type="text" id="admin-username" placeholder="Choose a username">
+              </div>
+
+              <div class="field-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="At least 8 characters">
+                <div class="pw-strength-bar"><div class="pw-strength-fill" id="admin-pw-fill"></div></div>
+                <div class="pw-strength-text" id="admin-pw-text"></div>
+              </div>
+
+              <div class="field-group">
+                <label for="admin-cpassword">Confirm Password</label>
+                <input type="password" id="admin-cpassword" placeholder="Re-enter your password">
+              </div>
+
+              <button type="button" class="btn-submit-ds" id="admin-submit-btn">Create Admin Account</button>
+              <hr class="divider">
+              <button type="button" class="btn-back-ds" id="cancel-add-admin">Cancel</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section><!-- End Admin User Management Section -->
+
     <!-- ======= Avaliablity Section ======= -->
     <section id="avaliablity" class="avaliablity section-bg">
       <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -586,6 +654,110 @@
             });
         }
       }
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var addAdminBtn     = document.getElementById('add-admin-btn');
+      var addAdminSection = document.getElementById('add-admin-section');
+      var addAdminForm    = document.getElementById('add-admin-form');
+
+      /* ── Toggle section ── */
+      addAdminBtn.addEventListener('click', function() {
+        var isOpen = addAdminSection.style.display !== 'none';
+        addAdminSection.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) { addAdminForm.reset(); clearAdminError(); }
+      });
+
+      /* ── Cancel ── */
+      document.getElementById('cancel-add-admin').addEventListener('click', function() {
+        addAdminSection.style.display = 'none';
+        addAdminForm.reset();
+        clearAdminError();
+      });
+
+      /* ── Password strength ── */
+      document.getElementById('admin-password').addEventListener('input', function() {
+        var val = this.value, score = 0;
+        if (val.length >= 8)                        score++;
+        if (/[A-Z]/.test(val))                      score++;
+        if (/[a-z]/.test(val))                      score++;
+        if (/[0-9]/.test(val))                      score++;
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(val))    score++;
+        var levels = [
+          { pct: '0%',   color: '#e0e8f5', label: '' },
+          { pct: '25%',  color: '#e74c3c', label: 'Weak' },
+          { pct: '50%',  color: '#e67e22', label: 'Fair' },
+          { pct: '75%',  color: '#f1c40f', label: 'Good' },
+          { pct: '100%', color: '#27ae60', label: 'Strong' }
+        ];
+        var lvl  = levels[Math.min(score, 4)];
+        var fill = document.getElementById('admin-pw-fill');
+        var text = document.getElementById('admin-pw-text');
+        fill.style.width      = lvl.pct;
+        fill.style.background = lvl.color;
+        text.textContent      = lvl.label;
+        text.style.color      = lvl.color;
+      });
+
+      /* ── Error helpers ── */
+      function showAdminError(msg) {
+        var el = document.getElementById('admin-inline-error');
+        el.textContent = msg;
+        el.classList.add('visible');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      function clearAdminError() {
+        var el = document.getElementById('admin-inline-error');
+        el.textContent = '';
+        el.classList.remove('visible');
+      }
+
+      /* ── Submit ── */
+      document.getElementById('admin-submit-btn').addEventListener('click', function() {
+        clearAdminError();
+        var fname    = document.getElementById('admin-fname').value.trim();
+        var lname    = document.getElementById('admin-lname').value.trim();
+        var email    = document.getElementById('admin-email').value.trim();
+        var username = document.getElementById('admin-username').value.trim();
+        var password = document.getElementById('admin-password').value;
+        var cpass    = document.getElementById('admin-cpassword').value;
+
+        if (!fname || !lname)                                       { showAdminError('Please enter first and last name.'); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))   { showAdminError('Please enter a valid email address.'); return; }
+        if (!username || username.length < 3)                       { showAdminError('Username must be at least 3 characters.'); return; }
+        if (password.length < 8)                                    { showAdminError('Password must be at least 8 characters.'); return; }
+        if (!/[A-Z]/.test(password))                                { showAdminError('Password must contain at least one uppercase letter.'); return; }
+        if (!/[a-z]/.test(password))                                { showAdminError('Password must contain at least one lowercase letter.'); return; }
+        if (!/[0-9]/.test(password))                                { showAdminError('Password must contain at least one number.'); return; }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))              { showAdminError('Password must contain at least one special character.'); return; }
+        if (password !== cpass)                                      { showAdminError('Passwords do not match.'); return; }
+
+        var successEl = document.getElementById('add-admin-success');
+        successEl.style.display = 'none';
+
+        fetch('/add_admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ fname, lname, email, username, password }).toString()
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.success) {
+            successEl.textContent = 'Admin account created. They will set up security questions on first login.';
+            successEl.style.display = 'block';
+            addAdminForm.reset();
+            document.getElementById('admin-pw-fill').style.width = '0%';
+            document.getElementById('admin-pw-text').textContent = '';
+          } else {
+            showAdminError(data.error || 'Failed to create admin account.');
+          }
+        })
+        .catch(function() {
+          showAdminError('An error occurred. Please try again.');
+        });
+      });
     });
   </script>
 
