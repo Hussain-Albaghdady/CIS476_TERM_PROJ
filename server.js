@@ -302,7 +302,8 @@ app.post("/contact_us", async (req, res) => {
   }
 });
 app.post("/sign_up", async (req, res) => {
-  const { fname, lname, email, username, password, user_type } = req.body;
+  const { fname, lname, email, username, password, user_type,
+          security1, answer1, security2, answer2, security3, answer3 } = req.body;
   const hash = crypto.createHash("sha256").update(password).digest("hex");
   try {
     const existingRental = await db
@@ -320,6 +321,12 @@ app.post("/sign_up", async (req, res) => {
 
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
+    const security_questions = [
+      { question: security1, answer: (answer1 || "").trim().toLowerCase() },
+      { question: security2, answer: (answer2 || "").trim().toLowerCase() },
+      { question: security3, answer: (answer3 || "").trim().toLowerCase() },
+    ];
+
     if (user_type === "host") {
       const hostId = await getNextSequence("hostId");
       const data = {
@@ -330,6 +337,7 @@ app.post("/sign_up", async (req, res) => {
         username,
         password: hash,
         user_type: "host",
+        security_questions,
         address: [],
         payment: [],
         created_at: now,
@@ -350,6 +358,7 @@ app.post("/sign_up", async (req, res) => {
         username,
         password: hash,
         user_type: "customer",
+        security_questions,
         address: [],
         payment: [],
         created_at: now,
@@ -377,6 +386,63 @@ app.post("/sign_up", async (req, res) => {
     );
   }
 });
+app.post("/reset_password", async (req, res) => {
+  const { username, security1, answer1, security2, answer2, security3, answer3, new_password, confirm_password } = req.body;
+
+  try {
+    if (!username || !new_password || !confirm_password) {
+      return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("All fields are required.")}`);
+    }
+
+    if (new_password !== confirm_password) {
+      return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("Passwords do not match.")}`);
+    }
+
+    // Find user across both collections
+    const collections = ["RentalUsers", "HostUsers"];
+    let user = null;
+    let collection = null;
+    for (const coll of collections) {
+      const found = await db.collection(coll).findOne({ username });
+      if (found) { user = found; collection = coll; break; }
+    }
+
+    if (!user) {
+      return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("No account found with that username.")}`);
+    }
+
+    // Verify security questions if stored on the user
+    if (user.security_questions && user.security_questions.length > 0) {
+      const submitted = [
+        { question: security1, answer: (answer1 || "").trim().toLowerCase() },
+        { question: security2, answer: (answer2 || "").trim().toLowerCase() },
+        { question: security3, answer: (answer3 || "").trim().toLowerCase() },
+      ];
+      const allMatch = user.security_questions.every((sq, i) => {
+        return submitted[i] &&
+          submitted[i].question === sq.question &&
+          submitted[i].answer === sq.answer.toLowerCase();
+      });
+      if (!allMatch) {
+        return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("Security answers do not match our records.")}`);
+      }
+    }
+
+    const hash = crypto.createHash("sha256").update(new_password).digest("hex");
+    const now  = new Date().toISOString().replace("T", " ").substring(0, 19);
+    await db.collection(collection).updateOne(
+      { username },
+      { $set: { password: hash, updated_at: now } }
+    );
+
+    console.log(`Password reset successful for user: ${username}`);
+    return res.redirect(`loginform.html?success=${encodeURIComponent("Password reset successfully. Please sign in.")}`);
+  } catch (err) {
+    console.error("Password reset error:", err);
+    return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("Reset failed: " + err.message)}`);
+  }
+});
+
 async function findUser(db, username, hashedPass) {
   const collections = ["AdminUsers", "RentalUsers", "HostUsers"];
   for (const coll of collections) {

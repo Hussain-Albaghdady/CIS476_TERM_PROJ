@@ -1128,4 +1128,161 @@ document.addEventListener("DOMContentLoaded", function () {
       localStorage.removeItem("showReservationModal");
     }
   });
+
+/* ==========================================================
+   Login Form
+   ========================================================== */
+(function () {
+  if (!document.getElementById("login-error-modal")) return;
+
+  var params = new URLSearchParams(window.location.search);
+  var serverError = params.get("error");
+  if (serverError) {
+    document.getElementById("login-error-modal-message").textContent = decodeURIComponent(serverError);
+    document.getElementById("login-error-modal").style.display = "flex";
+    window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
+  }
+}());
+
+/* ==========================================================
+   Registration Form
+   ========================================================== */
+(function () {
+  if (!document.getElementById("register-form")) return;
+
+  /* Server-side error modal */
+  var params = new URLSearchParams(window.location.search);
+  var serverError = params.get("error");
+  if (serverError) {
+    document.getElementById("error-modal-message").textContent = decodeURIComponent(serverError);
+    document.getElementById("error-modal").style.display = "flex";
+    window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
+  }
+
+  /* Account type selection */
+  var selectedAccountType = "";
+
+  window.selectType = function (type) {
+    selectedAccountType = type;
+    document.getElementById("user_type").value = type;
+    var rBtn = document.getElementById("btn-renter");
+    var hBtn = document.getElementById("btn-host");
+    rBtn.classList.remove("selected-renter", "selected-host");
+    hBtn.classList.remove("selected-renter", "selected-host");
+    if (type === "customer") rBtn.classList.add("selected-renter");
+    if (type === "host")     hBtn.classList.add("selected-host");
+  };
+
+  /* Password strength */
+  document.getElementById("password").addEventListener("input", function () {
+    var val   = this.value;
+    var score = 0;
+    if (val.length >= 8)                        score++;
+    if (/[A-Z]/.test(val))                      score++;
+    if (/[a-z]/.test(val))                      score++;
+    if (/[0-9]/.test(val))                      score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(val))    score++;
+
+    var levels = [
+      { pct: "0%",   color: "#e0e8f5", label: "" },
+      { pct: "25%",  color: "#e74c3c", label: "Weak" },
+      { pct: "50%",  color: "#e67e22", label: "Fair" },
+      { pct: "75%",  color: "#f1c40f", label: "Good" },
+      { pct: "100%", color: "#27ae60", label: "Strong" },
+    ];
+    var lvl  = levels[Math.min(score, 4)];
+    var fill = document.getElementById("pw-fill");
+    var text = document.getElementById("pw-text");
+    fill.style.width      = lvl.pct;
+    fill.style.background = lvl.color;
+    text.textContent      = lvl.label;
+    text.style.color      = lvl.color;
+  });
+
+  /* Error helpers */
+  function showError(msg) {
+    var el = document.getElementById("inline-error");
+    el.textContent = msg;
+    el.classList.add("visible");
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function clearError() {
+    var el = document.getElementById("inline-error");
+    el.textContent = "";
+    el.classList.remove("visible");
+  }
+
+  /* Step switcher */
+  function goToStep(n) {
+    document.querySelectorAll(".step-panel").forEach(function (p) { p.classList.remove("active"); });
+    document.getElementById("step-" + n).classList.add("active");
+
+    var b1 = document.getElementById("bubble-1");
+    var b2 = document.getElementById("bubble-2");
+    var l1 = document.getElementById("label-1");
+    var l2 = document.getElementById("label-2");
+    var ln = document.getElementById("connector-line");
+
+    if (n === 1) {
+      b1.className = "step-bubble active";
+      b2.className = "step-bubble";
+      l1.className = "step-label active";
+      l2.className = "step-label";
+      ln.className = "step-line";
+    } else {
+      b1.className = "step-bubble done";
+      b2.className = "step-bubble active";
+      l1.className = "step-label done";
+      l2.className = "step-label active";
+      ln.className = "step-line done";
+    }
+  }
+
+  /* Next: validate step 1 */
+  document.getElementById("next-btn").addEventListener("click", function () {
+    clearError();
+
+    var fname     = document.getElementById("fname").value.trim();
+    var lname     = document.getElementById("lname").value.trim();
+    var email     = document.getElementById("email").value.trim();
+    var username  = document.getElementById("username").value.trim();
+    var password  = document.getElementById("password").value;
+    var cpassword = document.getElementById("cpassword").value;
+
+    if (!selectedAccountType)                                   { showError("Please choose an account type — Renter or Host."); return; }
+    if (!fname || !lname)                                       { showError("Please enter your first and last name."); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))   { showError("Please enter a valid email address."); return; }
+    if (!username || username.length < 3)                       { showError("Username must be at least 3 characters."); return; }
+    if (password.length < 8)                                    { showError("Password must be at least 8 characters."); return; }
+    if (!/[A-Z]/.test(password))                                { showError("Password must contain at least one uppercase letter."); return; }
+    if (!/[a-z]/.test(password))                                { showError("Password must contain at least one lowercase letter."); return; }
+    if (!/[0-9]/.test(password))                                { showError("Password must contain at least one number."); return; }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))              { showError("Password must contain at least one special character (!@#$%^&*…)."); return; }
+    if (password !== cpassword)                                  { showError("Passwords do not match."); return; }
+
+    goToStep(2);
+  });
+
+  /* Back */
+  document.getElementById("back-btn").addEventListener("click", function () {
+    clearError();
+    goToStep(1);
+  });
+
+  /* Submit: validate step 2 */
+  document.getElementById("register-form").addEventListener("submit", function (e) {
+    clearError();
+
+    var s1 = document.getElementById("security1").value;
+    var s2 = document.getElementById("security2").value;
+    var s3 = document.getElementById("security3").value;
+    var a1 = document.getElementById("answer1").value.trim();
+    var a2 = document.getElementById("answer2").value.trim();
+    var a3 = document.getElementById("answer3").value.trim();
+
+    if (!s1 || !s2 || !s3) { e.preventDefault(); showError("Please select a question for each security field."); return; }
+    if (!a1 || !a2 || !a3) { e.preventDefault(); showError("Please provide an answer for each security question."); return; }
+    if (new Set([s1, s2, s3]).size < 3) { e.preventDefault(); showError("Please choose three different security questions."); return; }
+  });
+}());
 })(jQuery);

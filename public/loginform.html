@@ -40,67 +40,14 @@
     <link href="assets/css/style.css" rel="stylesheet" />
   </head>
 
-  <body>
-    <div
-      id="error-modal"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-      "
-    >
-      <div
-        style="
-          background: #fff;
-          padding: 32px 24px;
-          border-radius: 8px;
-          box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
-          min-width: 300px;
-          max-width: 90vw;
-          text-align: center;
-          position: relative;
-        "
-      >
-        <span
-          id="error-modal-message"
-          style="color: #c00; font-weight: bold"
-        ></span>
+  <body class="login-page">
+    <div id="login-error-modal">
+      <div class="modal-box">
+        <span class="modal-msg" id="login-error-modal-message"></span>
         <br /><br />
-        <button
-          onclick="
-            document.getElementById('error-modal').style.display = 'none'
-          "
-          style="
-            padding: 6px 18px;
-            border: none;
-            background: #007bff;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-          "
-        >
-          OK
-        </button>
+        <button onclick="document.getElementById('login-error-modal').style.display='none'">OK</button>
       </div>
     </div>
-    <script>
-      const params = new URLSearchParams(window.location.search);
-      const error = params.get("error");
-      if (error) {
-        document.getElementById("error-modal-message").textContent =
-          decodeURIComponent(error);
-        document.getElementById("error-modal").style.display = "flex";
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-      }
-    </script>
 
     <!-- ======= Header ======= -->
     <header id="header">
@@ -126,26 +73,26 @@
     </header>
     <!-- End Header -->
     <main id="main">
-      <div class="form-container">
+      <div class="login-card">
+        <h3>Welcome Back</h3>
+        <p class="login-subtitle">Sign in to your DriveShare account</p>
+
         <form action="/login" method="post">
-          <h3>Welcome to DriveShare</h3>
-          <input
-            type="username"
-            name="username"
-            required
-            placeholder="enter your username"
-          />
-          <input
-            type="password"
-            name="password"
-            required
-            placeholder="enter your password"
-          />
-          <input type="submit" name="submit" value="login" class="form-btn" />
-          <p>
-            Not a User?
-            <a href="register_form.html"><span>Register Now</span></a>
-          </p>
+          <div class="field-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required placeholder="Enter your username" />
+          </div>
+          <div class="field-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Enter your password" />
+          </div>
+
+          <input type="submit" name="submit" value="Sign In" class="btn-primary-ds login-submit" />
+
+          <hr class="login-divider" />
+
+          <a href="passwordresetform.html" class="btn-submit-ds login-action-btn">Forgot Password?</a>
+          <a href="register_form.html" class="btn-back-ds login-action-btn">Create an Account</a>
         </form>
       </div>
     </main>
