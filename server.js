@@ -17,7 +17,7 @@ if (!uri) {
     console.error("No MONGODB_URI env and ./atlas_uri not found.");
   }
 }
-const dbname = "RentFlicks";
+const dbname = "DriveShare";
 
 const client = new MongoClient(uri, {
   serverApi: {
