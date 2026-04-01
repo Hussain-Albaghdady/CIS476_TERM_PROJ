@@ -818,15 +818,12 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       document.getElementById("reservation-error").textContent = "";
       document.getElementById("reservation-success").textContent = "";
-      document.getElementById("selected-vehicle").value = JSON.stringify(
-        Array.from(selectedVehicleSet),
-      );
       if (selectedVehicleSet.size === 0) {
         document.getElementById("reservation-error").textContent =
           "Please select at least one vehicle to reserve.";
         return;
       }
-      const selectedIds = Array.from(selectedVehicleSet);
+      const vehicleId = Array.from(selectedVehicleSet)[0];
       const startDate = document.getElementById("start_date").value;
       const endDate = document.getElementById("end_date").value;
       if (!startDate) {
@@ -845,25 +842,21 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
       const days = calculateDays(startDate, endDate);
-      let totalPrice = 0;
-      selectedIds.forEach((id) => {
-        const eq = allVehicle.find((eq) => eq._id == id);
-        if (eq && eq.rental_rate_per_day) {
-          totalPrice += Number(eq.rental_rate_per_day) * days;
-        }
-      });
       const taxRate = 0.06;
-      const taxAmount = totalPrice * taxRate;
-      const totalWithTax = totalPrice + taxAmount;
-      document.getElementById("total-cost").value = totalWithTax.toFixed(2);
-      showPaymentModal(totalPrice, () => {
+      const eq = allVehicle.find((v) => v._id == vehicleId);
+      const vehiclePrice = eq && eq.rental_rate_per_day ? Number(eq.rental_rate_per_day) * days : 0;
+      const totalWithTax = (vehiclePrice * (1 + taxRate)).toFixed(2);
+
+      showPaymentModal(vehiclePrice, () => {
         const form = document.getElementById("reservation-form");
         const formData = new FormData(form);
-        // Disabled fields aren't included in FormData — manually add location
         const locationEl = document.getElementById("location");
         if (locationEl && locationEl.disabled && locationEl.value) {
           formData.set("location", locationEl.value);
         }
+        formData.set("vehicle_id", vehicleId);
+        formData.set("total_cost", totalWithTax);
+
         fetch(form.action, {
           method: "POST",
           body: new URLSearchParams([...formData]),
@@ -871,43 +864,27 @@ document.addEventListener("DOMContentLoaded", function () {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              document.getElementById("reservation-error").textContent =
-                data.error;
-              document.getElementById("reservation-success").textContent = "";
-            } else {
-              let msg = "";
-              if (
-                data.unavailable_vehicle_ids &&
-                data.unavailable_vehicle_ids.length > 0
-              ) {
-                msg = `<div style="color:green;font-weight:bold;">Reservation successful for available vehicles only.</div>
-                    <div style="color:red;font-weight:bold;">Some vehicles was already booked and not reserved.</div>`;
-              } else {
-                msg = `<div style="color:green;font-weight:bold;">Reservation successful!</div>`;
-              }
-              document.getElementById("reservation-modal-title").textContent =
-                "Reservation successful!";
-              document.getElementById("reservation-modal-body").innerHTML = `
-            ${msg}
-            <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
-          `;
-              document.getElementById("reservation-modal").style.display =
-                "flex";
-              document.getElementById("close-modal-btn").onclick = function () {
-                document.getElementById("reservation-modal").style.display =
-                  "none";
-                window.location.reload();
-              };
-              document.getElementById("reservation-success").textContent = "";
-              document.getElementById("reservation-error").textContent = "";
-              selectedVehicleSet.clear();
-              renderVehicle(document.getElementById("vehicle-category").value);
+              document.getElementById("reservation-error").textContent = data.error;
+              return;
             }
+            document.getElementById("reservation-modal-title").textContent =
+              "Reservation successful!";
+            document.getElementById("reservation-modal-body").innerHTML = `
+              <div style="color:green;font-weight:bold;">Reservation successful!</div>
+              <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
+            `;
+            document.getElementById("reservation-modal").style.display = "flex";
+            document.getElementById("close-modal-btn").onclick = function () {
+              document.getElementById("reservation-modal").style.display = "none";
+              window.location.reload();
+            };
+            document.getElementById("reservation-error").textContent = "";
+            selectedVehicleSet.clear();
+            renderVehicle(document.getElementById("vehicle-category").value);
           })
           .catch(() => {
             document.getElementById("reservation-error").textContent =
               "Reservation failed. Please try again.";
-            document.getElementById("reservation-success").textContent = "";
           });
       });
     });

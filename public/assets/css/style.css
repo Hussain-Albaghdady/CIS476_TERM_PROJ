@@ -2492,7 +2492,8 @@ section[id],
 # Global Footer
 --------------------------------------------------------------*/
 #footer {
-  background: linear-gradient(90deg,
+  background: linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16)),
+    linear-gradient(90deg,
       var(--DriveShare-start),
       var(--DriveShare-end));
   padding: 0 0 30px 0;
@@ -2501,12 +2502,11 @@ section[id],
 }
 
 #footer .footer-top {
-  background: linear-gradient(90deg,
-      var(--DriveShare-start),
-      var(--DriveShare-end));
-  border-top: 1px solid #b50000;
-  border-bottom: 0.5px solid #0000000a;
-  padding: 10px 0 10px 0;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16)),
+    linear-gradient(90deg, var(--DriveShare-start), var(--DriveShare-end));
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 18px 0;
 }
 
 #footer .info-box {
@@ -2704,7 +2704,9 @@ section[id],
 
 /* Page background */
 body.auth-page {
-  background: linear-gradient(135deg, #d9a90d 0%, #2160cd 50%, #1d63db 100%);
+  background: linear-gradient(90deg,
+      var(--DriveShare-start),
+      var(--DriveShare-end));
   min-height: 100vh;
 }
 
@@ -2840,8 +2842,7 @@ body.auth-page #main {
 }
 
 /* Step indicator */
-.step-progress
-{
+.step-progress {
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -2854,14 +2855,15 @@ body.auth-page #main {
   align-items: center;
   min-width: 120px;
 }
+
 .step-item-3 {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 70px;
 }
-.step-bubble 
-{
+
+.step-bubble {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -2876,20 +2878,17 @@ body.auth-page #main {
   flex-shrink: 0;
 }
 
-.step-bubble.active 
-{
+.step-bubble.active {
   background: #1a4a9e;
   color: #fff;
 }
 
-.step-bubble.done 
-{
+.step-bubble.done {
   background: #f4821e;
   color: #fff;
 }
 
-.step-line 
-{
+.step-line {
   height: 3px;
   width: 390px;
   background: #d0ddf5;

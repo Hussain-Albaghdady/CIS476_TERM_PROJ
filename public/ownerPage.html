@@ -14,7 +14,9 @@
   <link href="assets/img/favicon_io/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -49,13 +51,14 @@
   <header id="header">
     <div class="container">
 
-   <div class="logo float-left">
+      <div class="logo float-left">
         <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="" class="img-fluid"></a>
       </div>
       <div class="mobile">
         <div class="login float-right">
-        <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link-2"><i class="icofont-login"></i>
-        | Login</a></h1>
+          <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started"
+              id="login-link-2"><i class="icofont-login"></i>
+              | Login</a></h1>
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
@@ -66,7 +69,8 @@
           <li><a href="Home.html#team">Team Members</a></li>
           <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
           <li id="login-link-li">
-            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i
+                class="icofont-logout"></i>
               | Logout</a>
           </li>
         </ul>
@@ -75,641 +79,674 @@
     </div>
   </header><!-- End Header -->
   <div id="page-header" style="background-color: #f9fafb;">
-  <div class="container text-center" id="welcome">
-    <div class="d-flex flex-column justify-content-center align-items-center">
-      <h2 data-aos="fade-up">Welcome, <span>Host</span></h2>
-      <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt="" data-aos="zoom-out">
-      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>DriveShare</span></h1>
-      <p data-aos="fade-up" data-aos-delay="100">Rent a ride. Share the journey.<br></p>
+    <div class="container text-center" id="welcome">
+      <div class="d-flex flex-column justify-content-center align-items-center">
+        <h2 data-aos="fade-up">Welcome, <span>Host</span></h2>
+        <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt=""
+          data-aos="zoom-out">
+        <h1 id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>DriveShare</span>
+        </h1>
+        <p data-aos="fade-up" data-aos-delay="100">Rent a ride. Share the journey.<br></p>
+      </div>
     </div>
-  </div>
-  <div class="user-container">
-    <div class="content">
-      <h3 data-aos="fade-up" data-aos-delay="100">
-        <span  class="label">Signed in as</span>
-        <span id="user-welcome-name" class="username">Host</span>
-      </h3>
+    <div class="user-container">
+      <div class="content">
+        <h3 data-aos="fade-up" data-aos-delay="100">
+          <span class="label">Signed in as</span>
+          <span id="user-welcome-name" class="username">Host</span>
+        </h3>
+      </div>
     </div>
-  </div>
 
-  <main id="main"  class="hidden-page">
-    <section id="vehicle-management" class="vehicle-management">
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <main id="main" class="hidden-page">
+      <section id="vehicle-management" class="vehicle-management">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div class="management-header-box">
+          <div class="management-header-box">
+            <div class="section-title">
+              <h2>Vehicle Management</h2>
+              <p>Add new vehicles or Manage your vehicle inventory</p>
+            </div>
+
+            <div class="row mb-4 justify-content-center">
+              <div class="col-lg-4 col-md-5 text-center">
+                <button id="add-vehicle-btn" class="btn btn-success btn-lg me-2">
+                  <i class="icofont-plus"></i> Add New Vehicle
+                </button>
+              </div>
+              <div class="col-lg-4 col-md-5 text-center">
+                <button id="manage-vehicle-btn" class="btn btn-primary btn-lg ms-2">
+                  <i class="icofont-gear"></i> Manage Existing Vehicle
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Vehicle Form -->
+          <div id="add-vehicle-form" class="management-form" style="display: none;">
+            <div class="row">
+              <div class="col-lg-8 mx-auto">
+                <form id="vehicle-form">
+                  <h3>Add New Vehicle</h3>
+
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="vehicle-year">Vehicle Year *</label>
+                        <select id="vehicle-year" name="year" class="form-control" required>
+                          <option value="" disabled selected>-- Select Year --</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="vehicle-make">Vehicle Make *</label>
+                        <input type="text" id="vehicle-make" name="make" class="form-control" required
+                          placeholder="e.g., Toyota">
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="vehicle-name">Vehicle Model *</label>
+                        <input type="text" id="vehicle-name" name="model" class="form-control" required
+                          placeholder="e.g., Camry">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="vehicle-mileage">Current Mileage *</label>
+                        <input type="number" id="vehicle-mileage" name="mileage" class="form-control" required min="0"
+                          placeholder="e.g., 12000">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="vehicle-range">Range (miles) *</label>
+                        <input type="number" id="vehicle-range" name="range" class="form-control" required min="0"
+                          placeholder="e.g., 350">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="vehicle-category">Vehicle Type *</label>
+                    <select id="vehicle-category" name="category" class="form-control" required>
+                      <option value="">-- Vehicle Type --</option>
+                      <option value="Compact SUV">Compact SUV</option>
+                      <option value="Minivan">Minivan</option>
+                      <option value="Passenger Van">Passenger Van</option>
+                      <option value="Pickup">Pickup</option>
+                      <option value="Sedan">Sedan</option>
+                      <option value="Sports Car">Sports Car</option>
+                      <option value="SUV">SUV</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="vehicle-description">Description</label>
+                    <textarea id="vehicle-description" name="description" class="form-control" rows="3"
+                      placeholder="Brief description of the vehicle"></textarea>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="vehicle-pickup-location">Pickup Location *</label>
+                        <select id="vehicle-pickup-location" name="pickup_location" class="form-control" required>
+                          <option value="" disabled selected>-- Select Location --</option>
+                          <option value="Dearborn">Dearborn</option>
+                          <option value="Warren">Warren</option>
+                          <option value="DTW Airport">DTW Airport</option>
+                          <option value="Ann Arbor">Ann Arbor</option>
+                          <option value="Grand Rapids">Grand Rapids</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="rental-rate">Rental Rate (per day) *</label>
+                        <input type="number" id="rental-rate" name="rental_rate_per_day" class="form-control"
+                          step="0.01" min="0" required placeholder="$69.00">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="vehicle-image">Vehicle Image</label>
+                    <input type="file" id="vehicle-image" name="image" class="form-control" accept="image/*"
+                      placeholder="Choose an image file">
+                    <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
+                  </div>
+
+                  <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">
+                      <i class="icofont-check"></i> Add Vehicle
+                    </button>
+                    <button type="button" id="cancel-add" class="btn btn-secondary">
+                      <i class="icofont-close"></i> Cancel
+                    </button>
+                  </div>
+
+                  <div id="add-vehicle-success" class="alert alert-success mt-3" style="display: none;"></div>
+                  <div id="add-vehicle-error" class="alert alert-danger mt-3" style="display: none;"></div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manage Vehicle Section -->
+          <div id="manage-vehicle-section" class="management-form" style="display: none;">
+            <h3>Manage Existing Vehicle Inventory</h3>
+            <div class="table-responsive">
+              <div class="table-wrapper">
+                <table class="responsive-table" id="vehicle-management-table">
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Make</th>
+                      <th>Model</th>
+                      <th>Vehicle Class</th>
+                      <th>Mileage</th>
+                      <th>Range (mi)</th>
+                      <th>Rate/Day</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vehicle-management-body">
+                    <!-- Vehicle rows will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section><!-- End Vehicle Management Section -->
+
+      <!-- ======= Financial Management Section ======= -->
+      <section id="financial-management" class="vehicle-management section-bg">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+          <div class="management-header-box">
+            <div class="section-title">
+              <h2>Financial Management</h2>
+              <p>Track your revenue and vehicle performance</p>
+            </div>
+            <div class="row mb-4 justify-content-center">
+              <div class="col-lg-4 col-md-5 text-center">
+                <button id="view-financials-btn" class="btn btn-success btn-lg">
+                  <i class="icofont-chart-bar-graph"></i> View Financial Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="financial-section" class="management-form" style="display: none;">
+
+            <!-- Summary Cards -->
+            <div class="row mb-4" id="financial-summary-cards">
+              <div class="col-md-3">
+                <div class="info-box"
+                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                  <i class="icofont-money" style="font-size:2rem; color:#28a745;"></i>
+                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Revenue</h4>
+                  <p id="stat-total-revenue" style="font-size:1.8rem; font-weight:700; margin:0; color:#28a745;">$0</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="info-box"
+                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                  <i class="icofont-car" style="font-size:2rem; color:#007bff;"></i>
+                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Rentals</h4>
+                  <p id="stat-total-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#007bff;">0</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="info-box"
+                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                  <i class="icofont-star" style="font-size:2rem; color:#ffc107;"></i>
+                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Top Grossing Vehicle</h4>
+                  <p id="stat-top-vehicle" style="font-size:1rem; font-weight:700; margin:0; color:#ffc107;">—</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="info-box"
+                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                  <i class="icofont-clock-time" style="font-size:2rem; color:#17a2b8;"></i>
+                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Active Rentals</h4>
+                  <p id="stat-active-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#17a2b8;">0</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Per-Vehicle Breakdown Table -->
+            <h3 style="margin-bottom: 16px;">Vehicle Performance Breakdown</h3>
+            <div class="table-responsive">
+              <table class="table table-striped" id="financial-table">
+                <thead>
+                  <tr>
+                    <th>Vehicle</th>
+                    <th>Category</th>
+                    <th>Rate/Day</th>
+                    <th>Total Rentals</th>
+                    <th>Active</th>
+                    <th>Total Revenue</th>
+                    <th>Avg. Days/Rental</th>
+                    <th>View Rental History</th>
+                  </tr>
+                </thead>
+                <tbody id="financial-body">
+                </tbody>
+              </table>
+            </div>
+            <div id="history-section" style="display:none;">
+              <h3 id="history-title">Your Vehicle Rental History</h3>
+              <div class="table-wrapper">
+                <table class="responsive-table">
+                  <thead>
+                    <tr>
+                      <th>OrderID</th>
+                      <th>Renter</th>
+                      <th>Renter's Email</th>
+                      <th>Start Date</th>
+                      <th>Return Date</th>
+                      <th>Mileage</th>
+                      <th>Pick-Up Location</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orders-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section><!-- End Financial Management Section -->
+
+      <!-- ======= Avaliablity Section ======= -->
+      <section id="avaliablity" class="avaliablity section-bg">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
           <div class="section-title">
-            <h2>Vehicle Management</h2>
-            <p>Add new vehicles or Manage your vehicle inventory</p>
+            <h2>Vehicle Inventory</h2>
+            <p>Browse and view all current Vehicle inventory</p>
           </div>
 
-          <div class="row mb-4 justify-content-center">
-            <div class="col-lg-4 col-md-5 text-center">
-              <button id="add-vehicle-btn" class="btn btn-success btn-lg me-2">
-                <i class="icofont-plus"></i> Add New Vehicle
-              </button>
-            </div>
-            <div class="col-lg-4 col-md-5 text-center">
-              <button id="manage-vehicle-btn" class="btn btn-primary btn-lg ms-2">
-                <i class="icofont-gear"></i> Manage Existing Vehicle
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Add Vehicle Form -->
-        <div id="add-vehicle-form" class="management-form" style="display: none;">
           <div class="row">
-            <div class="col-lg-8 mx-auto">
-              <form id="vehicle-form">
-                <h3>Add New Vehicle</h3>
-                
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="vehicle-year">Vehicle Year *</label>
-                      <select id="vehicle-year" name="year" class="form-control" required>
-                        <option value="" disabled selected>-- Select Year --</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="vehicle-make">Vehicle Make *</label>
-                      <input type="text" id="vehicle-make" name="make" class="form-control" required
-                             placeholder="e.g., Toyota">
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="vehicle-name">Vehicle Model *</label>
-                      <input type="text" id="vehicle-name" name="model" class="form-control" required
-                             placeholder="e.g., Camry">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="vehicle-mileage">Current Mileage *</label>
-                      <input type="number" id="vehicle-mileage" name="mileage" class="form-control" required min="0" placeholder="e.g., 12000">
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="vehicle-range">Range (miles) *</label>
-                      <input type="number" id="vehicle-range" name="range" class="form-control" required min="0" placeholder="e.g., 350">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="vehicle-category">Vehicle Type *</label>
-                  <select id="vehicle-category" name="category" class="form-control" required>
-                    <option value="">-- Vehicle Type --</option>
-                    <option value="Compact SUV">Compact SUV</option>
-                    <option value="Minivan">Minivan</option>
-                    <option value="Passenger Van">Passenger Van</option>
-                    <option value="Pickup">Pickup</option>
-                    <option value="Sedan">Sedan</option>
-                    <option value="Sports Car">Sports Car</option>
-                    <option value="SUV">SUV</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label for="vehicle-description">Description</label>
-                  <textarea id="vehicle-description" name="description" class="form-control" rows="3"
-                            placeholder="Brief description of the vehicle"></textarea>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="vehicle-pickup-location">Pickup Location *</label>
-                      <select id="vehicle-pickup-location" name="pickup_location" class="form-control" required>
-                        <option value="" disabled selected>-- Select Location --</option>
-                        <option value="Dearborn">Dearborn</option>
-                        <option value="Warren">Warren</option>
-                        <option value="DTW Airport">DTW Airport</option>
-                        <option value="Ann Arbor">Ann Arbor</option>
-                        <option value="Grand Rapids">Grand Rapids</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="rental-rate">Rental Rate (per day) *</label>
-                      <input type="number" id="rental-rate" name="rental_rate_per_day" class="form-control"
-                             step="0.01" min="0" required placeholder="$69.00">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="vehicle-image">Vehicle Image</label>
-                  <input type="file" id="vehicle-image" name="image" class="form-control" 
-                         accept="image/*" placeholder="Choose an image file">
-                  <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
-                </div>
-
-                <div class="form-buttons">
-                  <button type="submit" class="btn btn-success">
-                    <i class="icofont-check"></i> Add Vehicle
-                  </button>
-                  <button type="button" id="cancel-add" class="btn btn-secondary">
-                    <i class="icofont-close"></i> Cancel
-                  </button>
-                </div>
-
-                <div id="add-vehicle-success" class="alert alert-success mt-3" style="display: none;"></div>
-                <div id="add-vehicle-error" class="alert alert-danger mt-3" style="display: none;"></div>
-              </form>
+            <div class="col-lg-12">
+              <ul id="event-flters">
+                <li data-filter="*" class="filter-active">All</li>
+                <li data-filter=".filter-Available">Available</li>
+                <li data-filter=".filter-Booked">Booked</li>
+              </ul>
             </div>
           </div>
-        </div>
-
-        <!-- Manage Vehicle Section -->
-        <div id="manage-vehicle-section" class="management-form" style="display: none;">
-          <h3>Manage Existing Vehicle Inventory</h3>
-          <div class="table-responsive">
-            <div class="table-wrapper">
-            <table class="responsive-table" id="vehicle-management-table">
-              <thead>
-                <tr>
-                  <th>Year</th>
-                  <th>Make</th>
-                  <th>Model</th>
-                  <th>Vehicle Class</th>
-                  <th>Mileage</th>
-                  <th>Range (mi)</th>
-                  <th>Rate/Day</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="vehicle-management-body">
-                <!-- Vehicle rows will be populated here -->
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section><!-- End Vehicle Management Section -->
-
-    <!-- ======= Financial Management Section ======= -->
-    <section id="financial-management" class="vehicle-management section-bg">
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="management-header-box">
-          <div class="section-title">
-            <h2>Financial Management</h2>
-            <p>Track your revenue and vehicle performance</p>
-          </div>
-          <div class="row mb-4 justify-content-center">
-            <div class="col-lg-4 col-md-5 text-center">
-              <button id="view-financials-btn" class="btn btn-success btn-lg">
-                <i class="icofont-chart-bar-graph"></i> View Financial Report
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div id="financial-section" class="management-form" style="display: none;">
-
-          <!-- Summary Cards -->
-          <div class="row mb-4" id="financial-summary-cards">
-            <div class="col-md-3">
-              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                <i class="icofont-money" style="font-size:2rem; color:#28a745;"></i>
-                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Revenue</h4>
-                <p id="stat-total-revenue" style="font-size:1.8rem; font-weight:700; margin:0; color:#28a745;">$0</p>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                <i class="icofont-car" style="font-size:2rem; color:#007bff;"></i>
-                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Rentals</h4>
-                <p id="stat-total-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#007bff;">0</p>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                <i class="icofont-star" style="font-size:2rem; color:#ffc107;"></i>
-                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Top Grossing Vehicle</h4>
-                <p id="stat-top-vehicle" style="font-size:1rem; font-weight:700; margin:0; color:#ffc107;">—</p>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                <i class="icofont-clock-time" style="font-size:2rem; color:#17a2b8;"></i>
-                <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Active Rentals</h4>
-                <p id="stat-active-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#17a2b8;">0</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Per-Vehicle Breakdown Table -->
-          <h3 style="margin-bottom: 16px;">Vehicle Performance Breakdown</h3>
-          <div class="table-responsive">
-            <table class="table table-striped" id="financial-table">
-              <thead>
-                <tr>
-                  <th>Vehicle</th>
-                  <th>Category</th>
-                  <th>Rate/Day</th>
-                  <th>Total Rentals</th>
-                  <th>Active</th>
-                  <th>Total Revenue</th>
-                  <th>Avg. Days/Rental</th>
-                </tr>
-              </thead>
-              <tbody id="financial-body">
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section><!-- End Financial Management Section -->
-
-    <!-- ======= Avaliablity Section ======= -->
-    <section id="avaliablity" class="avaliablity section-bg">
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="section-title">
-          <h2>Vehicle Inventory</h2>
-          <p>Browse and view all current Vehicle inventory</p>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-12">
-            <ul id="event-flters">
-              <li data-filter="*" class="filter-active">All</li>
-              <li data-filter=".filter-Available">Available</li>
-              <li data-filter=".filter-Booked">Booked</li>
-            </ul>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-12">
-             <ul id="type-flters">
-              <li data-filter=".filter-CompactSUV">Compact SUV</li>
-              <li data-filter=".filter-Minivan">Minivan</li>
-              <li data-filter=".filter-PassengerVan">Passenger Van</li>
-              <li data-filter=".filter-Pickup">Pickup</li>
-              <li data-filter=".filter-Sedan">Sedan</li>
-              <li data-filter=".filter-SportsCar">Sports Car</li>
-              <li data-filter=".filter-SUV">SUV</li>
-            </ul>
-          </div>
-        </div>
-        <div class="row event-container">
-          <!-- Dynamic vehicle cards will be injected here by JS -->
-        </div>
-    </section><!-- End Avaliablity Section -->
-
-  <div id="edit-vehicle-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Edit Vehicle</h3>
-        <span class="close" id="close-edit-modal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <form id="edit-vehicle-form">
-          <input type="hidden" id="edit-vehicle-id">
-          
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-lg-12">
+              <ul id="type-flters">
+                <li data-filter=".filter-CompactSUV">Compact SUV</li>
+                <li data-filter=".filter-Minivan">Minivan</li>
+                <li data-filter=".filter-PassengerVan">Passenger Van</li>
+                <li data-filter=".filter-Pickup">Pickup</li>
+                <li data-filter=".filter-Sedan">Sedan</li>
+                <li data-filter=".filter-SportsCar">Sports Car</li>
+                <li data-filter=".filter-SUV">SUV</li>
+              </ul>
+            </div>
+          </div>
+          <div class="row event-container">
+            <!-- Dynamic vehicle cards will be injected here by JS -->
+          </div>
+      </section><!-- End Avaliablity Section -->
+
+      <div id="edit-vehicle-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Edit Vehicle</h3>
+            <span class="close" id="close-edit-modal">&times;</span>
+          </div>
+          <div class="modal-body">
+            <form id="edit-vehicle-form">
+              <input type="hidden" id="edit-vehicle-id">
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="edit-vehicle-year">Vehicle Year *</label>
+                    <select id="edit-vehicle-year" class="form-control" required>
+                      <option value="" disabled selected>-- Select Year --</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="edit-vehicle-make">Vehicle Make *</label>
+                    <input type="text" id="edit-vehicle-make" class="form-control" required placeholder="e.g., Toyota">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="edit-vehicle-name">Vehicle Model *</label>
+                    <input type="text" id="edit-vehicle-name" class="form-control" required>
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group">
-                <label for="edit-vehicle-year">Vehicle Year *</label>
-                <select id="edit-vehicle-year" class="form-control" required>
-                  <option value="" disabled selected>-- Select Year --</option>
+                <label for="edit-vehicle-category">Vehicle Type *</label>
+                <select id="edit-vehicle-category" class="form-control" required>
+                  <option value="">-- Select Vehicle Type --</option>
+                  <option value="Compact SUV">Compact SUV</option>
+                  <option value="Minivan">Minivan</option>
+                  <option value="Passenger Van">Passenger Van</option>
+                  <option value="Pickup">Pickup</option>
+                  <option value="Sedan">Sedan</option>
+                  <option value="Sports Car">Sports Car</option>
+                  <option value="SUV">SUV</option>
                 </select>
               </div>
-            </div>
-            <div class="col-md-4">
+
               <div class="form-group">
-                <label for="edit-vehicle-make">Vehicle Make *</label>
-                <input type="text" id="edit-vehicle-make" class="form-control" required placeholder="e.g., Toyota">
+                <label for="edit-vehicle-description">Description</label>
+                <textarea id="edit-vehicle-description" class="form-control" rows="3"></textarea>
               </div>
-            </div>
-            <div class="col-md-4">
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="edit-vehicle-mileage">Current Mileage *</label>
+                    <input type="number" id="edit-vehicle-mileage" class="form-control" min="0" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="edit-vehicle-range">Range (miles) *</label>
+                    <input type="number" id="edit-vehicle-range" class="form-control" min="0" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="edit-pickup-location">Pickup Location *</label>
+                    <select id="edit-pickup-location" class="form-control" required>
+                      <option value="" disabled selected>-- Select Location --</option>
+                      <option value="Dearborn">Dearborn</option>
+                      <option value="Warren">Warren</option>
+                      <option value="DTW Airport">DTW Airport</option>
+                      <option value="Ann Arbor">Ann Arbor</option>
+                      <option value="Grand Rapids">Grand Rapids</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="edit-rental-rate">Rental Rate (per day) *</label>
+                    <input type="number" id="edit-rental-rate" class="form-control" step="0.01" min="0" required>
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group">
-                <label for="edit-vehicle-name">Vehicle Model *</label>
-                <input type="text" id="edit-vehicle-name" class="form-control" required>
+                <label for="edit-vehicle-image">Vehicle Cover</label>
+                <input type="file" id="edit-vehicle-image" class="form-control" accept="image/*">
+                <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF) - leave empty to keep current
+                  cover</small>
               </div>
-            </div>
-          </div>
 
-          <div class="form-group">
-            <label for="edit-vehicle-category">Vehicle Type *</label>
-            <select id="edit-vehicle-category" class="form-control" required>
-              <option value="">-- Select Vehicle Type --</option>
-              <option value="Compact SUV">Compact SUV</option>
-              <option value="Minivan">Minivan</option>
-              <option value="Passenger Van">Passenger Van</option>
-              <option value="Pickup">Pickup</option>
-              <option value="Sedan">Sedan</option>
-              <option value="Sports Car">Sports Car</option>
-              <option value="SUV">SUV</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="edit-vehicle-description">Description</label>
-            <textarea id="edit-vehicle-description" class="form-control" rows="3"></textarea>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="edit-vehicle-mileage">Current Mileage *</label>
-                <input type="number" id="edit-vehicle-mileage" class="form-control" min="0" required>
+              <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">
+                  <i class="icofont-check"></i> Update Vehicle Info
+                </button>
+                <button type="button" id="cancel-edit" class="btn btn-secondary">
+                  <i class="icofont-close"></i> Cancel
+                </button>
               </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="edit-vehicle-range">Range (miles) *</label>
-                <input type="number" id="edit-vehicle-range" class="form-control" min="0" required>
-              </div>
-            </div>
+
+              <div id="edit-vehicle-success" class="alert alert-success mt-3" style="display: none;"></div>
+              <div id="edit-vehicle-error" class="alert alert-danger mt-3" style="display: none;"></div>
+            </form>
           </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="edit-pickup-location">Pickup Location *</label>
-                <select id="edit-pickup-location" class="form-control" required>
-                  <option value="" disabled selected>-- Select Location --</option>
-                  <option value="Dearborn">Dearborn</option>
-                  <option value="Warren">Warren</option>
-                  <option value="DTW Airport">DTW Airport</option>
-                  <option value="Ann Arbor">Ann Arbor</option>
-                  <option value="Grand Rapids">Grand Rapids</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="edit-rental-rate">Rental Rate (per day) *</label>
-                <input type="number" id="edit-rental-rate" class="form-control" step="0.01" min="0" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="edit-vehicle-image">Vehicle Cover</label>
-            <input type="file" id="edit-vehicle-image" class="form-control" 
-                   accept="image/*">
-            <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF) - leave empty to keep current cover</small>
-          </div>
-
-          <div class="form-buttons">
-            <button type="submit" class="btn btn-primary">
-              <i class="icofont-check"></i> Update Vehicle Info
-            </button>
-            <button type="button" id="cancel-edit" class="btn btn-secondary">
-              <i class="icofont-close"></i> Cancel
-            </button>
-          </div>
-
-          <div id="edit-vehicle-success" class="alert alert-success mt-3" style="display: none;"></div>
-          <div id="edit-vehicle-error" class="alert alert-danger mt-3" style="display: none;"></div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div id="delete-vehicle-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Confirm Delete</h3>
-        <span class="close" id="close-delete-modal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete this vehicle? This action cannot be undone.</p>
-        <div class="form-buttons">
-          <button id="confirm-delete-vehicle" class="btn btn-danger">
-            <i class="icofont-trash"></i> Delete
-          </button>
-          <button id="cancel-delete-vehicle" class="btn btn-secondary">
-            <i class="icofont-close"></i> Cancel
-          </button>
         </div>
       </div>
-    </div>
-  </div>
-  </main><!-- End #main -->
 
-  <!-- ======= Footer ======= -->
-  <footer id="footer">
-    
-    <div class="footer-top">
-      <div class="container">
-        <div class="row">
+      <div id="delete-vehicle-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <span class="close" id="close-delete-modal">&times;</span>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete this vehicle? This action cannot be undone.</p>
+            <div class="form-buttons">
+              <button id="confirm-delete-vehicle" class="btn btn-danger">
+                <i class="icofont-trash"></i> Delete
+              </button>
+              <button id="cancel-delete-vehicle" class="btn btn-secondary">
+                <i class="icofont-close"></i> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main><!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+
+      <div class="footer-top">
+        <div class="container">
+          <div class="row">
             <div class="col-md-5 d-flex align-items-stretch" data-aos="fade-up">
               <div class="info-box">
-                <a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
-                <h3>Our Headquarter Address</h3>
-                <p>4901 Evergreen Rd Dearborn, MI 48128</p></a>
+                <a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i
+                    class="bx bx-map"></i>
+                  <h3>Our Headquarter Address</h3>
+                  <p>4901 Evergreen Rd Dearborn, MI 48128</p>
+                </a>
               </div>
             </div>
             <div class="col-md-4 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
               <div class="info-box">
                 <a href="mailto:info@conference.com"><i class="bx bx-envelope"></i>
-                <h3>Email Us</h3>
-                <p>info@DriveShare.com</p></a>
+                  <h3>Email Us</h3>
+                  <p>info@DriveShare.com</p>
+                </a>
               </div>
             </div>
             <div class="col-md-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
               <div class="info-box ">
                 <a href="tel:248-420-6969"><i class="bx bx-phone-call"></i>
-                <h3>Call Us</h3>
-                <p>+1 248-420-6969</p></a>
+                  <h3>Call Us</h3>
+                  <p>+1 248-420-6969</p>
+                </a>
               </div>
             </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-12 footer-links">            
-            <ul>
-              <li><a href="tos.html">Terms of Services </a></li>
-              <li><a href="privacy.html">Privacy Policy</a></li>
-              <li><a href="cookies_settings.html">Cookies Settings</a></li>
-            </ul>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 footer-links">
+              <ul>
+                <li><a href="tos.html">Terms of Services </a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="cookies_settings.html">Cookies Settings</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
       <div class="container">
         <div class="copyright">
           &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
         </div>
         <div class="credits">
-           Designed by <a href="Home.html#team">Meaad Hassan</a>
+          Designed by <a href="Home.html#team">Meaad Hassan</a>
         </div>
       </div>
 
-  </footer><!-- End Footer -->
+    </footer><!-- End Footer -->
 
-  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+    <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/jquery/jquery.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
-  <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
-  <script src="assets/vendor/venobox/venobox.min.js"></script>
-  <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
-  <script src="assets/vendor/counterup/counterup.min.js"></script>
-  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+    <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+    <script src="assets/vendor/venobox/venobox.min.js"></script>
+    <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+    <script src="assets/vendor/counterup/counterup.min.js"></script>
+    <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+    <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
 
-  <!-- Main JS File -->
-  <script src="assets/js/main.js"></script>
+    <!-- Main JS File -->
+    <script src="assets/js/main.js"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/userdetail")
-        .then(res => {
-          if (!res.ok) throw new Error("Not logged in");
-          return res.json();
-        })
-        .then(data => {
-          if (data.user_type !== "host") {
-            fetch("/logout", { credentials: "include" })
-              .then(() => window.location.href = "/loginform.html");
-          } else {
-            document.getElementById("main").classList.remove("hidden-page");
-          }
-        })
-        .catch(() => {
-          window.location.href = "/loginform.html"; 
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("/userdetail")
+          .then(res => {
+            if (!res.ok) throw new Error("Not logged in");
+            return res.json();
+          })
+          .then(data => {
+            if (data.user_type !== "host") {
+              fetch("/logout", { credentials: "include" })
+                .then(() => window.location.href = "/loginform.html");
+            } else {
+              document.getElementById("main").classList.remove("hidden-page");
+            }
+          })
+          .catch(() => {
+            window.location.href = "/loginform.html";
+          });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const logoImg = document.getElementById("logo-img");
+        const fallbackText = document.getElementById("logo-fallback");
+
+        logoImg.addEventListener("error", function () {
+          logoImg.style.display = "none";
+          fallbackText.style.display = "block";
         });
-    });
-    document.addEventListener("DOMContentLoaded", function () {
-      const logoImg = document.getElementById("logo-img");
-      const fallbackText = document.getElementById("logo-fallback");
 
-      logoImg.addEventListener("error", function () {
-        logoImg.style.display = "none";
-        fallbackText.style.display = "block";
-      });
-
-      logoImg.addEventListener("load", function () {
-        fallbackText.style.display = "none";
-      });
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-      // Populate vehicle year dropdowns
-      ['vehicle-year', 'edit-vehicle-year'].forEach(function(id) {
-        const sel = document.getElementById(id);
-        if (!sel) return;
-        for (let y = 2026; y >= 2000; y--) {
-          const opt = document.createElement('option');
-          opt.value = y;
-          opt.textContent = y;
-          sel.appendChild(opt);
-        }
-      });
-
-      let currentVehicleToDelete = null;
-
-      const addVehicleBtn = document.getElementById('add-vehicle-btn');
-      const manageVehicleBtn = document.getElementById('manage-vehicle-btn');
-      const addVehicleForm = document.getElementById('add-vehicle-form');
-      const manageVehicleSection = document.getElementById('manage-vehicle-section');
-      const vehicleForm = document.getElementById('vehicle-form');
-      const editVehicleForm = document.getElementById('edit-vehicle-form');
-      const editModal = document.getElementById('edit-vehicle-modal');
-      const deleteModal = document.getElementById('delete-vehicle-modal');
-
-      addVehicleBtn.addEventListener('click', function() {
-        addVehicleForm.style.display = addVehicleForm.style.display === 'none' ? 'block' : 'none';
-        manageVehicleSection.style.display = 'none';
-        if (addVehicleForm.style.display === 'block') {
-          loadVehicleForManagement();
-        }
-      });
-
-      manageVehicleBtn.addEventListener('click', function() {
-        manageVehicleSection.style.display = manageVehicleSection.style.display === 'none' ? 'block' : 'none';
-        addVehicleForm.style.display = 'none';
-        if (manageVehicleSection.style.display === 'block') {
-          loadVehicleForManagement();
-        }
-      });
-
-      document.getElementById('cancel-add').addEventListener('click', function() {
-        addVehicleForm.style.display = 'none';
-        vehicleForm.reset();
-        clearMessages();
-      });
-
-      vehicleForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        clearMessages();
-
-        const formData = new FormData(vehicleForm);
-        
-        const model = formData.get('model');
-        const category = formData.get('category');
-        const rental_rate_per_day = formData.get('rental_rate_per_day');
-        const make = formData.get('make');
-        const year = formData.get('year');
-        const mileage = formData.get('mileage');
-        const range = formData.get('range');
-        const pickup_location = formData.get('pickup_location');
-        if (!model || !category || !rental_rate_per_day || !make || !year || !mileage || !range || !pickup_location) {
-          showMessage('add-vehicle-error', 'Please fill in all required fields.');
-          return;
-        }
-
-        console.log('Sending vehicle data with FormData'); 
-        fetch('/api/vehicle', {
-          method: 'POST',
-          body: formData 
-        })
-        .then(res => {
-          console.log('Response status:', res.status); 
-          return res.json();
-        })
-        .then(data => {
-          console.log('Response data:', data); 
-          if (data.error) {
-            showMessage('add-vehicle-error', data.error);
-          } else {
-            showMessage('add-vehicle-success', 'Vehicle added successfully!');
-            vehicleForm.reset();
-            setTimeout(() => {
-              location.reload();
-            }, 1500);
-          }
-        })
-        .catch(err => {
-          console.error('Fetch error:', err);
-          showMessage('add-vehicle-error', 'Failed to add vehicle. Please check the console for details.');
+        logoImg.addEventListener("load", function () {
+          fallbackText.style.display = "none";
         });
       });
 
-      function loadVehicleForManagement() {
-        fetch('/api/my-vehicles')
-        .then(res => res.json())
-        .then(vehicles => {
-          const tbody = document.getElementById('vehicle-management-body');
-          tbody.innerHTML = '';
+      document.addEventListener('DOMContentLoaded', function () {
+        // Populate vehicle year dropdowns
+        ['vehicle-year', 'edit-vehicle-year'].forEach(function (id) {
+          const sel = document.getElementById(id);
+          if (!sel) return;
+          for (let y = 2026; y >= 2000; y--) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            sel.appendChild(opt);
+          }
+        });
 
-          if (!vehicles || vehicles.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center">No vehicle found</td></tr>';
+        let currentVehicleToDelete = null;
+
+        const addVehicleBtn = document.getElementById('add-vehicle-btn');
+        const manageVehicleBtn = document.getElementById('manage-vehicle-btn');
+        const addVehicleForm = document.getElementById('add-vehicle-form');
+        const manageVehicleSection = document.getElementById('manage-vehicle-section');
+        const vehicleForm = document.getElementById('vehicle-form');
+        const editVehicleForm = document.getElementById('edit-vehicle-form');
+        const editModal = document.getElementById('edit-vehicle-modal');
+        const deleteModal = document.getElementById('delete-vehicle-modal');
+
+        addVehicleBtn.addEventListener('click', function () {
+          addVehicleForm.style.display = addVehicleForm.style.display === 'none' ? 'block' : 'none';
+          manageVehicleSection.style.display = 'none';
+          if (addVehicleForm.style.display === 'block') {
+            loadVehicleForManagement();
+          }
+        });
+
+        manageVehicleBtn.addEventListener('click', function () {
+          manageVehicleSection.style.display = manageVehicleSection.style.display === 'none' ? 'block' : 'none';
+          addVehicleForm.style.display = 'none';
+          if (manageVehicleSection.style.display === 'block') {
+            loadVehicleForManagement();
+          }
+        });
+
+        document.getElementById('cancel-add').addEventListener('click', function () {
+          addVehicleForm.style.display = 'none';
+          vehicleForm.reset();
+          clearMessages();
+        });
+
+        vehicleForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          clearMessages();
+
+          const formData = new FormData(vehicleForm);
+
+          const model = formData.get('model');
+          const category = formData.get('category');
+          const rental_rate_per_day = formData.get('rental_rate_per_day');
+          const make = formData.get('make');
+          const year = formData.get('year');
+          const mileage = formData.get('mileage');
+          const range = formData.get('range');
+          const pickup_location = formData.get('pickup_location');
+          if (!model || !category || !rental_rate_per_day || !make || !year || !mileage || !range || !pickup_location) {
+            showMessage('add-vehicle-error', 'Please fill in all required fields.');
             return;
           }
 
-          vehicles.forEach(vehicle => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
+          console.log('Sending vehicle data with FormData');
+          fetch('/api/vehicle', {
+            method: 'POST',
+            body: formData
+          })
+            .then(res => {
+              console.log('Response status:', res.status);
+              return res.json();
+            })
+            .then(data => {
+              console.log('Response data:', data);
+              if (data.error) {
+                showMessage('add-vehicle-error', data.error);
+              } else {
+                showMessage('add-vehicle-success', 'Vehicle added successfully!');
+                vehicleForm.reset();
+                setTimeout(() => {
+                  location.reload();
+                }, 1500);
+              }
+            })
+            .catch(err => {
+              console.error('Fetch error:', err);
+              showMessage('add-vehicle-error', 'Failed to add vehicle. Please check the console for details.');
+            });
+        });
+
+        function loadVehicleForManagement() {
+          fetch('/api/my-vehicles')
+            .then(res => res.json())
+            .then(vehicles => {
+              const tbody = document.getElementById('vehicle-management-body');
+              tbody.innerHTML = '';
+
+              if (!vehicles || vehicles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No vehicle found</td></tr>';
+                return;
+              }
+
+              vehicles.forEach(vehicle => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
               <td data-label="Year">${vehicle.year || 'N/A'}</td>
               <td data-label="Make">${vehicle.make || 'N/A'}</td>
               <td data-label="Model">${vehicle.model || 'N/A'}</td>
@@ -736,234 +773,234 @@
                 </div>
               </td>
             `;
-            tbody.appendChild(row);
-          });
+                tbody.appendChild(row);
+              });
 
-          document.querySelectorAll('.edit-vehicle-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const vehicleId = this.getAttribute('data-id');
-              openEditModal(vehicleId);
+              document.querySelectorAll('.edit-vehicle-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                  const vehicleId = this.getAttribute('data-id');
+                  openEditModal(vehicleId);
+                });
+              });
+
+              document.querySelectorAll('.delete-vehicle-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                  const vehicleId = this.getAttribute('data-id');
+                  const vehicleName = this.getAttribute('data-name');
+                  openDeleteModal(vehicleId, vehicleName);
+                });
+              });
+
+              document.querySelectorAll('.toggle-availability-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                  const vehicleId = this.getAttribute('data-id');
+                  const currentAvail = this.getAttribute('data-available') === 'true';
+                  const newAvail = !currentAvail;
+                  fetch(`/api/vehicle/${vehicleId}/availability`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ availability: newAvail })
+                  })
+                    .then(res => res.json())
+                    .then(data => {
+                      if (data.success) loadVehicleForManagement();
+                    })
+                    .catch(err => console.error('Toggle availability error:', err));
+                });
+              });
+            })
+            .catch(err => {
+              console.error('Failed to load vehicle:', err);
             });
-          });
-
-          document.querySelectorAll('.delete-vehicle-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const vehicleId = this.getAttribute('data-id');
-              const vehicleName = this.getAttribute('data-name');
-              openDeleteModal(vehicleId, vehicleName);
-            });
-          });
-
-          document.querySelectorAll('.toggle-availability-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const vehicleId = this.getAttribute('data-id');
-              const currentAvail = this.getAttribute('data-available') === 'true';
-              const newAvail = !currentAvail;
-              fetch(`/api/vehicle/${vehicleId}/availability`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ availability: newAvail })
-              })
-              .then(res => res.json())
-              .then(data => {
-                if (data.success) loadVehicleForManagement();
-              })
-              .catch(err => console.error('Toggle availability error:', err));
-            });
-          });
-        })
-        .catch(err => {
-          console.error('Failed to load vehicle:', err);
-        });
-      }
-
-      function openEditModal(vehicleId) {
-        fetch('/api/my-vehicles')
-        .then(res => res.json())
-        .then(vehicles => {
-          const vehicle = vehicles.find(eq => eq._id === vehicleId);
-          if (vehicle) {
-            document.getElementById('edit-vehicle-id').value = vehicle._id;
-            document.getElementById('edit-vehicle-name').value = vehicle.model || '';
-            document.getElementById('edit-vehicle-category').value = vehicle.category || '';
-            document.getElementById('edit-vehicle-description').value = vehicle.description || '';
-            document.getElementById('edit-rental-rate').value = vehicle.rental_rate_per_day || '';
-            document.getElementById('edit-vehicle-make').value = vehicle.make || '';
-            document.getElementById('edit-vehicle-year').value = vehicle.year || '';
-            document.getElementById('edit-vehicle-mileage').value = vehicle.mileage || '';
-            document.getElementById('edit-vehicle-range').value = vehicle.range || '';
-            document.getElementById('edit-pickup-location').value = vehicle.pickup_location || '';
-            document.getElementById('edit-vehicle-image').value = '';
-            editModal.style.display = 'block';
-          }
-        });
-      }
-
-      function openDeleteModal(vehicleId, vehicleName) {
-        currentVehicleToDelete = vehicleId;
-        deleteModal.querySelector('.modal-body p').textContent = 
-          `Are you sure you want to delete "${vehicleName}"? This action cannot be undone.`;
-        deleteModal.style.display = 'block';
-      }
-
-      editVehicleForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const vehicleId = document.getElementById('edit-vehicle-id').value;
-        const formData = new FormData();
-        
-        formData.append('model', document.getElementById('edit-vehicle-name').value);
-        formData.append('category', document.getElementById('edit-vehicle-category').value);
-        formData.append('description', document.getElementById('edit-vehicle-description').value);
-        formData.append('rental_rate_per_day', document.getElementById('edit-rental-rate').value);
-        formData.append('make', document.getElementById('edit-vehicle-make').value);
-        formData.append('year', document.getElementById('edit-vehicle-year').value);
-        formData.append('mileage', document.getElementById('edit-vehicle-mileage').value);
-        formData.append('range', document.getElementById('edit-vehicle-range').value);
-        formData.append('pickup_location', document.getElementById('edit-pickup-location').value);
-        
-        const imageFile = document.getElementById('edit-vehicle-image').files[0];
-        if (imageFile) {
-          formData.append('image', imageFile);
         }
 
-        fetch(`/api/vehicle/${vehicleId}`, {
-          method: 'PUT',
-          body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            showMessage('edit-vehicle-error', data.error);
-          } else {
-            showMessage('edit-vehicle-success', 'Vehicle updated successfully!');
-            setTimeout(() => {
-              editModal.style.display = 'none';
-              loadVehicleForManagement();
-              refreshMainVehicleDisplay();
-            }, 1500);
-          }
-        })
-        .catch(err => {
-          showMessage('edit-vehicle-error', 'Failed to update vehicle. Please try again.');
-        });
-      });
-
-      document.getElementById('confirm-delete-vehicle').addEventListener('click', function() {
-        if (currentVehicleToDelete) {
-          fetch(`/api/vehicle/${currentVehicleToDelete}`, {
-            method: 'DELETE'
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              deleteModal.style.display = 'none';
-              loadVehicleForManagement();
-              refreshMainVehicleDisplay();
-            } else {
-              alert('Failed to delete vehicle: ' + (data.error || 'Unknown error'));
-            }
-          })
-          .catch(err => {
-            alert('Failed to delete vehicle. Please try again.');
-          });
-        }
-      });
-
-      document.getElementById('close-edit-modal').addEventListener('click', function() {
-        editModal.style.display = 'none';
-      });
-
-      document.getElementById('cancel-edit').addEventListener('click', function() {
-        editModal.style.display = 'none';
-      });
-
-      document.getElementById('close-delete-modal').addEventListener('click', function() {
-        deleteModal.style.display = 'none';
-      });
-
-      document.getElementById('cancel-delete-vehicle').addEventListener('click', function() {
-        deleteModal.style.display = 'none';
-      });
-
-      window.addEventListener('click', function(e) {
-        if (e.target === editModal) {
-          editModal.style.display = 'none';
-        }
-        if (e.target === deleteModal) {
-          deleteModal.style.display = 'none';
-        }
-      });
-
-      function showMessage(elementId, message) {
-        const element = document.getElementById(elementId);
-        if (element) {
-          element.textContent = message;
-          element.style.display = 'block';
-          setTimeout(() => {
-            element.style.display = 'none';
-          }, 5000);
-        }
-      }
-
-      function clearMessages() {
-        ['add-vehicle-success', 'add-vehicle-error', 'edit-vehicle-success', 'edit-vehicle-error'].forEach(id => {
-          const element = document.getElementById(id);
-          if (element) {
-            element.style.display = 'none';
-          }
-        });
-      }
-
-      function refreshMainVehicleDisplay() {
-        if (typeof $ !== 'undefined' && $('.event-container').length) {
+        function openEditModal(vehicleId) {
           fetch('/api/my-vehicles')
             .then(res => res.json())
-            .then(data => {
-              console.log("Refreshing vehicle display:", data);
-              const $container = $('.event-container');
-              $container.empty();
-              if (!Array.isArray(data) || data.length === 0) {
-                $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No vehicle found. Check your API or database.</p></div>');
-                return;
+            .then(vehicles => {
+              const vehicle = vehicles.find(eq => eq._id === vehicleId);
+              if (vehicle) {
+                document.getElementById('edit-vehicle-id').value = vehicle._id;
+                document.getElementById('edit-vehicle-name').value = vehicle.model || '';
+                document.getElementById('edit-vehicle-category').value = vehicle.category || '';
+                document.getElementById('edit-vehicle-description').value = vehicle.description || '';
+                document.getElementById('edit-rental-rate').value = vehicle.rental_rate_per_day || '';
+                document.getElementById('edit-vehicle-make').value = vehicle.make || '';
+                document.getElementById('edit-vehicle-year').value = vehicle.year || '';
+                document.getElementById('edit-vehicle-mileage').value = vehicle.mileage || '';
+                document.getElementById('edit-vehicle-range').value = vehicle.range || '';
+                document.getElementById('edit-pickup-location').value = vehicle.pickup_location || '';
+                document.getElementById('edit-vehicle-image').value = '';
+                editModal.style.display = 'block';
               }
-              
-              data.sort((a, b) => {
-                const categoryPriority = {
-                      "Compact SUV": 0,
-                      "Minivan": 1,
-                      "Passenger Van": 2,
-                      "Pickup": 3,
-                      "Sedan": 4,
-                      "Sports Car": 5,
-                      "SUV": 6,
-                };
-                
-                if (a.category !== b.category) {
-                  const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
-                  const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
-                  return priorityA - priorityB;
+            });
+        }
+
+        function openDeleteModal(vehicleId, vehicleName) {
+          currentVehicleToDelete = vehicleId;
+          deleteModal.querySelector('.modal-body p').textContent =
+            `Are you sure you want to delete "${vehicleName}"? This action cannot be undone.`;
+          deleteModal.style.display = 'block';
+        }
+
+        editVehicleForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const vehicleId = document.getElementById('edit-vehicle-id').value;
+          const formData = new FormData();
+
+          formData.append('model', document.getElementById('edit-vehicle-name').value);
+          formData.append('category', document.getElementById('edit-vehicle-category').value);
+          formData.append('description', document.getElementById('edit-vehicle-description').value);
+          formData.append('rental_rate_per_day', document.getElementById('edit-rental-rate').value);
+          formData.append('make', document.getElementById('edit-vehicle-make').value);
+          formData.append('year', document.getElementById('edit-vehicle-year').value);
+          formData.append('mileage', document.getElementById('edit-vehicle-mileage').value);
+          formData.append('range', document.getElementById('edit-vehicle-range').value);
+          formData.append('pickup_location', document.getElementById('edit-pickup-location').value);
+
+          const imageFile = document.getElementById('edit-vehicle-image').files[0];
+          if (imageFile) {
+            formData.append('image', imageFile);
+          }
+
+          fetch(`/api/vehicle/${vehicleId}`, {
+            method: 'PUT',
+            body: formData
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.error) {
+                showMessage('edit-vehicle-error', data.error);
+              } else {
+                showMessage('edit-vehicle-success', 'Vehicle updated successfully!');
+                setTimeout(() => {
+                  editModal.style.display = 'none';
+                  loadVehicleForManagement();
+                  refreshMainVehicleDisplay();
+                }, 1500);
+              }
+            })
+            .catch(err => {
+              showMessage('edit-vehicle-error', 'Failed to update vehicle. Please try again.');
+            });
+        });
+
+        document.getElementById('confirm-delete-vehicle').addEventListener('click', function () {
+          if (currentVehicleToDelete) {
+            fetch(`/api/vehicle/${currentVehicleToDelete}`, {
+              method: 'DELETE'
+            })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  deleteModal.style.display = 'none';
+                  loadVehicleForManagement();
+                  refreshMainVehicleDisplay();
+                } else {
+                  alert('Failed to delete vehicle: ' + (data.error || 'Unknown error'));
                 }
-                return a.name.localeCompare(b.name);
+              })
+              .catch(err => {
+                alert('Failed to delete vehicle. Please try again.');
               });
-              
-              data.forEach(item => {
-                let filters = [];
-                if (item.quantity_available > 0) filters.push("filter-Available");
-                else filters.push("filter-Booked");
-                if (item.category === "Compact SUV") filters.push("filter-CompactSUV");
-                if (item.category === "Minivan") filters.push("filter-Minivan");
-                if (item.category === "Passenger Van") filters.push("filter-PassengerVan");
-                if (item.category === "Pickup") filters.push("filter-Pickup");
-                if (item.category === "Sedan") filters.push("filter-Sedan");
-                if (item.category === "Sports Car") filters.push("filter-SportsCar");
-                if (item.category === "SUV") filters.push("filter-SUV");
-                const imgUrl = (item.image_url && item.image_url.trim() !== "")
-                ? item.image_url
-                : (item.image && item.image.trim() !== "")
-                  ? item.image
-                  : "assets/img/no-image.png";
-                $container.append(`
+          }
+        });
+
+        document.getElementById('close-edit-modal').addEventListener('click', function () {
+          editModal.style.display = 'none';
+        });
+
+        document.getElementById('cancel-edit').addEventListener('click', function () {
+          editModal.style.display = 'none';
+        });
+
+        document.getElementById('close-delete-modal').addEventListener('click', function () {
+          deleteModal.style.display = 'none';
+        });
+
+        document.getElementById('cancel-delete-vehicle').addEventListener('click', function () {
+          deleteModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (e) {
+          if (e.target === editModal) {
+            editModal.style.display = 'none';
+          }
+          if (e.target === deleteModal) {
+            deleteModal.style.display = 'none';
+          }
+        });
+
+        function showMessage(elementId, message) {
+          const element = document.getElementById(elementId);
+          if (element) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+              element.style.display = 'none';
+            }, 5000);
+          }
+        }
+
+        function clearMessages() {
+          ['add-vehicle-success', 'add-vehicle-error', 'edit-vehicle-success', 'edit-vehicle-error'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+              element.style.display = 'none';
+            }
+          });
+        }
+
+        function refreshMainVehicleDisplay() {
+          if (typeof $ !== 'undefined' && $('.event-container').length) {
+            fetch('/api/my-vehicles')
+              .then(res => res.json())
+              .then(data => {
+                console.log("Refreshing vehicle display:", data);
+                const $container = $('.event-container');
+                $container.empty();
+                if (!Array.isArray(data) || data.length === 0) {
+                  $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No vehicle found. Check your API or database.</p></div>');
+                  return;
+                }
+
+                data.sort((a, b) => {
+                  const categoryPriority = {
+                    "Compact SUV": 0,
+                    "Minivan": 1,
+                    "Passenger Van": 2,
+                    "Pickup": 3,
+                    "Sedan": 4,
+                    "Sports Car": 5,
+                    "SUV": 6,
+                  };
+
+                  if (a.category !== b.category) {
+                    const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+                    const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+                    return priorityA - priorityB;
+                  }
+                  return a.name.localeCompare(b.name);
+                });
+
+                data.forEach(item => {
+                  let filters = [];
+                  if (item.quantity_available > 0) filters.push("filter-Available");
+                  else filters.push("filter-Booked");
+                  if (item.category === "Compact SUV") filters.push("filter-CompactSUV");
+                  if (item.category === "Minivan") filters.push("filter-Minivan");
+                  if (item.category === "Passenger Van") filters.push("filter-PassengerVan");
+                  if (item.category === "Pickup") filters.push("filter-Pickup");
+                  if (item.category === "Sedan") filters.push("filter-Sedan");
+                  if (item.category === "Sports Car") filters.push("filter-SportsCar");
+                  if (item.category === "SUV") filters.push("filter-SUV");
+                  const imgUrl = (item.image_url && item.image_url.trim() !== "")
+                    ? item.image_url
+                    : (item.image && item.image.trim() !== "")
+                      ? item.image
+                      : "assets/img/no-image.png";
+                  $container.append(`
                   <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
                     <div class="card">
                       <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category}" />
@@ -977,79 +1014,186 @@
                     </div>
                   </div>
                 `);
-              });
-              const initIso = () => {
-                if ($container.data('isotope')) {
-                  $container.isotope('reloadItems').isotope('layout');
-                } else if (typeof Isotope !== "undefined") {
-                  $container.isotope({ itemSelector: '.event-item' });
-                }
-              };
-              const imgs = $container.find('img').toArray();
-              let loaded = 0;
-              if (!imgs.length) { initIso(); }
-              else {
-                imgs.forEach(img => {
-                  if (img.complete) { if (++loaded === imgs.length) initIso(); }
-                  else { img.onload = img.onerror = () => { if (++loaded === imgs.length) initIso(); }; }
                 });
+                const initIso = () => {
+                  if ($container.data('isotope')) {
+                    $container.isotope('reloadItems').isotope('layout');
+                  } else if (typeof Isotope !== "undefined") {
+                    $container.isotope({ itemSelector: '.event-item' });
+                  }
+                };
+                const imgs = $container.find('img').toArray();
+                let loaded = 0;
+                if (!imgs.length) { initIso(); }
+                else {
+                  imgs.forEach(img => {
+                    if (img.complete) { if (++loaded === imgs.length) initIso(); }
+                    else { img.onload = img.onerror = () => { if (++loaded === imgs.length) initIso(); }; }
+                  });
+                }
+                setTimeout(() => { if ($container.data('isotope')) $container.isotope('layout'); }, 800);
+              })
+              .catch(err => {
+                console.error("Error refreshing vehicles:", err);
+              });
+          }
+        }
+      });
+      document.getElementById('financial-body').addEventListener('click', function (e) {
+        const btn = e.target.closest('.view-history-btn');
+        if (!btn) return;
+
+        const vehicleId = btn.dataset.vehicleId;
+        const vehicleLabel = btn.dataset.vehicleLabel;
+
+        loadVehicleHistory(vehicleId, vehicleLabel);
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        const viewFinancialsBtn = document.getElementById('view-financials-btn');
+        const financialSection = document.getElementById('financial-section');
+
+        viewFinancialsBtn.addEventListener('click', function () {
+          const isVisible = financialSection.style.display !== 'none';
+          financialSection.style.display = isVisible ? 'none' : 'block';
+          if (!isVisible) loadFinancials();
+        });
+
+        let openHistoryVehicleId = null;
+
+        function loadFinancials() {
+          const historySection = document.getElementById('history-section');
+          const ordersBody = document.getElementById('orders-body');
+          const historyTitle = document.getElementById('history-title');
+
+          openHistoryVehicleId = null;
+          historySection.style.display = 'none';
+          ordersBody.innerHTML = '';
+          historyTitle.textContent = 'Your Vehicle Rental History';
+
+          fetch('/api/host-financials')
+            .then(res => res.json())
+            .then(data => {
+              document.getElementById('stat-total-revenue').textContent =
+                '$' + Number(data.totalRevenue || 0).toFixed(2);
+              document.getElementById('stat-total-rentals').textContent =
+                data.totalRentals || 0;
+              document.getElementById('stat-active-rentals').textContent =
+                data.activeRentals || 0;
+              document.getElementById('stat-top-vehicle').textContent =
+                data.topVehicle || '—';
+
+              const tbody = document.getElementById('financial-body');
+              tbody.innerHTML = '';
+
+              if (!data.vehicles || data.vehicles.length === 0) {
+                tbody.innerHTML =
+                  '<tr><td colspan="8" class="text-center">No rental data yet</td></tr>';
+                return;
               }
-              setTimeout(() => { if ($container.data('isotope')) $container.isotope('layout'); }, 800);
+
+              data.vehicles.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td>${v.label || 'Unknown Vehicle'}</td>
+          <td>${v.category || 'N/A'}</td>
+          <td>$${Number(v.rate || 0).toFixed(2)}</td>
+          <td>${v.totalRentals || 0}</td>
+          <td>
+            <span class="badge ${v.activeRentals > 0 ? 'badge-success' : 'badge-secondary'}">
+              ${v.activeRentals || 0}
+            </span>
+          </td>
+          <td><strong>$${Number(v.totalRevenue || 0).toFixed(2)}</strong></td>
+          <td>${Number(v.avgDays || 0).toFixed(1)} days</td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-sm btn-primary view-history-btn"
+              data-vehicle-id="${v.vehicleId}"
+              data-vehicle-label="${v.label || 'Unknown Vehicle'}">
+              View History
+            </button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+              });
             })
             .catch(err => {
-              console.error("Error refreshing vehicles:", err);
+              console.error('Failed to load financials:', err);
             });
         }
-      }
-    });
-  </script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const viewFinancialsBtn = document.getElementById('view-financials-btn');
-      const financialSection = document.getElementById('financial-section');
+        function loadVehicleHistory(vehicleId, vehicleLabel) {
+          const historySection = document.getElementById('history-section');
+          const title = document.getElementById('history-title');
+          const ordersBody = document.getElementById('orders-body');
 
-      viewFinancialsBtn.addEventListener('click', function() {
-        const isVisible = financialSection.style.display !== 'none';
-        financialSection.style.display = isVisible ? 'none' : 'block';
-        if (!isVisible) loadFinancials();
-      });
+          fetch(`/api/host-financials/history/${vehicleId}`)
+            .then(res => res.json())
+            .then(data => {
+              title.textContent = `${data.vehicleLabel || vehicleLabel} Rental History`;
+              ordersBody.innerHTML = '';
 
-      function loadFinancials() {
-        fetch('/api/host-financials')
-          .then(res => res.json())
-          .then(data => {
-            document.getElementById('stat-total-revenue').textContent = '$' + (data.totalRevenue || 0).toFixed(2);
-            document.getElementById('stat-total-rentals').textContent = data.totalRentals || 0;
-            document.getElementById('stat-active-rentals').textContent = data.activeRentals || 0;
-            document.getElementById('stat-top-vehicle').textContent = data.topVehicle || '—';
+              if (!data.history || data.history.length === 0) {
+                ordersBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center">No rental history found for this vehicle</td>
+          </tr>
+        `;
+              } else {
+                data.history.forEach(item => {
+                  const tr = document.createElement('tr');
+                  tr.innerHTML = `
+            <td>${item.orderId || '—'}</td>
+            <td>${item.renter || '—'}</td>
+            <td>${item.renterEmail || '—'}</td>
+            <td>${formatDate(item.startDate)}</td>
+            <td>${formatDate(item.returnDate)}</td>
+            <td>${item.mileage !== undefined && item.mileage !== null && item.mileage !== ''? Number(item.mileage).toLocaleString() + ' mi': '—'}</td>
+            <td>${item.pickupLocation || '—'}</td>
+            <td>$${Number(item.total || 0).toFixed(2)}</td>
+          `;
+                  ordersBody.appendChild(tr);
+                });
+              }
 
-            const tbody = document.getElementById('financial-body');
-            tbody.innerHTML = '';
-            if (!data.vehicles || data.vehicles.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="7" class="text-center">No rental data yet</td></tr>';
-              return;
-            }
-            data.vehicles.forEach(v => {
-              const tr = document.createElement('tr');
-              tr.innerHTML = `
-                <td>${v.label}</td>
-                <td>${v.category || 'N/A'}</td>
-                <td>$${Number(v.rate).toFixed(2)}</td>
-                <td>${v.totalRentals}</td>
-                <td><span class="badge ${v.activeRentals > 0 ? 'badge-success' : 'badge-secondary'}">${v.activeRentals}</span></td>
-                <td><strong>$${Number(v.totalRevenue).toFixed(2)}</strong></td>
-                <td>${v.avgDays.toFixed(1)} days</td>
-              `;
-              tbody.appendChild(tr);
+              historySection.style.display = 'block';
+              historySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              openHistoryVehicleId = vehicleId;
+            })
+            .catch(err => {
+              console.error('Failed to load vehicle history:', err);
             });
-          })
-          .catch(err => {
-            console.error('Failed to load financials:', err);
-          });
-      }
-    });
-  </script>
+        }
+
+        function formatDate(value) {
+          if (!value || value === '—') return '—';
+          const d = new Date(value);
+          return isNaN(d) ? value : d.toLocaleDateString();
+        }
+
+        document.getElementById('financial-body').addEventListener('click', function (e) {
+          const btn = e.target.closest('.view-history-btn');
+          if (!btn) return;
+
+          const vehicleId = btn.dataset.vehicleId;
+          const vehicleLabel = btn.dataset.vehicleLabel;
+          const historySection = document.getElementById('history-section');
+          const ordersBody = document.getElementById('orders-body');
+          const historyTitle = document.getElementById('history-title');
+
+          if (openHistoryVehicleId === vehicleId && historySection.style.display !== 'none') {
+            historySection.style.display = 'none';
+            ordersBody.innerHTML = '';
+            historyTitle.textContent = 'Your Vehicle Rental History';
+            openHistoryVehicleId = null;
+            return;
+          }
+
+          loadVehicleHistory(vehicleId, vehicleLabel);
+        });
+      });
+    </script>
 </body>
 
 </html>

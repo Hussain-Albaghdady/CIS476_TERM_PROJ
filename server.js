@@ -257,6 +257,12 @@ async function getNextSequence(counterName) {
   }
 }
 
+// Normalize a vehicle id field that may be a single ObjectId or an array
+function toIdArray(val) {
+  if (!val) return [];
+  return Array.isArray(val) ? val : [val];
+}
+
 app.get("/health", (req, res) => res.status(200).send("OK"));
 
 app.post("/contact_us", async (req, res) => {
@@ -286,7 +292,7 @@ app.post("/contact_us", async (req, res) => {
 });
 app.post("/sign_up", async (req, res) => {
   const { fname, lname, email, username, password, user_type,
-          security1, answer1, security2, answer2, security3, answer3 } = req.body;
+    security1, answer1, security2, answer2, security3, answer3 } = req.body;
   const hash = crypto.createHash("sha256").update(password).digest("hex");
   try {
     const existingRental = await db
@@ -412,7 +418,7 @@ app.post("/reset_password", async (req, res) => {
     }
 
     const hash = crypto.createHash("sha256").update(new_password).digest("hex");
-    const now  = new Date().toISOString().replace("T", " ").substring(0, 19);
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
     await db.collection(collection).updateOne(
       { username },
       { $set: { password: hash, updated_at: now } }
@@ -471,20 +477,20 @@ app.post("/admin_setup", async (req, res) => {
   }
 
   const { new_password, confirm_password,
-          security1, answer1, security2, answer2, security3, answer3 } = req.body;
+    security1, answer1, security2, answer2, security3, answer3 } = req.body;
 
   const err_redirect = (msg) =>
     res.redirect("/admin-setup.html?error=" + encodeURIComponent(msg));
 
   try {
     if (!new_password || !confirm_password) return err_redirect("All fields are required.");
-    if (new_password !== confirm_password)   return err_redirect("Passwords do not match.");
+    if (new_password !== confirm_password) return err_redirect("Passwords do not match.");
     if (!security1 || !security2 || !security3) return err_redirect("Please select all three security questions.");
-    if (!answer1 || !answer2 || !answer3)        return err_redirect("Please answer all three security questions.");
+    if (!answer1 || !answer2 || !answer3) return err_redirect("Please answer all three security questions.");
     if (new Set([security1, security2, security3]).size < 3) return err_redirect("Please choose three different security questions.");
 
     const hash = crypto.createHash("sha256").update(new_password).digest("hex");
-    const now  = new Date().toISOString().replace("T", " ").substring(0, 19);
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
     const security_questions = [
       { question: security1, answer: (answer1 || "").trim().toLowerCase() },
@@ -533,7 +539,7 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.redirect(
         "/loginform.html?error=" +
-          encodeURIComponent("Incorrect username or password"),
+        encodeURIComponent("Incorrect username or password"),
       );
     }
     const fullName = [user.fname, user.lname].filter(Boolean).join(" ");
@@ -633,7 +639,7 @@ app.get("/api/vehicles/available", async (req, res) => {
         end_date: { $gte: start_date },
       }).toArray();
       overlapping.forEach((r) => {
-        (r.history_vehicle_ids || r.vehicle_ids || []).forEach((id) => {
+        toIdArray(r.history_vehicle_id || r.vehicle_id).forEach((id) => {
           bookedVehicleIds.add(id.toString());
         });
       });
@@ -714,7 +720,7 @@ app.get("/api/admin-financials", requireLogin, async (_req, res) => {
     });
 
     allReservations.forEach((r) => {
-      const ids = (r.history_vehicle_ids || [])
+      const ids = toIdArray(r.history_vehicle_id)
         .map((id) => id.toString())
         .filter((id) => vehicleIdStrings.includes(id));
       const perVehicleCost =
@@ -807,7 +813,7 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
       .find({})
       .toArray();
     const relevant = allReservations.filter((r) =>
-      (r.history_vehicle_ids || []).some((id) =>
+      toIdArray(r.history_vehicle_id).some((id) =>
         vehicleIdStrings.includes(id.toString()),
       ),
     );
@@ -824,7 +830,7 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
     });
 
     relevant.forEach((r) => {
-      const ids = (r.history_vehicle_ids || [])
+      const ids = toIdArray(r.history_vehicle_id)
         .map((id) => id.toString())
         .filter((id) => vehicleIdStrings.includes(id));
       const perVehicleCost =
@@ -863,6 +869,7 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
         topVehicle = label;
       }
       return {
+        vehicleId: id,
         label,
         category: v.category,
         rate: v.rental_rate_per_day,
@@ -886,6 +893,82 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
   } catch (err) {
     console.error("Host financials error:", err);
     res.status(500).json({ error: "Failed to fetch financials" });
+  }
+});
+
+app.get("/api/host-financials/history/:vehicleId", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const { vehicleId } = req.params;
+
+    const vehicle = await db.collection("Vehicles").findOne({
+      _id: new ObjectId(vehicleId),
+      host_username: username,
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({ error: "Vehicle not found" });
+    }
+
+    const reservations = await db.collection("Reservations").find({}).toArray();
+
+    const matchingReservations = reservations.filter((r) =>
+      toIdArray(r.history_vehicle_id).some((id) => id.toString() === vehicleId)
+    );
+    const userIds = matchingReservations
+      .map((r) => r.user_id)
+      .filter((id) => id && ObjectId.isValid(id))
+      .map((id) => new ObjectId(id));
+
+    const renters = await db
+      .collection("RentalUsers")
+      .find({ _id: { $in: userIds } })
+      .toArray();
+
+    const renterMap = {};
+    renters.forEach((u) => {
+      renterMap[u._id.toString()] = u;
+    });
+    const historyRows = matchingReservations.map((r) => {
+      const ids = Array.isArray(r.history_vehicle_ids)
+        ? r.history_vehicle_ids.map((id) => id.toString())
+        : r.vehicle_id
+          ? [r.vehicle_id.toString()]
+          : [];
+
+      const countForSplit = ids.length || 1;
+      const perVehicleCost = (r.total_cost || 0) / countForSplit;
+
+      const renterUser =
+        r.user_id && renterMap[r.user_id.toString()]
+          ? renterMap[r.user_id.toString()]
+          : null;
+
+      return {
+        orderId: r.orderId || r._id.toString(),
+        renter: r.customer_name || renterUser?.username || "—",
+        renterEmail: renterUser?.email || "—",
+        startDate: r.start_date || "—",
+        returnDate: r.end_date || "—",
+        mileage: r.mileage || "—",
+        pickupLocation: r.location || r.pickup_location || "—",
+        total: perVehicleCost,
+      };
+    });
+
+    historyRows.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+    res.json({
+      vehicleId,
+      vehicleLabel:
+        [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
+        vehicle.name ||
+        "Unknown",
+      history: historyRows,
+    });
+  } catch (err) {
+    console.error("Vehicle rental history error:", err);
+    res.status(500).json({ error: "Failed to fetch vehicle rental history" });
   }
 });
 
@@ -914,9 +997,8 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       location,
       address,
       payment,
-      vehicle_ids,
+      vehicle_id,
       total_cost,
-      host_name,
     } = req.body;
     if (
       !customer_name ||
@@ -925,33 +1007,15 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       !location ||
       !address ||
       !payment ||
-      !vehicle_ids
+      !vehicle_id
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
-    let vehicleIds = vehicle_ids;
-    if (typeof vehicleIds === "string") {
-      try {
-        vehicleIds = JSON.parse(vehicleIds);
-      } catch {
-        vehicleIds = [];
-      }
+    const rawId = Array.isArray(vehicle_id) ? vehicle_id[0] : vehicle_id;
+    if (!rawId || !/^[a-fA-F0-9]{24}$/.test(String(rawId))) {
+      return res.status(400).json({ error: "Invalid vehicle ID" });
     }
-    const objectIds = vehicleIds.map((id) => {
-      try {
-        if (
-          typeof id === "object" &&
-          id &&
-          (id._bsontype === "ObjectID" || id._bsontype === "ObjectId")
-        )
-          return id;
-        if (typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id))
-          return new ObjectId(id);
-        return id;
-      } catch {
-        return id;
-      }
-    });
+    const objectId = new ObjectId(rawId);
 
     let user_id = null;
     if (req.session && req.session.user_name) {
@@ -962,38 +1026,43 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
         user_id = user._id;
       }
     }
-    let hostId = null;
-    if (req.session && req.session.user_name) {
-      const host = await db
-        .collection("HostUsers")
-        .findOne({ username: req.session.user_name });
-      if (host && host._id) {
-        hostId = host._id;
-      }
-    }
 
-    // Check for overlapping reservations on each vehicle
-    const conflicts = await db.collection("Reservations").find({
+    // Check for overlapping reservations on this vehicle
+    const conflict = await db.collection("Reservations").findOne({
       status: { $nin: ["Complete", "Cancelled"] },
       start_date: { $lte: end_date },
       end_date: { $gte: start_date },
       $or: [
-        { history_vehicle_ids: { $in: objectIds } },
-        { vehicle_ids: { $in: objectIds } },
+        { history_vehicle_id: objectId },
+        { vehicle_id: objectId },
       ],
-    }).toArray();
-    if (conflicts.length > 0) {
-      return res.status(409).json({ error: "One or more selected vehicles are already booked for the requested dates. Please choose different dates or a different vehicle." });
+    });
+    if (conflict) {
+      return res.status(409).json({ error: "This vehicle is already booked for the requested dates. Please choose different dates or a different vehicle." });
     }
 
     const today = new Date().toISOString().split("T")[0];
     const reservationStatus = start_date <= today ? "Renting" : "Reserved";
+    const vehicle = await db
+      .collection("Vehicles")
+      .findOne({ _id: objectId });
+
+    if (!vehicle) {
+      return res.status(404).json({ error: "Selected vehicle not found" });
+    }
+
+    const vehicleMileage =
+      vehicle.mileage !== undefined && vehicle.mileage !== null
+        ? Number(vehicle.mileage)
+        : null;
+
+    const hostUsername = vehicle.host_username || null;
 
     const orderId = await getNextSequence("orderId");
     const data = {
       orderId,
       customer_name,
-      host_name,
+      hostUsername,
       start_date,
       end_date,
       order_date: new Date().toISOString().split("T")[0],
@@ -1001,27 +1070,20 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       address,
       payment,
       status: reservationStatus,
-      history_vehicle_ids: vehicleIds,
-      vehicle_ids: vehicleIds,
+      history_vehicle_id: objectId,
+      vehicle_id: objectId,
       ...(user_id && { user_id }),
       ...(total_cost && { total_cost: Number(total_cost) }),
+      ...(vehicleMileage !== null ? { mileage: vehicleMileage } : {}),
       created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
       updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
     };
     await db.collection("Reservations").insertOne(data);
 
-    console.log("Updating Vehicles with IDs:", objectIds);
-
-    const validObjectIds = objectIds.filter(
-      (id) => ObjectId.isValid(id) && typeof id === "object",
-    );
-
-    console.log("Valid ObjectIds for update:", validObjectIds);
-
     // Only mark vehicle unavailable immediately if reservation starts today
-    if (validObjectIds.length > 0 && reservationStatus === "Renting") {
-      await db.collection("Vehicles").updateMany(
-        { _id: { $in: validObjectIds } },
+    if (reservationStatus === "Renting") {
+      await db.collection("Vehicles").updateOne(
+        { _id: objectId },
         { $set: { availability: false, unavailable_until: new Date(end_date) } }
       );
     }
@@ -1192,26 +1254,9 @@ app.post("/api/return", requireLogin, async (req, res) => {
       .collection("Reservations")
       .find({ user_id: user._id })
       .toArray();
-    let reservation = null;
-    let matchedIdType = null;
-    for (const resv of reservations) {
-      if (Array.isArray(resv.vehicle_ids)) {
-        for (const id of resv.vehicle_ids) {
-          if (
-            (typeof id === "object" &&
-              id &&
-              id._bsontype &&
-              id.toString() === vehicleId) ||
-            (typeof id === "string" && id === vehicleId)
-          ) {
-            reservation = resv;
-            matchedIdType = typeof id;
-            break;
-          }
-        }
-      }
-      if (reservation) break;
-    }
+    const reservation = reservations.find((resv) =>
+      toIdArray(resv.vehicle_id).some((id) => id.toString() === vehicleId)
+    );
     if (!reservation) {
       return res.status(404).json({
         success: false,
@@ -1219,40 +1264,16 @@ app.post("/api/return", requireLogin, async (req, res) => {
       });
     }
 
-    let updatedVehicleIds = reservation.vehicle_ids.filter((id) => {
-      if (typeof id === "object" && id && id._bsontype) {
-        return id.toString() !== vehicleId;
-      }
-      return id !== vehicleId;
-    });
-    if (updatedVehicleIds.length === 0) {
-      await db.collection("Reservations").updateOne(
-        { _id: reservation._id },
-        {
-          $set: {
-            vehicle_ids: [],
-            status: "Complete",
-            updated_at: new Date()
-              .toISOString()
-              .replace("T", " ")
-              .substring(0, 19),
-          },
+    await db.collection("Reservations").updateOne(
+      { _id: reservation._id },
+      {
+        $set: {
+          vehicle_id: null,
+          status: "Complete",
+          updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
         },
-      );
-    } else {
-      await db.collection("Reservations").updateOne(
-        { _id: reservation._id },
-        {
-          $set: {
-            vehicle_ids: updatedVehicleIds,
-            updated_at: new Date()
-              .toISOString()
-              .replace("T", " ")
-              .substring(0, 19),
-          },
-        },
-      );
-    }
+      },
+    );
 
     let eqId = ObjectId.isValid(vehicleId)
       ? new ObjectId(vehicleId)
@@ -1345,15 +1366,9 @@ app.get("/api/myrentals", async (req, res) => {
       .toArray();
     const vehicleIdSet = new Set();
     reservations.forEach((resv) => {
-      if (Array.isArray(resv.vehicle_ids)) {
-        resv.vehicle_ids.forEach((id) => {
-          if (typeof id === "object" && id && id._bsontype) {
-            vehicleIdSet.add(id.toString());
-          } else if (typeof id === "string") {
-            vehicleIdSet.add(id);
-          }
-        });
-      }
+      toIdArray(resv.vehicle_id).forEach((id) => {
+        vehicleIdSet.add(id.toString());
+      });
     });
     if (vehicleIdSet.size === 0) {
       return res.json([]);
@@ -1379,6 +1394,7 @@ app.get("/api/myrentals", async (req, res) => {
         "Unknown Vehicle",
       description: eq.description || "",
       image: eq.image || "",
+      mileage: eq.mileage ?? null,
     }));
     res.json(result);
   } catch (err) {
@@ -1403,7 +1419,7 @@ app.get("/api/myreservations", async (req, res) => {
     if (reservations.length === 0) return res.json([]);
 
     const allVehicleIds = reservations.flatMap(
-      (r) => r.history_vehicle_ids || [],
+      (r) => toIdArray(r.history_vehicle_id),
     );
     const uniqueIds = [...new Set(allVehicleIds.map((id) => id.toString()))];
     const objectIds = uniqueIds
@@ -1426,7 +1442,7 @@ app.get("/api/myreservations", async (req, res) => {
     });
 
     const result = reservations.map((r) => {
-      const vehicleEntries = (r.history_vehicle_ids || []).map(
+      const vehicleEntries = toIdArray(r.history_vehicle_id).map(
         (id) =>
           vehicleMap[id.toString()] || { name: "Unknown", mileage: undefined },
       );
