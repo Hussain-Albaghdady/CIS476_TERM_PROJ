@@ -170,7 +170,7 @@
                       type="text"
                       class="form-control"
                       id="addrFullName"
-                      name="full_name"
+                      name="customer_name"
                       placeholder="e.g. John Doe"
                       required
                     />
@@ -213,10 +213,11 @@
                   <div class="form-group col-md-3">
                     <label for="addrState">State *</label>
                     <select
+                      id="addrState"
                       name="state"
-                      id="state"
                       class="form-control"
                       required
+                      style="height: 42px; box-sizing: border-box"
                     >
                       <option value="" disabled selected>Select State</option>
                       <option value="AL">Alabama</option>
@@ -394,7 +395,7 @@
                   <div class="form-group col-md-4">
                     <label for="payExpiration">Expiration Date *</label>
                     <input
-                      type="date"
+                      type="month"
                       class="form-control"
                       id="payExpiration"
                       name="expiration"
@@ -407,6 +408,7 @@
                       class="form-control"
                       id="payCardType"
                       name="card_type"
+                      style="height: 42px; box-sizing: border-box"
                       required
                     >
                       <option value="" disabled selected>
@@ -457,6 +459,7 @@
                 <tr>
                   <th>Last 4 Digits</th>
                   <th>Name</th>
+                  <th>Address</th>
                   <th>Expiration</th>
                   <th>Status</th>
                   <th>Card Type</th>
@@ -776,6 +779,7 @@
               tr.innerHTML = `
             <td data-label="last4">${p.last4}</td>
             <td data-label="Name">${p.customer_name}</td>
+            <td data-label="Address">${p.payment_address}</td>
             <td data-label="Expiration">${p.expiration}</td>
             <td data-label="Status">${p.status}</td>
             <td data-label="card_type">${p.card_type}</td>
@@ -837,7 +841,7 @@
           document.getElementById("confirm-delete-btn").onclick = function () {
             modal.style.display = "none";
             fetch("/api/delete-address", {
-              method: "DELETE",
+              method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ address_nickname, address_line1 }),
             })
@@ -1133,10 +1137,10 @@
             e.preventDefault();
             const data = {
               address_nickname: document.getElementById("addrNickname").value,
-              customer_name: document.getElementById("addrCustomerName").value,
-              address_line1: document.getElementById("addrLine1").value,
+              customer_name: document.getElementById("addrFullName").value,
+              street: document.getElementById("addrStreet").value,
               city: document.getElementById("addrCity").value,
-              state: document.getElementById("state").value,
+              state: document.getElementById("addrState").value,
               zip_code: document.getElementById("addrZip").value,
               phone_number: document.getElementById("addrPhone").value,
             };
@@ -1147,7 +1151,7 @@
             })
               .then((res) => res.json())
               .then((result) => {
-                if (result.success) {
+                if (result.message) {
                   addressForm.reset();
                   const btn = document.querySelector(
                     "[onclick*='add-address-panel']",
@@ -1171,11 +1175,12 @@
             e.preventDefault();
             const data = {
               payment_nickname: document.getElementById("payNickname").value,
-              customer_name: document.getElementById("payCustomerName").value,
+              full_name: document.getElementById("payFullName").value,
+              address: document.getElementById("payAddress").value,
               card_number: document.getElementById("payCardNumber").value,
               expiration: document.getElementById("payExpiration").value,
-              cvv: document.getElementById("payCVV").value,
               card_type: document.getElementById("payCardType").value,
+              payment_zip_code: document.getElementById("payZip").value,
             };
             fetch("/payments", {
               method: "POST",

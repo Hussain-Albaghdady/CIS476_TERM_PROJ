@@ -755,18 +755,22 @@ document.addEventListener("DOMContentLoaded", function () {
         renderVehicle(document.getElementById("vehicle-category").value);
       })
       .catch(() => {
-        document.getElementById("vehicle-list").innerHTML =
-          '<div class="col-12"><p style="color:red;">Failed to load vehicles. Please try again.</p></div>';
+        const vehicleList = document.getElementById("vehicle-list");
+        if (vehicleList) {
+          vehicleList.innerHTML =
+            '<div class="col-12"><p style="color:red;">Failed to load vehicles. Please try again.</p></div>';
+        }
       });
   }
 
   fetchAndRenderVehicles();
 
-  document
-    .getElementById("vehicle-category")
-    .addEventListener("change", function () {
+  const vehicleCategory = document.getElementById("vehicle-category");
+  if (vehicleCategory) {
+    vehicleCategory.addEventListener("change", function () {
       renderVehicle(this.value);
     });
+  }
 
   const formLocation = document.getElementById("location");
   if (formLocation) {

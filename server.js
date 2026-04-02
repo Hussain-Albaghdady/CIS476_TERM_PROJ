@@ -1229,7 +1229,7 @@ app.post("/payments", requireLogin, async (req, res) => {
       return res.status(400).json({ error: "Invalid card number" });
     }
     const entry = {
-      payment_customer_name: full_name,
+      customer_name: full_name,
       payment_address: address,
       last4: String(cleanCardNumber).slice(-4),
       card_type: card_type,
@@ -1268,22 +1268,22 @@ app.post("/payments", requireLogin, async (req, res) => {
 
 app.post("/addresses", requireLogin, async (req, res) => {
   const {
-    addrfullName,
-    addrStreet,
-    addrCity,
-    addrState,
-    addrZipCode,
-    addrPhoneNumber,
-    addrNickname,
+    customer_name,
+    street,
+    city,
+    state,
+    zip_code,
+    phone_number,
+    address_nickname,
   } = req.body;
   if (
-    !addrfullName ||
-    !addrStreet ||
-    !addrCity ||
-    !addrState ||
-    !addrZipCode ||
-    !addrPhoneNumber ||
-    !addrNickname
+    !customer_name ||
+    !street ||
+    !city ||
+    !state ||
+    !zip_code ||
+    !phone_number ||
+    !address_nickname
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -1299,13 +1299,13 @@ app.post("/addresses", requireLogin, async (req, res) => {
 
       if (user && user._id) {
         const addressEntry = {
-          customer_name: addrfullName,
-          address_line1: addrStreet,
-          city: addrCity,
-          state: addrState,
-          zip_code: addrZipCode,
-          phone_number: addrPhoneNumber,
-          address_nickname: addrNickname,
+          customer_name: customer_name || " ",
+          address_line1: street || " ",
+          city: city || " ",
+          state: state || " ",
+          zip_code: zip_code || " ",
+          phone_number: phone_number || " ",
+          address_nickname: address_nickname || " ",
           added_at: new Date().toISOString().replace("T", " ").substring(0, 19),
         };
         await db.collection("RentalUsers").updateOne(
@@ -1599,6 +1599,7 @@ app.get("/api/mypayments", async (req, res) => {
 
     const result = payments.map((p, index) => ({
       customer_name: p.customer_name || "N/A",
+      payment_address: p.payment_address || "N/A",
       last4: p.last4,
       expiration: p.expiration,
       status: p.status || "Active",
@@ -1670,10 +1671,13 @@ app.delete("/api/delete-payment", requireLogin, async (req, res) => {
   }
 });
 
-app.delete("/api/delete-address", async (req, res) => {
+app.post("/api/delete-address", async (req, res) => {
   const { address_nickname, address_line1 } = req.body;
   if (!req.session || !req.session.user_name) {
     return res.status(401).json({ error: "Not logged in" });
+  }
+  if (!address_nickname) {
+    return res.status(400).json({ error: "address_nickname is required" });
   }
 
   try {
@@ -1682,12 +1686,21 @@ app.delete("/api/delete-address", async (req, res) => {
       .findOne({ username: req.session.user_name });
     if (!user) return res.status(404).json({ error: "User not found" });
 
+    console.log(
+      "Deleting address:",
+      address_nickname,
+      "for user:",
+      req.session.user_name,
+    );
+    console.log("User address array:", JSON.stringify(user.address));
+
     const result = await db
       .collection("RentalUsers")
       .updateOne(
         { _id: user._id },
-        { $pull: { address: { address_nickname, address_line1 } } },
+        { $pull: { address: { address_nickname } } },
       );
+    console.log("Pull result modifiedCount:", result.modifiedCount);
     if (result.modifiedCount > 0) {
       res.json({ success: true });
     } else {
