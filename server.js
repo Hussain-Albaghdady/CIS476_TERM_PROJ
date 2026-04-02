@@ -291,8 +291,20 @@ app.post("/contact_us", async (req, res) => {
   }
 });
 app.post("/sign_up", async (req, res) => {
-  const { fname, lname, email, username, password, user_type,
-    security1, answer1, security2, answer2, security3, answer3 } = req.body;
+  const {
+    fname,
+    lname,
+    email,
+    username,
+    password,
+    user_type,
+    security1,
+    answer1,
+    security2,
+    answer2,
+    security3,
+    answer3,
+  } = req.body;
   const hash = crypto.createHash("sha256").update(password).digest("hex");
   try {
     const existingRental = await db
@@ -376,15 +388,29 @@ app.post("/sign_up", async (req, res) => {
   }
 });
 app.post("/reset_password", async (req, res) => {
-  const { username, security1, answer1, security2, answer2, security3, answer3, new_password, confirm_password } = req.body;
+  const {
+    username,
+    security1,
+    answer1,
+    security2,
+    answer2,
+    security3,
+    answer3,
+    new_password,
+    confirm_password,
+  } = req.body;
 
   try {
     if (!username || !new_password || !confirm_password) {
-      return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("All fields are required.")}`);
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent("All fields are required.")}`,
+      );
     }
 
     if (new_password !== confirm_password) {
-      return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("Passwords do not match.")}`);
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent("Passwords do not match.")}`,
+      );
     }
 
     // Find user across both collections
@@ -393,11 +419,17 @@ app.post("/reset_password", async (req, res) => {
     let collection = null;
     for (const coll of collections) {
       const found = await db.collection(coll).findOne({ username });
-      if (found) { user = found; collection = coll; break; }
+      if (found) {
+        user = found;
+        collection = coll;
+        break;
+      }
     }
 
     if (!user) {
-      return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("No account found with that username.")}`);
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent("No account found with that username.")}`,
+      );
     }
 
     // Verify security questions if stored on the user
@@ -408,27 +440,34 @@ app.post("/reset_password", async (req, res) => {
         { question: security3, answer: (answer3 || "").trim().toLowerCase() },
       ];
       const allMatch = user.security_questions.every((sq, i) => {
-        return submitted[i] &&
+        return (
+          submitted[i] &&
           submitted[i].question === sq.question &&
-          submitted[i].answer === sq.answer.toLowerCase();
+          submitted[i].answer === sq.answer.toLowerCase()
+        );
       });
       if (!allMatch) {
-        return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("Security answers do not match our records.")}`);
+        return res.redirect(
+          `passwordResetForm.html?error=${encodeURIComponent("Security answers do not match our records.")}`,
+        );
       }
     }
 
     const hash = crypto.createHash("sha256").update(new_password).digest("hex");
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
-    await db.collection(collection).updateOne(
-      { username },
-      { $set: { password: hash, updated_at: now } }
-    );
+    await db
+      .collection(collection)
+      .updateOne({ username }, { $set: { password: hash, updated_at: now } });
 
     console.log(`Password reset successful for user: ${username}`);
-    return res.redirect(`loginform.html?success=${encodeURIComponent("Password reset successfully. Please sign in.")}`);
+    return res.redirect(
+      `loginform.html?success=${encodeURIComponent("Password reset successfully. Please sign in.")}`,
+    );
   } catch (err) {
     console.error("Password reset error:", err);
-    return res.redirect(`passwordResetForm.html?error=${encodeURIComponent("Reset failed: " + err.message)}`);
+    return res.redirect(
+      `passwordResetForm.html?error=${encodeURIComponent("Reset failed: " + err.message)}`,
+    );
   }
 });
 
@@ -467,7 +506,10 @@ app.post("/add_admin", async (req, res) => {
     return res.json({ success: true });
   } catch (err) {
     console.error("Add admin error:", err);
-    return res.json({ success: false, error: "Failed to create admin: " + err.message });
+    return res.json({
+      success: false,
+      error: "Failed to create admin: " + err.message,
+    });
   }
 });
 
@@ -476,18 +518,31 @@ app.post("/admin_setup", async (req, res) => {
     return res.redirect("/loginform.html");
   }
 
-  const { new_password, confirm_password,
-    security1, answer1, security2, answer2, security3, answer3 } = req.body;
+  const {
+    new_password,
+    confirm_password,
+    security1,
+    answer1,
+    security2,
+    answer2,
+    security3,
+    answer3,
+  } = req.body;
 
   const err_redirect = (msg) =>
     res.redirect("/admin-setup.html?error=" + encodeURIComponent(msg));
 
   try {
-    if (!new_password || !confirm_password) return err_redirect("All fields are required.");
-    if (new_password !== confirm_password) return err_redirect("Passwords do not match.");
-    if (!security1 || !security2 || !security3) return err_redirect("Please select all three security questions.");
-    if (!answer1 || !answer2 || !answer3) return err_redirect("Please answer all three security questions.");
-    if (new Set([security1, security2, security3]).size < 3) return err_redirect("Please choose three different security questions.");
+    if (!new_password || !confirm_password)
+      return err_redirect("All fields are required.");
+    if (new_password !== confirm_password)
+      return err_redirect("Passwords do not match.");
+    if (!security1 || !security2 || !security3)
+      return err_redirect("Please select all three security questions.");
+    if (!answer1 || !answer2 || !answer3)
+      return err_redirect("Please answer all three security questions.");
+    if (new Set([security1, security2, security3]).size < 3)
+      return err_redirect("Please choose three different security questions.");
 
     const hash = crypto.createHash("sha256").update(new_password).digest("hex");
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
@@ -500,11 +555,20 @@ app.post("/admin_setup", async (req, res) => {
 
     await db.collection("AdminUsers").updateOne(
       { username: req.session.user.username },
-      { $set: { password: hash, security_questions, force_password_change: false, updated_at: now } }
+      {
+        $set: {
+          password: hash,
+          security_questions,
+          force_password_change: false,
+          updated_at: now,
+        },
+      },
     );
 
     req.session.user.force_password_change = false;
-    console.log(`Admin '${req.session.user.username}' completed first-time setup.`);
+    console.log(
+      `Admin '${req.session.user.username}' completed first-time setup.`,
+    );
     return res.redirect("/adminPage.html");
   } catch (err) {
     console.error("Admin setup error:", err);
@@ -539,7 +603,7 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.redirect(
         "/loginform.html?error=" +
-        encodeURIComponent("Incorrect username or password"),
+          encodeURIComponent("Incorrect username or password"),
       );
     }
     const fullName = [user.fname, user.lname].filter(Boolean).join(" ");
@@ -633,11 +697,14 @@ app.get("/api/vehicles/available", async (req, res) => {
     let bookedVehicleIds = new Set();
     if (start_date && end_date) {
       // Find reservations that overlap the requested period (not Complete/Cancelled)
-      const overlapping = await db.collection("Reservations").find({
-        status: { $nin: ["Complete", "Cancelled"] },
-        start_date: { $lte: end_date },
-        end_date: { $gte: start_date },
-      }).toArray();
+      const overlapping = await db
+        .collection("Reservations")
+        .find({
+          status: { $nin: ["Complete", "Cancelled"] },
+          start_date: { $lte: end_date },
+          end_date: { $gte: start_date },
+        })
+        .toArray();
       overlapping.forEach((r) => {
         toIdArray(r.history_vehicle_id || r.vehicle_id).forEach((id) => {
           bookedVehicleIds.add(id.toString());
@@ -645,15 +712,27 @@ app.get("/api/vehicles/available", async (req, res) => {
       });
     }
 
-    const hostUsernames = [...new Set(vehicles.filter((v) => v.host_username).map((v) => v.host_username))];
-    const hosts = await db.collection("HostUsers").find({ username: { $in: hostUsernames } }).toArray();
+    const hostUsernames = [
+      ...new Set(
+        vehicles.filter((v) => v.host_username).map((v) => v.host_username),
+      ),
+    ];
+    const hosts = await db
+      .collection("HostUsers")
+      .find({ username: { $in: hostUsernames } })
+      .toArray();
     const hostMap = {};
-    hosts.forEach((h) => { hostMap[h.username] = h.fname; });
+    hosts.forEach((h) => {
+      hostMap[h.username] = h.fname;
+    });
 
     const enriched = vehicles
       .filter((v) => v.availability !== false) // host hasn't marked it unavailable
       .filter((v) => !bookedVehicleIds.has(v._id.toString())) // not booked for requested dates
-      .map((v) => ({ ...v, host_fname: v.host_username ? hostMap[v.host_username] || null : null }));
+      .map((v) => ({
+        ...v,
+        host_fname: v.host_username ? hostMap[v.host_username] || null : null,
+      }));
 
     res.json(enriched);
   } catch (err) {
@@ -896,81 +975,92 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
   }
 });
 
-app.get("/api/host-financials/history/:vehicleId", requireLogin, async (req, res) => {
-  try {
-    const username = req.session.user_name;
-    const { vehicleId } = req.params;
+app.get(
+  "/api/host-financials/history/:vehicleId",
+  requireLogin,
+  async (req, res) => {
+    try {
+      const username = req.session.user_name;
+      const { vehicleId } = req.params;
 
-    const vehicle = await db.collection("Vehicles").findOne({
-      _id: new ObjectId(vehicleId),
-      host_username: username,
-    });
+      const vehicle = await db.collection("Vehicles").findOne({
+        _id: new ObjectId(vehicleId),
+        host_username: username,
+      });
 
-    if (!vehicle) {
-      return res.status(404).json({ error: "Vehicle not found" });
+      if (!vehicle) {
+        return res.status(404).json({ error: "Vehicle not found" });
+      }
+
+      const reservations = await db
+        .collection("Reservations")
+        .find({})
+        .toArray();
+
+      const matchingReservations = reservations.filter((r) =>
+        toIdArray(r.history_vehicle_id).some(
+          (id) => id.toString() === vehicleId,
+        ),
+      );
+      const userIds = matchingReservations
+        .map((r) => r.user_id)
+        .filter((id) => id && ObjectId.isValid(id))
+        .map((id) => new ObjectId(id));
+
+      const renters = await db
+        .collection("RentalUsers")
+        .find({ _id: { $in: userIds } })
+        .toArray();
+
+      const renterMap = {};
+      renters.forEach((u) => {
+        renterMap[u._id.toString()] = u;
+      });
+      const historyRows = matchingReservations.map((r) => {
+        const ids = Array.isArray(r.history_vehicle_ids)
+          ? r.history_vehicle_ids.map((id) => id.toString())
+          : r.vehicle_id
+            ? [r.vehicle_id.toString()]
+            : [];
+
+        const countForSplit = ids.length || 1;
+        const perVehicleCost = (r.total_cost || 0) / countForSplit;
+
+        const renterUser =
+          r.user_id && renterMap[r.user_id.toString()]
+            ? renterMap[r.user_id.toString()]
+            : null;
+
+        return {
+          orderId: r.orderId || r._id.toString(),
+          renter: r.customer_name || renterUser?.username || "—",
+          renterEmail: renterUser?.email || "—",
+          startDate: r.start_date || "—",
+          returnDate: r.end_date || "—",
+          mileage: r.mileage || "—",
+          pickupLocation: r.location || r.pickup_location || "—",
+          total: perVehicleCost,
+        };
+      });
+
+      historyRows.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+      res.json({
+        vehicleId,
+        vehicleLabel:
+          [vehicle.year, vehicle.make, vehicle.model]
+            .filter(Boolean)
+            .join(" ") ||
+          vehicle.name ||
+          "Unknown",
+        history: historyRows,
+      });
+    } catch (err) {
+      console.error("Vehicle rental history error:", err);
+      res.status(500).json({ error: "Failed to fetch vehicle rental history" });
     }
-
-    const reservations = await db.collection("Reservations").find({}).toArray();
-
-    const matchingReservations = reservations.filter((r) =>
-      toIdArray(r.history_vehicle_id).some((id) => id.toString() === vehicleId)
-    );
-    const userIds = matchingReservations
-      .map((r) => r.user_id)
-      .filter((id) => id && ObjectId.isValid(id))
-      .map((id) => new ObjectId(id));
-
-    const renters = await db
-      .collection("RentalUsers")
-      .find({ _id: { $in: userIds } })
-      .toArray();
-
-    const renterMap = {};
-    renters.forEach((u) => {
-      renterMap[u._id.toString()] = u;
-    });
-    const historyRows = matchingReservations.map((r) => {
-      const ids = Array.isArray(r.history_vehicle_ids)
-        ? r.history_vehicle_ids.map((id) => id.toString())
-        : r.vehicle_id
-          ? [r.vehicle_id.toString()]
-          : [];
-
-      const countForSplit = ids.length || 1;
-      const perVehicleCost = (r.total_cost || 0) / countForSplit;
-
-      const renterUser =
-        r.user_id && renterMap[r.user_id.toString()]
-          ? renterMap[r.user_id.toString()]
-          : null;
-
-      return {
-        orderId: r.orderId || r._id.toString(),
-        renter: r.customer_name || renterUser?.username || "—",
-        renterEmail: renterUser?.email || "—",
-        startDate: r.start_date || "—",
-        returnDate: r.end_date || "—",
-        mileage: r.mileage || "—",
-        pickupLocation: r.location || r.pickup_location || "—",
-        total: perVehicleCost,
-      };
-    });
-
-    historyRows.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-
-    res.json({
-      vehicleId,
-      vehicleLabel:
-        [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
-        vehicle.name ||
-        "Unknown",
-      history: historyRows,
-    });
-  } catch (err) {
-    console.error("Vehicle rental history error:", err);
-    res.status(500).json({ error: "Failed to fetch vehicle rental history" });
-  }
-});
+  },
+);
 
 app.get("/api/my-vehicles", requireLogin, async (req, res) => {
   try {
@@ -1032,20 +1122,18 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       status: { $nin: ["Complete", "Cancelled"] },
       start_date: { $lte: end_date },
       end_date: { $gte: start_date },
-      $or: [
-        { history_vehicle_id: objectId },
-        { vehicle_id: objectId },
-      ],
+      $or: [{ history_vehicle_id: objectId }, { vehicle_id: objectId }],
     });
     if (conflict) {
-      return res.status(409).json({ error: "This vehicle is already booked for the requested dates. Please choose different dates or a different vehicle." });
+      return res.status(409).json({
+        error:
+          "This vehicle is already booked for the requested dates. Please choose different dates or a different vehicle.",
+      });
     }
 
     const today = new Date().toISOString().split("T")[0];
     const reservationStatus = start_date <= today ? "Renting" : "Reserved";
-    const vehicle = await db
-      .collection("Vehicles")
-      .findOne({ _id: objectId });
+    const vehicle = await db.collection("Vehicles").findOne({ _id: objectId });
 
     if (!vehicle) {
       return res.status(404).json({ error: "Selected vehicle not found" });
@@ -1084,7 +1172,12 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     if (reservationStatus === "Renting") {
       await db.collection("Vehicles").updateOne(
         { _id: objectId },
-        { $set: { availability: false, unavailable_until: new Date(end_date) } }
+        {
+          $set: {
+            availability: false,
+            unavailable_until: new Date(end_date),
+          },
+        },
       );
     }
 
@@ -1100,13 +1193,17 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
 app.post("/payments", requireLogin, async (req, res) => {
   try {
     const {
+      full_name,
+      address,
+      payment_nickname,
       card_number,
       expiration,
       card_type,
       payment_zip_code,
-      payment_nickname,
     } = req.body;
     if (
+      !full_name ||
+      !address ||
       !card_number ||
       !expiration ||
       !card_type ||
@@ -1121,15 +1218,24 @@ app.post("/payments", requireLogin, async (req, res) => {
       .findOne({ username: req.session.user_name });
     if (!user?._id) return res.status(404).json({ error: "User not found" });
 
-    const d = new Date(expiration);
-    const exp = `${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getFullYear()).slice(-2)}`;
+    if (!/^\d{4}-\d{2}$/.test(expiration)) {
+      return res.status(400).json({ error: "Invalid expiration date" });
+    }
+
+    const [year, month] = expiration.split("-");
+    const exp = `${month}/${String(year).slice(-2)}`;
+    const cleanCardNumber = card_number.replace(/\D/g, "");
+    if (cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
+      return res.status(400).json({ error: "Invalid card number" });
+    }
     const entry = {
-      payment_customer_name: user.fname + " " + user.lname,
-      last4: String(card_number).slice(-4),
-      card_type,
+      payment_customer_name: full_name,
+      payment_address: address,
+      last4: String(cleanCardNumber).slice(-4),
+      card_type: card_type,
       expiration: exp,
-      payment_zip_code,
-      payment_nickname,
+      payment_zip_code: payment_zip_code,
+      payment_nickname: payment_nickname,
       status: "Active",
       added_at: new Date().toISOString().replace("T", " ").substring(0, 19),
     };
@@ -1161,15 +1267,23 @@ app.post("/payments", requireLogin, async (req, res) => {
 });
 
 app.post("/addresses", requireLogin, async (req, res) => {
-  const { street, city, state, zip_code, phone_number, address_nickname } =
-    req.body;
+  const {
+    addrfullName,
+    addrStreet,
+    addrCity,
+    addrState,
+    addrZipCode,
+    addrPhoneNumber,
+    addrNickname,
+  } = req.body;
   if (
-    !street ||
-    !city ||
-    !state ||
-    !zip_code ||
-    !phone_number ||
-    !address_nickname
+    !addrfullName ||
+    !addrStreet ||
+    !addrCity ||
+    !addrState ||
+    !addrZipCode ||
+    !addrPhoneNumber ||
+    !addrNickname
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -1185,13 +1299,13 @@ app.post("/addresses", requireLogin, async (req, res) => {
 
       if (user && user._id) {
         const addressEntry = {
-          customer_name: user.fname + " " + user.lname,
-          address_line1: street,
-          city,
-          state,
-          zip_code,
-          phone_number,
-          address_nickname,
+          customer_name: addrfullName,
+          address_line1: addrStreet,
+          city: addrCity,
+          state: addrState,
+          zip_code: addrZipCode,
+          phone_number: addrPhoneNumber,
+          address_nickname: addrNickname,
           added_at: new Date().toISOString().replace("T", " ").substring(0, 19),
         };
         await db.collection("RentalUsers").updateOne(
@@ -1255,7 +1369,7 @@ app.post("/api/return", requireLogin, async (req, res) => {
       .find({ user_id: user._id })
       .toArray();
     const reservation = reservations.find((resv) =>
-      toIdArray(resv.vehicle_id).some((id) => id.toString() === vehicleId)
+      toIdArray(resv.vehicle_id).some((id) => id.toString() === vehicleId),
     );
     if (!reservation) {
       return res.status(404).json({
@@ -1270,7 +1384,10 @@ app.post("/api/return", requireLogin, async (req, res) => {
         $set: {
           vehicle_id: null,
           status: "Complete",
-          updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
+          updated_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .substring(0, 19),
         },
       },
     );
@@ -1418,8 +1535,8 @@ app.get("/api/myreservations", async (req, res) => {
       .toArray();
     if (reservations.length === 0) return res.json([]);
 
-    const allVehicleIds = reservations.flatMap(
-      (r) => toIdArray(r.history_vehicle_id),
+    const allVehicleIds = reservations.flatMap((r) =>
+      toIdArray(r.history_vehicle_id),
     );
     const uniqueIds = [...new Set(allVehicleIds.map((id) => id.toString()))];
     const objectIds = uniqueIds
@@ -1649,11 +1766,14 @@ app.patch("/api/vehicle/:id/availability", requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { availability } = req.body;
-    if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid vehicle ID" });
-    await db.collection("Vehicles").updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { availability: !!availability } }
-    );
+    if (!ObjectId.isValid(id))
+      return res.status(400).json({ error: "Invalid vehicle ID" });
+    await db
+      .collection("Vehicles")
+      .updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { availability: !!availability } },
+      );
     res.json({ success: true });
   } catch (err) {
     console.error(err);

@@ -942,21 +942,56 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
+  function fillAddressSelect(
+    selectElement,
+    addresses,
+    placeholderText = "-- Choose Billing Address --",
+  ) {
+    if (!selectElement) return;
+
+    selectElement.innerHTML = `<option value="" disabled selected>${placeholderText}</option>`;
+
+    if (!Array.isArray(addresses) || addresses.length === 0) {
+      return;
+    }
+
+    addresses.forEach((address, index) => {
+      const option = document.createElement("option");
+
+      const nickname = address.address_nickname || `Address ${index + 1}`;
+      const street = address.street || address.address_line1 || "";
+      const city = address.city || "";
+      const state = address.state || "";
+      const zip = address.zip_code || "";
+
+      option.value = nickname;
+      option.textContent = `${street}, ${city}, ${state} ${zip} (${nickname})`;
+
+      selectElement.appendChild(option);
+    });
+  }
   function populateAddressDropdown() {
     fetch("/api/myaddress")
       .then((res) => res.json())
       .then((addresses) => {
         const addressSelect = document.getElementById("address");
-        if (addressSelect && addresses && addresses.length > 0) {
-          addressSelect.innerHTML =
-            '<option value="" disabled selected>-- Choose Billing address--</option>';
+        const payAddressSelect = document.getElementById("payAddress");
+        console.log("payAddressSelect:", payAddressSelect);
 
-          addresses.forEach((address, index) => {
-            const option = document.createElement("option");
-            option.value = address.address_nickname || `address_${index}`;
-            option.textContent = `${address.address_line1}, ${address.city}, ${address.state} ${address.zip_code} (${address.address_nickname || "Address " + (index + 1)})`;
-            addressSelect.appendChild(option);
-          });
+        if (payAddressSelect) {
+          fillAddressSelect(
+            payAddressSelect,
+            addresses,
+            "-- Choose Billing Address --",
+          );
+        }
+
+        if (addressSelect) {
+          fillAddressSelect(
+            addressSelect,
+            addresses,
+            "-- Choose Billing Address --",
+          );
         }
       })
       .catch((err) => {
@@ -980,145 +1015,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (window.location.pathname.endsWith("vehicle-reservation.html")) {
       populatePaymentDropdown();
       populateAddressDropdown();
-
-      const addPaymentBtn = document.getElementById("add-payment-btn");
-      const addAddressBtn = document.getElementById("add-address-btn");
-      const paymentForm = document.getElementById("Payment-form");
-      const addressForm = document.getElementById("Address-form");
-
-      if (addPaymentBtn && paymentForm) {
-        addPaymentBtn.addEventListener("click", function () {
-          paymentForm.classList.toggle("hidden-form");
-          addPaymentBtn.textContent = paymentForm.classList.contains(
-            "hidden-form",
-          )
-            ? "+ Add New Payment Method"
-            : "- Hide Payment Form";
-        });
-      }
-
-      if (addAddressBtn && addressForm) {
-        addAddressBtn.addEventListener("click", function () {
-          addressForm.classList.toggle("hidden-form");
-          addAddressBtn.textContent = addressForm.classList.contains(
-            "hidden-form",
-          )
-            ? "+ Add New Address"
-            : "- Hide Address Form";
-        });
-      }
-      const cardField = document.getElementById("card_number");
-      if (cardField) {
-        cardField.addEventListener("input", function () {
-          let digits = this.value.replace(/\D/g, "").substring(0, 16);
-          let formatted = digits.match(/.{1,4}/g)?.join("-") || "";
-          this.value = formatted;
-        });
-      }
-      ["payment_zip_code", "cvv"].forEach(function (fieldId) {
-        const field = document.getElementById(fieldId);
-        if (field) {
-          field.addEventListener("input", function () {
-            this.value = this.value.replace(/[^\d]/g, "");
-          });
-        }
-      });
-
-      if (paymentForm) {
-        paymentForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const cardNumberFormatted = paymentForm.card_number.value.trim();
-          const rawCardNumber = cardNumberFormatted.replace(/\D/g, "");
-          const zipCode = paymentForm.payment_zip_code.value.trim();
-          const cvv = paymentForm.cvv.value.trim();
-
-          let errorMsg = "";
-          if (!/^\d{16}$/.test(rawCardNumber)) {
-            errorMsg = "Card number must be exactly 16 digits.";
-          } else if (!/^\d{5}$/.test(zipCode)) {
-            errorMsg = "Zip code must be exactly 5 digits.";
-          } else if (!/^\d{3,4}$/.test(cvv)) {
-            errorMsg = "CVV must be 3 or 4 digits.";
-          }
-
-          if (errorMsg) {
-            document.getElementById("payments-error").textContent = errorMsg;
-            document.getElementById("payments-success").textContent = "";
-            return;
-          }
-
-          const formData = new FormData(paymentForm);
-          formData.set("card_number", rawCardNumber);
-
-          fetch("/payments", {
-            method: "POST",
-            body: new URLSearchParams([...formData]),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.message || data.success || !data.error) {
-                document.getElementById("payments-success").textContent =
-                  "Payment method added successfully!";
-                document.getElementById("payments-error").textContent = "";
-                paymentForm.reset();
-
-                setTimeout(() => {
-                  populatePaymentDropdown();
-                  paymentForm.classList.add("hidden-form");
-                  if (addPaymentBtn) {
-                    addPaymentBtn.textContent = "+ Add New Payment Method";
-                  }
-                }, 1000);
-              } else {
-                document.getElementById("payments-error").textContent =
-                  data.error || "Failed to add payment method";
-                document.getElementById("payments-success").textContent = "";
-              }
-            })
-            .catch((err) => {
-              console.error("Payment submit error:", err);
-              document.getElementById("payments-error").textContent =
-                "Failed to add payment method";
-              document.getElementById("payments-success").textContent = "";
-            });
-        });
-      }
-
-      if (addressForm) {
-        addressForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-          const formData = new FormData(addressForm);
-
-          fetch("/addresses", {
-            method: "POST",
-            body: new URLSearchParams([...formData]),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.message || data.success || !data.error) {
-                document.getElementById("address-success").textContent =
-                  "Address added successfully!";
-                document.getElementById("address-error").textContent = "";
-                addressForm.reset();
-                setTimeout(() => {
-                  populateAddressDropdown();
-                  addressForm.classList.add("hidden-form");
-                  addAddressBtn.textContent = "+ Add New Address";
-                }, 1000);
-              } else {
-                document.getElementById("address-error").textContent =
-                  data.error || "Failed to add address";
-                document.getElementById("address-success").textContent = "";
-              }
-            })
-            .catch(() => {
-              document.getElementById("address-error").textContent =
-                "Failed to add address";
-              document.getElementById("address-success").textContent = "";
-            });
-        });
-      }
     }
 
     if (localStorage.getItem("showReservationModal") === "1") {
