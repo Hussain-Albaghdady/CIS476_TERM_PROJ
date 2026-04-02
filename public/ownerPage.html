@@ -289,41 +289,37 @@
             <!-- Summary Cards -->
             <div class="row mb-4" id="financial-summary-cards">
               <div class="col-md-3">
-                <div class="info-box"
-                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                  <i class="icofont-money" style="font-size:2rem; color:#28a745;"></i>
-                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Revenue</h4>
-                  <p id="stat-total-revenue" style="font-size:1.8rem; font-weight:700; margin:0; color:#28a745;">$0</p>
+                <div class="info-box">
+                  <i class="icofont-money"></i>
+                  <h4>Total Revenue</h4>
+                  <p id="stat-total-revenue">$0</p>
                 </div>
               </div>
               <div class="col-md-3">
-                <div class="info-box"
-                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                  <i class="icofont-car" style="font-size:2rem; color:#007bff;"></i>
-                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Rentals</h4>
-                  <p id="stat-total-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#007bff;">0</p>
+                <div class="info-box">
+                  <i class="icofont-car"></i>
+                  <h4>Total Rentals</h4>
+                  <p id="stat-total-rentals">0</p>
                 </div>
               </div>
               <div class="col-md-3">
-                <div class="info-box"
-                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                  <i class="icofont-star" style="font-size:2rem; color:#ffc107;"></i>
-                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Top Grossing Vehicle</h4>
-                  <p id="stat-top-vehicle" style="font-size:1rem; font-weight:700; margin:0; color:#ffc107;">—</p>
+                <div class="info-box-vehicle">
+                  <i class="icofont-star"></i>
+                  <h4>Top Grossing Vehicle</h4>
+                  <p id="stat-top-vehicle">—</p>
                 </div>
               </div>
               <div class="col-md-3">
-                <div class="info-box"
-                  style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                  <i class="icofont-clock-time" style="font-size:2rem; color:#17a2b8;"></i>
-                  <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Active Rentals</h4>
-                  <p id="stat-active-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#17a2b8;">0</p>
+                <div class="info-box">
+                  <i class="icofont-clock-time"></i>
+                  <h4>Active Rentals</h4>
+                  <p id="stat-active-rentals">0</p>
                 </div>
               </div>
             </div>
 
             <!-- Per-Vehicle Breakdown Table -->
-            <h3 style="margin-bottom: 16px;">Vehicle Performance Breakdown</h3>
+            <h3>Vehicle Performance Breakdown</h3>
             <div class="table-responsive">
               <table class="table table-striped" id="financial-table">
                 <thead>
@@ -342,7 +338,7 @@
                 </tbody>
               </table>
             </div>
-            <div id="history-section" style="display:none;">
+            <div id="history-section">
               <h3 id="history-title">Your Vehicle Rental History</h3>
               <div class="table-wrapper">
                 <table class="responsive-table">
@@ -366,8 +362,8 @@
         </div>
       </section><!-- End Financial Management Section -->
 
-      <!-- ======= Avaliablity Section ======= -->
-      <section id="avaliablity" class="avaliablity section-bg">
+      <!-- ======= Availability Section ======= -->
+      <section id="availability" class="availability section-bg">
         <div class="container" data-aos="fade-up" data-aos-delay="100">
 
           <div class="section-title">
@@ -400,7 +396,7 @@
           <div class="row event-container">
             <!-- Dynamic vehicle cards will be injected here by JS -->
           </div>
-      </section><!-- End Avaliablity Section -->
+      </section><!-- End Availability Section -->
 
       <div id="edit-vehicle-modal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -678,6 +674,34 @@
           if (manageVehicleSection.style.display === 'block') {
             loadVehicleForManagement();
           }
+        });
+
+        document.addEventListener('click', function (e) {
+          const anchor = e.target.closest('#add-vehicle-link-anchor');
+          if (!anchor) return;
+          e.preventDefault();
+          addVehicleForm.style.display = 'block';
+          manageVehicleSection.style.display = 'none';
+          loadVehicleForManagement();
+          document.getElementById('vehicle-management').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.addEventListener('click', function (e) {
+          const anchor = e.target.closest('#manage-existing-link-anchor');
+          if (!anchor) return;
+          e.preventDefault();
+          manageVehicleSection.style.display = 'block';
+          addVehicleForm.style.display = 'none';
+          loadVehicleForManagement();
+          document.getElementById('vehicle-management').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.addEventListener('click', function (e) {
+          const anchor = e.target.closest('#view-financial-link-anchor');
+          if (!anchor) return;
+          e.preventDefault();
+          document.getElementById('view-financials-btn').click();
+          document.getElementById('financial-management').scrollIntoView({ behavior: 'smooth' });
         });
 
         document.getElementById('cancel-add').addEventListener('click', function () {
@@ -1094,18 +1118,18 @@
               data.vehicles.forEach(v => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-          <td>${v.label || 'Unknown Vehicle'}</td>
-          <td>${v.category || 'N/A'}</td>
-          <td>$${Number(v.rate || 0).toFixed(2)}</td>
-          <td>${v.totalRentals || 0}</td>
-          <td>
+          <td data-label="Vehicle"><span>${v.label || 'Unknown Vehicle'}</span></td>
+          <td data-label="Category"><span>${v.category || 'N/A'}</span></td>
+          <td data-label="Rate/Day"><span>$${Number(v.rate || 0).toFixed(2)}</span></td>
+          <td data-label="Total Rentals"><span>${v.totalRentals || 0}</span></td>
+          <td data-label="Active">
             <span class="badge ${v.activeRentals > 0 ? 'badge-success' : 'badge-secondary'}">
               ${v.activeRentals || 0}
             </span>
           </td>
-          <td><strong>$${Number(v.totalRevenue || 0).toFixed(2)}</strong></td>
-          <td>${Number(v.avgDays || 0).toFixed(1)} days</td>
-          <td>
+          <td data-label="Total Revenue"><span><strong>$${Number(v.totalRevenue || 0).toFixed(2)}</strong></span></td>
+          <td data-label="Avg. Days/Rental"><span>${Number(v.avgDays || 0).toFixed(1)} days</span></td>
+          <td data-label="View Rental History">
             <button
               type="button"
               class="btn btn-sm btn-primary view-history-btn"
@@ -1144,14 +1168,14 @@
                 data.history.forEach(item => {
                   const tr = document.createElement('tr');
                   tr.innerHTML = `
-            <td>${item.orderId || '—'}</td>
-            <td>${item.renter || '—'}</td>
-            <td>${item.renterEmail || '—'}</td>
-            <td>${formatDate(item.startDate)}</td>
-            <td>${formatDate(item.returnDate)}</td>
-            <td>${item.mileage !== undefined && item.mileage !== null && item.mileage !== ''? Number(item.mileage).toLocaleString() + ' mi': '—'}</td>
-            <td>${item.pickupLocation || '—'}</td>
-            <td>$${Number(item.total || 0).toFixed(2)}</td>
+            <td data-label="OrderID"><span>${item.orderId || '—'}</span></td>
+            <td data-label="Renter"><span>${item.renter || '—'}</span></td>
+            <td data-label="Renter's Email"><span>${item.renterEmail || '—'}</span></td>
+            <td data-label="Start Date"><span>${formatDate(item.startDate)}</span></td>
+            <td data-label="Return Date"><span>${formatDate(item.returnDate)}</span></td>
+            <td data-label="Mileage"><span>${item.mileage !== undefined && item.mileage !== null && item.mileage !== ''? Number(item.mileage).toLocaleString() + ' mi': '—'}</span></td>
+            <td data-label="Pick-Up Location"><span>${item.pickupLocation || '—'}</span></td>
+            <td data-label="Total"><span>$${Number(item.total || 0).toFixed(2)}</span></td>
           `;
                   ordersBody.appendChild(tr);
                 });

@@ -113,7 +113,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     $(document).on("click", ".mobile-nav .drop-down > a", function (e) {
-      e.preventDefault();
+      const href = $(this).attr("href") || "";
+      if (!href.includes("#")) {
+        e.preventDefault();
+      }
       $(this).next().slideToggle(300);
       $(this).parent().toggleClass("active");
     });
@@ -506,9 +509,34 @@ document.addEventListener("DOMContentLoaded", function () {
             }
           } else if (userType === "host") {
             const dropdownLi = document.createElement("li");
-            dropdownLi.id = "owner-page";
+            dropdownLi.classList.add("drop-down");
+            dropdownLi.id = "host-dropdown";
             dropdownLi.innerHTML = `
-            <a href="ownerPage.html">Host Portal</a>
+            <a href="ownerPage.html" class="account-toggle">Host Portal<i class="icofont-simple-down dropdown-arrow"></i></a>
+            <ul>
+              <li id="vehicle-page-link" class="drop-down">
+                <a href="ownerPage.html" id="vehicle-page-link-anchor">Vehicle Management<i class="icofont-simple-down dropdown-arrow"></i></a>
+                <ul>
+                  <li id="add-vehicle-link">
+                    <a href="ownerPage.html#vehicle-management" id="add-vehicle-link-anchor">Add New Vehicle</a>
+                  </li>
+                  <li id="manage-existing-link">
+                    <a href="ownerPage.html#vehicle-management" id="manage-existing-link-anchor">Manage Existing Vehicle</a>
+                  </li>
+                </ul>
+              </li>
+              <li id="financial-page-link" class="drop-down">
+                <a href="ownerPage.html" id="financial-page-link-anchor">Financial Management<i class="icofont-simple-down dropdown-arrow"></i></a>
+                <ul>
+                  <li id="view-financial-link">
+                    <a href="ownerPage.html#financial-management" id="view-financial-link-anchor">View Financial Records</a>
+                  </li>
+                </ul>
+              </li>
+              <li id="return-page-link">
+                <a href="ownerPage.html#availability" id="return-page-link-anchor">Vehicle Inventory</a>
+              </li>
+            </ul>
           `;
 
             const logoutLi = nav.querySelector("#login-link-li");
@@ -626,21 +654,19 @@ document.addEventListener("DOMContentLoaded", function () {
               ? eq.image_url
               : "assets/img/no-image.png";
         return `
-      <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm">
-          <img src="${imgUrl}" class="card-img-top" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}" style="height:200px; object-fit:cover; width:100%;">
-          <div class="card-body">
-            <h5 class="card-title" style="font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1;">${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h5>
-            <p class="card-text">${eq.description || ""}</p>
-            <div style="font-weight:bold;margin-bottom:5px;">
-              Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : "N/A"} per day
-            </div>
-            ${eq.range ? `<div style="font-size:0.98em;margin-bottom:3px;"><b>Range:</b> ${eq.range} mi</div>` : ""}
-            ${eq.pickup_location ? `<div style="font-size:0.98em;margin-bottom:5px;"><b>Pick-Up:</b> ${eq.pickup_location}</div>` : ""}
-            <div>
+      <div class="col-lg-4 col-md-6 event-item mb-4">
+        <div class="card">
+          <img src="${imgUrl}" class="img-fluid" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}">
+          <div class="card-text">
+            <h2>${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h2>
+            <p class="desc">${eq.description || ""}</p>
+            ${eq.range ? `<p class="range"><b>Range:</b> ${eq.range} mi</p>` : ""}
+            ${eq.pickup_location ? `<p class="range"><b>Pick-Up:</b> ${eq.pickup_location}</p>` : ""}
+            <div class="reservation-select">
               <input type="checkbox" class="vehicle-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedVehicleSet.has(eq._id) ? "checked" : ""}>
               <label for="equip_${eq._id}">Select this Vehicle</label>
             </div>
+            <p class="rate">Rate: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : "N/A"} / day</p>
           </div>
         </div>
       </div>
@@ -844,7 +870,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const days = calculateDays(startDate, endDate);
       const taxRate = 0.06;
       const eq = allVehicle.find((v) => v._id == vehicleId);
-      const vehiclePrice = eq && eq.rental_rate_per_day ? Number(eq.rental_rate_per_day) * days : 0;
+      const vehiclePrice =
+        eq && eq.rental_rate_per_day
+          ? Number(eq.rental_rate_per_day) * days
+          : 0;
       const totalWithTax = (vehiclePrice * (1 + taxRate)).toFixed(2);
 
       showPaymentModal(vehiclePrice, () => {
@@ -864,7 +893,8 @@ document.addEventListener("DOMContentLoaded", function () {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              document.getElementById("reservation-error").textContent = data.error;
+              document.getElementById("reservation-error").textContent =
+                data.error;
               return;
             }
             document.getElementById("reservation-modal-title").textContent =
@@ -875,7 +905,8 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
             document.getElementById("reservation-modal").style.display = "flex";
             document.getElementById("close-modal-btn").onclick = function () {
-              document.getElementById("reservation-modal").style.display = "none";
+              document.getElementById("reservation-modal").style.display =
+                "none";
               window.location.reload();
             };
             document.getElementById("reservation-error").textContent = "";
@@ -1106,160 +1137,218 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-/* ==========================================================
+  /* ==========================================================
    Login Form
    ========================================================== */
-(function () {
-  if (!document.getElementById("login-error-modal")) return;
+  (function () {
+    if (!document.getElementById("login-error-modal")) return;
 
-  var params = new URLSearchParams(window.location.search);
-  var serverError = params.get("error");
-  if (serverError) {
-    document.getElementById("login-error-modal-message").textContent = decodeURIComponent(serverError);
-    document.getElementById("login-error-modal").style.display = "flex";
-    window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
-  }
-}());
+    var params = new URLSearchParams(window.location.search);
+    var serverError = params.get("error");
+    if (serverError) {
+      document.getElementById("login-error-modal-message").textContent =
+        decodeURIComponent(serverError);
+      document.getElementById("login-error-modal").style.display = "flex";
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.origin + window.location.pathname,
+      );
+    }
+  })();
 
-/* ==========================================================
+  /* ==========================================================
    Registration Form
    ========================================================== */
-(function () {
-  if (!document.getElementById("register-form")) return;
+  (function () {
+    if (!document.getElementById("register-form")) return;
 
-  /* Server-side error modal */
-  var params = new URLSearchParams(window.location.search);
-  var serverError = params.get("error");
-  if (serverError) {
-    document.getElementById("error-modal-message").textContent = decodeURIComponent(serverError);
-    document.getElementById("error-modal").style.display = "flex";
-    window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
-  }
-
-  /* Account type selection */
-  var selectedAccountType = "";
-
-  window.selectType = function (type) {
-    selectedAccountType = type;
-    document.getElementById("user_type").value = type;
-    var rBtn = document.getElementById("btn-renter");
-    var hBtn = document.getElementById("btn-host");
-    rBtn.classList.remove("selected-renter", "selected-host");
-    hBtn.classList.remove("selected-renter", "selected-host");
-    if (type === "customer") rBtn.classList.add("selected-renter");
-    if (type === "host")     hBtn.classList.add("selected-host");
-  };
-
-  /* Password strength */
-  document.getElementById("password").addEventListener("input", function () {
-    var val   = this.value;
-    var score = 0;
-    if (val.length >= 8)                        score++;
-    if (/[A-Z]/.test(val))                      score++;
-    if (/[a-z]/.test(val))                      score++;
-    if (/[0-9]/.test(val))                      score++;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(val))    score++;
-
-    var levels = [
-      { pct: "0%",   color: "#e0e8f5", label: "" },
-      { pct: "25%",  color: "#e74c3c", label: "Weak" },
-      { pct: "50%",  color: "#e67e22", label: "Fair" },
-      { pct: "75%",  color: "#f1c40f", label: "Good" },
-      { pct: "100%", color: "#27ae60", label: "Strong" },
-    ];
-    var lvl  = levels[Math.min(score, 4)];
-    var fill = document.getElementById("pw-fill");
-    var text = document.getElementById("pw-text");
-    fill.style.width      = lvl.pct;
-    fill.style.background = lvl.color;
-    text.textContent      = lvl.label;
-    text.style.color      = lvl.color;
-  });
-
-  /* Error helpers */
-  function showError(msg) {
-    var el = document.getElementById("inline-error");
-    el.textContent = msg;
-    el.classList.add("visible");
-    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
-  function clearError() {
-    var el = document.getElementById("inline-error");
-    el.textContent = "";
-    el.classList.remove("visible");
-  }
-
-  /* Step switcher */
-  function goToStep(n) {
-    document.querySelectorAll(".step-panel").forEach(function (p) { p.classList.remove("active"); });
-    document.getElementById("step-" + n).classList.add("active");
-
-    var b1 = document.getElementById("bubble-1");
-    var b2 = document.getElementById("bubble-2");
-    var l1 = document.getElementById("label-1");
-    var l2 = document.getElementById("label-2");
-    var ln = document.getElementById("connector-line");
-
-    if (n === 1) {
-      b1.className = "step-bubble active";
-      b2.className = "step-bubble";
-      l1.className = "step-label active";
-      l2.className = "step-label";
-      ln.className = "step-line";
-    } else {
-      b1.className = "step-bubble done";
-      b2.className = "step-bubble active";
-      l1.className = "step-label done";
-      l2.className = "step-label active";
-      ln.className = "step-line done";
+    /* Server-side error modal */
+    var params = new URLSearchParams(window.location.search);
+    var serverError = params.get("error");
+    if (serverError) {
+      document.getElementById("error-modal-message").textContent =
+        decodeURIComponent(serverError);
+      document.getElementById("error-modal").style.display = "flex";
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.origin + window.location.pathname,
+      );
     }
-  }
 
-  /* Next: validate step 1 */
-  document.getElementById("next-btn").addEventListener("click", function () {
-    clearError();
+    /* Account type selection */
+    var selectedAccountType = "";
 
-    var fname     = document.getElementById("fname").value.trim();
-    var lname     = document.getElementById("lname").value.trim();
-    var email     = document.getElementById("email").value.trim();
-    var username  = document.getElementById("username").value.trim();
-    var password  = document.getElementById("password").value;
-    var cpassword = document.getElementById("cpassword").value;
+    window.selectType = function (type) {
+      selectedAccountType = type;
+      document.getElementById("user_type").value = type;
+      var rBtn = document.getElementById("btn-renter");
+      var hBtn = document.getElementById("btn-host");
+      rBtn.classList.remove("selected-renter", "selected-host");
+      hBtn.classList.remove("selected-renter", "selected-host");
+      if (type === "customer") rBtn.classList.add("selected-renter");
+      if (type === "host") hBtn.classList.add("selected-host");
+    };
 
-    if (!selectedAccountType)                                   { showError("Please choose an account type — Renter or Host."); return; }
-    if (!fname || !lname)                                       { showError("Please enter your first and last name."); return; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))   { showError("Please enter a valid email address."); return; }
-    if (!username || username.length < 3)                       { showError("Username must be at least 3 characters."); return; }
-    if (password.length < 8)                                    { showError("Password must be at least 8 characters."); return; }
-    if (!/[A-Z]/.test(password))                                { showError("Password must contain at least one uppercase letter."); return; }
-    if (!/[a-z]/.test(password))                                { showError("Password must contain at least one lowercase letter."); return; }
-    if (!/[0-9]/.test(password))                                { showError("Password must contain at least one number."); return; }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))              { showError("Password must contain at least one special character (!@#$%^&*…)."); return; }
-    if (password !== cpassword)                                  { showError("Passwords do not match."); return; }
+    /* Password strength */
+    document.getElementById("password").addEventListener("input", function () {
+      var val = this.value;
+      var score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[a-z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(val)) score++;
 
-    goToStep(2);
-  });
+      var levels = [
+        { pct: "0%", color: "#e0e8f5", label: "" },
+        { pct: "25%", color: "#e74c3c", label: "Weak" },
+        { pct: "50%", color: "#e67e22", label: "Fair" },
+        { pct: "75%", color: "#f1c40f", label: "Good" },
+        { pct: "100%", color: "#27ae60", label: "Strong" },
+      ];
+      var lvl = levels[Math.min(score, 4)];
+      var fill = document.getElementById("pw-fill");
+      var text = document.getElementById("pw-text");
+      fill.style.width = lvl.pct;
+      fill.style.background = lvl.color;
+      text.textContent = lvl.label;
+      text.style.color = lvl.color;
+    });
 
-  /* Back */
-  document.getElementById("back-btn").addEventListener("click", function () {
-    clearError();
-    goToStep(1);
-  });
+    /* Error helpers */
+    function showError(msg) {
+      var el = document.getElementById("inline-error");
+      el.textContent = msg;
+      el.classList.add("visible");
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    function clearError() {
+      var el = document.getElementById("inline-error");
+      el.textContent = "";
+      el.classList.remove("visible");
+    }
 
-  /* Submit: validate step 2 */
-  document.getElementById("register-form").addEventListener("submit", function (e) {
-    clearError();
+    /* Step switcher */
+    function goToStep(n) {
+      document.querySelectorAll(".step-panel").forEach(function (p) {
+        p.classList.remove("active");
+      });
+      document.getElementById("step-" + n).classList.add("active");
 
-    var s1 = document.getElementById("security1").value;
-    var s2 = document.getElementById("security2").value;
-    var s3 = document.getElementById("security3").value;
-    var a1 = document.getElementById("answer1").value.trim();
-    var a2 = document.getElementById("answer2").value.trim();
-    var a3 = document.getElementById("answer3").value.trim();
+      var b1 = document.getElementById("bubble-1");
+      var b2 = document.getElementById("bubble-2");
+      var l1 = document.getElementById("label-1");
+      var l2 = document.getElementById("label-2");
+      var ln = document.getElementById("connector-line");
 
-    if (!s1 || !s2 || !s3) { e.preventDefault(); showError("Please select a question for each security field."); return; }
-    if (!a1 || !a2 || !a3) { e.preventDefault(); showError("Please provide an answer for each security question."); return; }
-    if (new Set([s1, s2, s3]).size < 3) { e.preventDefault(); showError("Please choose three different security questions."); return; }
-  });
-}());
+      if (n === 1) {
+        b1.className = "step-bubble active";
+        b2.className = "step-bubble";
+        l1.className = "step-label active";
+        l2.className = "step-label";
+        ln.className = "step-line";
+      } else {
+        b1.className = "step-bubble done";
+        b2.className = "step-bubble active";
+        l1.className = "step-label done";
+        l2.className = "step-label active";
+        ln.className = "step-line done";
+      }
+    }
+
+    /* Next: validate step 1 */
+    document.getElementById("next-btn").addEventListener("click", function () {
+      clearError();
+
+      var fname = document.getElementById("fname").value.trim();
+      var lname = document.getElementById("lname").value.trim();
+      var email = document.getElementById("email").value.trim();
+      var username = document.getElementById("username").value.trim();
+      var password = document.getElementById("password").value;
+      var cpassword = document.getElementById("cpassword").value;
+
+      if (!selectedAccountType) {
+        showError("Please choose an account type — Renter or Host.");
+        return;
+      }
+      if (!fname || !lname) {
+        showError("Please enter your first and last name.");
+        return;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError("Please enter a valid email address.");
+        return;
+      }
+      if (!username || username.length < 3) {
+        showError("Username must be at least 3 characters.");
+        return;
+      }
+      if (password.length < 8) {
+        showError("Password must be at least 8 characters.");
+        return;
+      }
+      if (!/[A-Z]/.test(password)) {
+        showError("Password must contain at least one uppercase letter.");
+        return;
+      }
+      if (!/[a-z]/.test(password)) {
+        showError("Password must contain at least one lowercase letter.");
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        showError("Password must contain at least one number.");
+        return;
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        showError(
+          "Password must contain at least one special character (!@#$%^&*…).",
+        );
+        return;
+      }
+      if (password !== cpassword) {
+        showError("Passwords do not match.");
+        return;
+      }
+
+      goToStep(2);
+    });
+
+    /* Back */
+    document.getElementById("back-btn").addEventListener("click", function () {
+      clearError();
+      goToStep(1);
+    });
+
+    /* Submit: validate step 2 */
+    document
+      .getElementById("register-form")
+      .addEventListener("submit", function (e) {
+        clearError();
+
+        var s1 = document.getElementById("security1").value;
+        var s2 = document.getElementById("security2").value;
+        var s3 = document.getElementById("security3").value;
+        var a1 = document.getElementById("answer1").value.trim();
+        var a2 = document.getElementById("answer2").value.trim();
+        var a3 = document.getElementById("answer3").value.trim();
+
+        if (!s1 || !s2 || !s3) {
+          e.preventDefault();
+          showError("Please select a question for each security field.");
+          return;
+        }
+        if (!a1 || !a2 || !a3) {
+          e.preventDefault();
+          showError("Please provide an answer for each security question.");
+          return;
+        }
+        if (new Set([s1, s2, s3]).size < 3) {
+          e.preventDefault();
+          showError("Please choose three different security questions.");
+          return;
+        }
+      });
+  })();
 })(jQuery);

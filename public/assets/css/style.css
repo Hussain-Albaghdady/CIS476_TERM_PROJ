@@ -221,7 +221,7 @@ h6,
   list-style: none;
 }
 
-.nav-menu>ul>li {
+.nav-menu > ul > li {
   position: relative;
   white-space: nowrap;
   float: left;
@@ -239,7 +239,7 @@ h6,
   padding: 5px 0;
 }
 
-.nav-menu li.drop-down:hover>ul {
+.nav-menu li.drop-down:hover > ul {
   display: block;
 }
 
@@ -248,9 +248,26 @@ h6,
   white-space: nowrap;
 }
 
-.nav-menu li.drop-down:hover>a::after {
+.nav-menu li.drop-down:hover > a::after {
   width: 0;
   opacity: 0;
+}
+
+.nav-menu li.drop-down li.drop-down {
+  position: relative;
+}
+
+.nav-menu li.drop-down li.drop-down ul {
+  top: 0;
+  left: 100%;
+  padding-left: 4px;
+  margin-left: -4px;
+}
+
+.nav-menu li.drop-down li.drop-down > a::after {
+  content: " \203A";
+  float: right;
+  margin-left: 8px;
 }
 
 .nav-menu a {
@@ -277,19 +294,19 @@ h6,
 }
 
 .nav-menu a:hover,
-.nav-menu .active>a {
+.nav-menu .active > a {
   color: var(--secondary-color);
   text-decoration: none;
 }
 
-.nav-menu li:hover>a {
+.nav-menu li:hover > a {
   color: var(--secondary-color);
   text-decoration: none;
 }
 
 .nav-menu a:hover::after,
-.nav-menu .active>a::after,
-.nav-menu li:hover>a::after {
+.nav-menu .active > a::after,
+.nav-menu li:hover > a::after {
   width: 90%;
   opacity: 1;
 }
@@ -323,7 +340,7 @@ h6,
 }
 
 .mobile-nav a:hover,
-.mobile-nav li.active:not(.account-toggle)>a {
+.mobile-nav li.active:not(.account-toggle) > a {
   color: var(--DriveShare-end);
   text-decoration: none;
 }
@@ -354,7 +371,7 @@ h6,
   display: inline-block;
 }
 
-.mobile-nav .drop-down.active>a .dropdown-arrow {
+.mobile-nav .drop-down.active > a .dropdown-arrow {
   transform: rotate(180deg);
 }
 
@@ -565,11 +582,11 @@ section[id],
   font-size: 14px;
 }
 
-.breadcrumbs ol li+li {
+.breadcrumbs ol li + li {
   padding-left: 10px;
 }
 
-.breadcrumbs ol li+li::before {
+.breadcrumbs ol li + li::before {
   display: inline-block;
   padding-right: 10px;
   color: #6c757d;
@@ -781,7 +798,7 @@ section[id],
   font-weight: 600;
 }
 
-.event-container>[class*="col-"] {
+.event-container > [class*="col-"] {
   display: flex;
 }
 
@@ -1452,9 +1469,11 @@ section[id],
 }
 
 #welcome .username {
-  background: linear-gradient(90deg,
-      var(--btn-blue-start),
-      var(--btn-blue-end));
+  background: linear-gradient(
+    90deg,
+    var(--btn-blue-start),
+    var(--btn-blue-end)
+  );
   color: #fff;
   border-radius: 6px;
   padding: 0.25rem 0.75rem;
@@ -1478,9 +1497,11 @@ section[id],
 .gradient-text {
   font-family: "Montserrat-Alt1", sans-serif;
   font-weight: 700;
-  background: linear-gradient(90deg,
-      var(--DriveShare-start),
-      var(--DriveShare-end));
+  background: linear-gradient(
+    90deg,
+    var(--DriveShare-start),
+    var(--DriveShare-end)
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1568,9 +1589,11 @@ section[id],
 }
 
 .legal-container .page-highlight {
-  background: linear-gradient(90deg,
-      var(--btn-blue-start),
-      var(--btn-blue-end));
+  background: linear-gradient(
+    90deg,
+    var(--btn-blue-start),
+    var(--btn-blue-end)
+  );
   color: #fff;
   border-radius: 6px;
   padding: 0.25rem 0.75rem;
@@ -1610,7 +1633,7 @@ section[id],
   color: var(--text);
 }
 
-.content-section+.content-section {
+.content-section + .content-section {
   margin-top: 32px;
 }
 
@@ -1641,7 +1664,7 @@ section[id],
   border-left: 3px solid var(--border);
 }
 
-.subsection+.subsection {
+.subsection + .subsection {
   margin-top: 16px;
 }
 
@@ -1756,7 +1779,6 @@ section[id],
 }
 
 @media (max-width: 768px) {
-
   .tos-content,
   .privacy-content {
     padding: 20px;
@@ -1898,6 +1920,58 @@ section[id],
   background: var(--btn-end);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#account .section-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+#account .section-action-header h3 {
+  margin: 0;
+}
+
+#account .btn-add-new {
+  background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+#account .btn-add-new:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  color: white;
+}
+
+#account .add-form-panel {
+  display: none;
+  background: #fff;
+  border: 1px solid #dde1e7;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+#account .add-form-panel.open {
+  display: block;
+}
+
+#account .add-form-panel .form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 #account .delete-btn {
@@ -2492,10 +2566,9 @@ section[id],
 # Global Footer
 --------------------------------------------------------------*/
 #footer {
-  background: linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16)),
-    linear-gradient(90deg,
-      var(--DriveShare-start),
-      var(--DriveShare-end));
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16)),
+    linear-gradient(90deg, var(--DriveShare-start), var(--DriveShare-end));
   padding: 0 0 30px 0;
   color: var(--background-color);
   font-size: 14px;
@@ -2630,17 +2703,17 @@ section[id],
 /*--------------------------------------------------------------
 # Reservation Form - Actions Row (Desktop)
 --------------------------------------------------------------*/
-#reservation-actions-row>div {
+#reservation-actions-row > div {
   flex: 0 0 50%;
   display: flex;
   gap: 12px;
 }
 
-#reservation-actions-row>div button {
+#reservation-actions-row > div button {
   flex: 1;
 }
 
-#reservation-actions-row>input[type="submit"] {
+#reservation-actions-row > input[type="submit"] {
   flex: 0 0 25%;
   margin-left: auto;
 }
@@ -2658,18 +2731,18 @@ section[id],
 # Reservation Form - Mobile
 --------------------------------------------------------------*/
 @media (max-width: 768px) {
-  #reservation-form>div:first-of-type {
+  #reservation-form > div:first-of-type {
     flex-direction: column;
   }
 
-  #reservation-form>div:first-of-type>div {
+  #reservation-form > div:first-of-type > div {
     flex: 0 0 100% !important;
     min-width: 100% !important;
     width: 100%;
   }
 
-  #reservation-form>div:first-of-type>div input,
-  #reservation-form>div:first-of-type>div select {
+  #reservation-form > div:first-of-type > div input,
+  #reservation-form > div:first-of-type > div select {
     width: 100%;
   }
 
@@ -2678,13 +2751,13 @@ section[id],
     align-items: stretch;
   }
 
-  #reservation-actions-row>div {
+  #reservation-actions-row > div {
     display: flex;
     flex-direction: row;
     gap: 8px;
   }
 
-  #reservation-actions-row>div button {
+  #reservation-actions-row > div button {
     flex: 1;
     white-space: normal;
     text-align: center;
@@ -2704,9 +2777,11 @@ section[id],
 
 /* Page background */
 body.auth-page {
-  background: linear-gradient(90deg,
-      var(--DriveShare-start),
-      var(--DriveShare-end));
+  background: linear-gradient(
+    90deg,
+    var(--DriveShare-start),
+    var(--DriveShare-end)
+  );
   min-height: 100vh;
 }
 
@@ -2728,12 +2803,12 @@ body.auth-page #main {
   width: 100%;
   margin: 0 auto 48px;
   padding: 40px 44px 36px;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 .login-card h3 {
   text-align: center;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   font-weight: 700;
   color: #0d2b5e;
   margin-bottom: 4px;
@@ -2769,12 +2844,14 @@ body.auth-page #main {
   border-radius: 8px;
   font-weight: 700;
   font-size: 1rem;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   letter-spacing: 0.03em;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
   margin-top: 10px;
   box-sizing: border-box;
 }
@@ -2838,7 +2915,7 @@ body.auth-page #main {
   width: 100%;
   margin: 0 auto 48px;
   padding: 40px 44px 36px;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 /* Step indicator */
@@ -2874,7 +2951,9 @@ body.auth-page #main {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s, color 0.3s;
+  transition:
+    background 0.3s,
+    color 0.3s;
   flex-shrink: 0;
 }
 
@@ -2922,7 +3001,7 @@ body.auth-page #main {
 /* Headings */
 .register-card h3 {
   text-align: center;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   font-weight: 700;
   color: #0d2b5e;
   margin-bottom: 4px;
@@ -2959,9 +3038,11 @@ body.auth-page #main {
   font-size: 0.92rem;
   color: #1a2a4a;
   background: #f5f8ff;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   outline: none;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 .field-group input:focus,
@@ -3000,7 +3081,9 @@ body.auth-page #main {
   height: 100%;
   width: 0%;
   border-radius: 2px;
-  transition: width 0.3s, background 0.3s;
+  transition:
+    width 0.3s,
+    background 0.3s;
 }
 
 .pw-strength-text {
@@ -3035,10 +3118,12 @@ body.auth-page #main {
   color: #fff;
   font-weight: 700;
   font-size: 1rem;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   letter-spacing: 0.03em;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
   margin-top: 6px;
 }
 
@@ -3060,10 +3145,12 @@ body.auth-page #main {
   color: #fff;
   font-weight: 700;
   font-size: 1rem;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   letter-spacing: 0.03em;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
   margin-top: 6px;
 }
 
@@ -3081,7 +3168,7 @@ body.auth-page #main {
   color: var(--background-color);
   font-weight: 600;
   font-size: 0.95rem;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   cursor: pointer;
   transition: background 0.2s;
   margin-top: 8px;
@@ -3105,7 +3192,7 @@ body.auth-page #main {
   border-radius: 10px;
   background: #f5f8ff;
   color: #5577aa;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
@@ -3219,6 +3306,27 @@ body.auth-page #main {
   font-weight: 600;
 }
 
+/* Sticky reservation card — only after scrolling */
+.reservation-section .reservation-form-container.is-sticky {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 1400px;
+  z-index: 900;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.reservation-section-placeholder {
+  display: none;
+}
+
+/* Reservation card select row */
+.reservation-select {
+  margin: 8px 0;
+}
+
 #error-modal .modal-box button {
   margin-top: 18px;
   padding: 8px 28px;
@@ -3228,4 +3336,202 @@ body.auth-page #main {
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
+}
+
+/* Financial Summary Cards — Mobile */
+@media (max-width: 768px) {
+  #financial-summary-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  #financial-summary-cards .col-md-3 {
+    width: 100%;
+    padding: 0;
+  }
+}
+
+/* Financial Table — Mobile Card Layout */
+@media (max-width: 768px) {
+  #history-section {
+    border-top: 2px solid #e0e0e0;
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+
+  #financial-table thead {
+    display: none;
+  }
+
+  #financial-table tbody tr {
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 16px;
+    padding: 12px 16px;
+  }
+
+  #financial-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+  }
+
+  #financial-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  #financial-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+
+  #financial-table tbody td > span,
+  #financial-table tbody td > button {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  #financial-section .table-responsive {
+    overflow-x: visible;
+  }
+
+  #history-section .responsive-table thead {
+    display: none;
+  }
+
+  #history-section .responsive-table tbody tr {
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 16px;
+    padding: 12px 16px;
+  }
+
+  #history-section .responsive-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+  }
+
+  #history-section .responsive-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  #history-section .responsive-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+
+  #history-section .table-wrapper {
+    overflow-x: visible;
+  }
+
+  #history-section .responsive-table tbody td > span,
+  #history-section .responsive-table tbody td > button {
+    margin-left: auto;
+    text-align: right;
+  }
+}
+
+/* Financial Section */
+#financial-summary-cards .info-box {
+  text-align: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#financial-summary-cards .info-box i {
+  font-size: 2rem;
+}
+
+#financial-summary-cards .info-box h4 {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+#financial-summary-cards .info-box p {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+#financial-summary-cards .info-box-vehicle {
+  text-align: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#financial-summary-cards .info-box-vehicle i {
+  font-size: 2rem;
+}
+
+#financial-summary-cards .info-box-vehicle h4 {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+#financial-summary-cards .info-box-vehicle p {
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding-bottom: 10px;
+  margin: 0;
+}
+#stat-total-revenue {
+  color: #28a745;
+}
+.icofont-money {
+  color: #28a745;
+}
+
+#stat-total-rentals {
+  color: #007bff;
+}
+.icofont-car {
+  color: #007bff;
+}
+
+#stat-top-vehicle {
+  color: #ffc107;
+}
+.icofont-star {
+  color: #ffc107;
+}
+
+#stat-active-rentals {
+  color: #17a2b8;
+}
+.icofont-clock-time {
+  color: #17a2b8;
+}
+
+#financial-section h3 {
+  margin-bottom: 16px;
+}
+
+#history-section {
+  display: none;
 }
