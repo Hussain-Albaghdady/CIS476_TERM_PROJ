@@ -71,7 +71,6 @@
             <li><a href="Home.html#about">About Us</a></li>
             <li><a href="Home.html#location">Locations</a></li>
             <li><a href="Home.html#contact">Contact Us</a></li>
-            <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
             <li id="login-link-li">
               <a
                 href="/logout"
@@ -84,15 +83,13 @@
             </li>
           </ul>
         </nav>
-        <!-- .nav-menu -->
       </div>
     </header>
     <!-- End Header -->
-    <div id="page-header" style="background-color: #f9fafb">
+
+    <div id="page-header" class="res-page-header">
       <div class="container text-center" id="welcome">
-        <div
-          class="d-flex flex-column justify-content-center align-items-center"
-        >
+        <div class="d-flex flex-column justify-content-center align-items-center">
           <h2 data-aos="fade-up">Welcome, <span>Renter</span></h2>
           <img
             id="logo-img"
@@ -101,12 +98,7 @@
             alt="logo"
             data-aos="zoom-out"
           />
-          <h1
-            id="logo-fallback"
-            class="gradient-text"
-            data-aos="fade-up"
-            style="display: none"
-          >
+          <h1 id="logo-fallback" class="gradient-text res-logo-fallback" data-aos="fade-up">
             <span>DriveShare</span>
           </h1>
           <p data-aos="fade-up" data-aos-delay="100">
@@ -123,117 +115,55 @@
         </div>
       </div>
     </div>
+
     <main id="main" class="hidden-page">
       <!-- Reservation Section -->
-      <section class="reservation-section" style="padding-bottom: 0">
-        <div
-          class="container"
-          style="
-            max-width: 1400px;
-            width: 95%;
-            margin: 0 auto;
-            padding-bottom: 0;
-          "
-        >
-          <div
-            class="reservation-form-container"
-            style="
-              max-width: none;
-              width: 100%;
-              padding-bottom: 0;
-              margin-bottom: 0;
-            "
-          >
+      <section class="reservation-section res-section-no-bottom">
+        <div class="container res-container">
+          <div class="reservation-form-container res-form-wrapper">
             <form
               id="reservation-form"
               action="/api/reservations"
               method="post"
-              style="width: 100%; text-align: left"
+              class="res-form"
             >
-              <h3 style="margin-bottom: 12px">Reservation</h3>
-              <!-- Row 1: all fields + submit -->
-              <div
-                style="
-                  display: flex;
-                  align-items: stretch;
-                  gap: 16px;
-                  flex-wrap: wrap;
-                "
-              >
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    min-width: 140px;
-                  "
-                >
-                  <label for="customer_name" style="margin-bottom: 4px"
-                    >Name</label
-                  >
+              <h3 class="res-form-title">Reservation</h3>
+
+              <!-- Row 1: all fields -->
+              <div class="res-fields-row">
+                <div class="res-field-group">
+                  <label for="customer_name" class="res-label">Name</label>
                   <input
                     type="text"
                     name="customer_name"
                     id="customer_name"
                     required
-                    style="height: 42px; box-sizing: border-box"
+                    class="res-input"
                   />
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    min-width: 140px;
-                  "
-                >
-                  <label for="start_date" style="margin-bottom: 4px"
-                    >Start Date</label
-                  >
+                <div class="res-field-group">
+                  <label for="start_date" class="res-label">Start Date</label>
                   <input
                     type="date"
                     name="start_date"
                     id="start_date"
                     required
-                    style="height: 42px; box-sizing: border-box"
+                    class="res-input"
                   />
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    min-width: 140px;
-                  "
-                >
-                  <label for="end_date" style="margin-bottom: 4px"
-                    >Return Date</label
-                  >
+                <div class="res-field-group">
+                  <label for="end_date" class="res-label">Return Date</label>
                   <input
                     type="date"
                     name="end_date"
                     id="end_date"
                     required
-                    style="height: 42px; box-sizing: border-box"
+                    class="res-input"
                   />
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    min-width: 160px;
-                  "
-                >
-                  <label for="location" style="margin-bottom: 4px"
-                    >Pickup Location</label
-                  >
-                  <select
-                    id="location"
-                    name="location"
-                    required
-                    style="height: 42px; box-sizing: border-box"
-                  >
+                <div class="res-field-group">
+                  <label for="location" class="res-label">Pickup Location</label>
+                  <select id="location" name="location" required class="res-input">
                     <option value="">-- All Location --</option>
                     <option value="Dearborn">Dearborn</option>
                     <option value="Warren">Warren</option>
@@ -243,132 +173,54 @@
                     <option value="Lansing">Lansing</option>
                   </select>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    min-width: 160px;
-                  "
-                >
-                  <label for="address" style="margin-bottom: 4px"
-                    >Billing Address</label
-                  >
-                  <select
-                    id="address"
-                    name="address"
-                    required
-                    style="height: 42px; box-sizing: border-box"
-                  >
-                    <option value="" disabled selected>
-                      -- Choose Address --
-                    </option>
+                <div class="res-field-group">
+                  <label for="address" class="res-label">Billing Address</label>
+                  <select id="address" name="address" required class="res-input">
+                    <option value="" disabled selected>-- Choose Address --</option>
                   </select>
-                  <a
-                    href="account.html?open=address"
-                    class="add-new-link"
-                    style="
-                      margin-top: 6px;
-                      font-size: 14px;
-                      text-decoration: none;
-                    "
-                  >
+                  <a href="account.html?open=address" class="add-new-btn">
                     + Add New Address
                   </a>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    min-width: 160px;
-                  "
-                >
-                  <label for="payment" style="margin-bottom: 4px"
-                    >Payment Method</label
-                  >
-                  <select
-                    id="payment"
-                    name="payment"
-                    required
-                    style="height: 42px; box-sizing: border-box"
-                  >
-                    <option value="" disabled selected>
-                      -- Choose Payment --
-                    </option>
+                <div class="res-field-group">
+                  <label for="payment" class="res-label">Payment Method</label>
+                  <select id="payment" name="payment" required class="res-input">
+                    <option value="" disabled selected>-- Choose Payment --</option>
                   </select>
-                  <a
-                    href="/account.html?open=payment"
-                    class="add-new-link"
-                    style="
-                      margin-top: 6px;
-                      font-size: 14px;
-                      text-decoration: none;
-                    "
-                  >
+                  <a href="/account.html?open=payment" class="add-new-btn">
                     + Add New Payment Method
                   </a>
                 </div>
               </div>
-              <!-- Row 2: reserve button -->
-              <div
-                id="reservation-actions-row"
-                style="
-                  display: flex;
-                  gap: 12px;
-                  margin-top: 10px;
-                  justify-content: flex-end;
-                  align-items: center;
-                "
-              >
-                <input
-                  type="submit"
-                  name="submit"
-                  value="Reserve Selected Vehicles"
-                  class="form-btn"
-                  style="
-                    height: 42px;
-                    line-height: 42px;
-                    padding: 0 15px;
-                    white-space: nowrap;
-                    box-sizing: border-box;
-                    text-align: center;
-                    flex: 0 0 25%;
-                  "
-                />
+
+              <!-- Row 2: action buttons -->
+              <div id="reservation-actions-row" class="res-actions-row">
+                <button type="button" class="watch-vehicle-btn">
+                  <i class="bx bx-heart"></i> Watch Selected Vehicle
+                </button>
+                <button type="submit" name="submit" class="form-btn reserve-btn">
+                  <i class="bx bx-calendar-check"></i> Reserve Selected Vehicle
+                </button>
               </div>
+
               <!-- Hidden inputs -->
               <input type="hidden" name="vehicle_id" id="selected-vehicle" />
               <input type="hidden" name="total_cost" id="total-cost" />
-              <div
-                id="reservation-error"
-                style="color: red; font-weight: bold; margin-top: 10px"
-              ></div>
-              <div
-                id="reservation-success"
-                style="color: green; font-weight: bold; margin-top: 10px"
-              ></div>
+              <div id="reservation-error" class="res-msg-error"></div>
+              <div id="reservation-success" class="res-msg-success"></div>
             </form>
           </div>
         </div>
       </section>
+
       <!-- Vehicle List Section -->
       <section id="vehicle" class="vehicle-section py-4">
         <div class="container">
           <h3 class="mb-4">Available Vehicles</h3>
-          <div
-            class="d-flex flex-wrap mb-3"
-            style="gap: 16px; align-items: flex-end"
-          >
+          <div class="res-filter-row d-flex flex-wrap mb-3">
             <div>
-              <label for="vehicle-category" class="form-label"
-                >Filter by Vehicle Type:</label
-              >
-              <select
-                id="vehicle-category"
-                class="form-control"
-                style="min-width: 180px"
-              >
+              <label for="vehicle-category" class="form-label">Filter by Vehicle Type:</label>
+              <select id="vehicle-category" class="form-control res-category-select">
                 <option value="">-- All Types --</option>
                 <option value="Compact SUV">Compact SUV</option>
                 <option value="Minivan">Minivan</option>
@@ -380,52 +232,18 @@
               </select>
             </div>
           </div>
-          <div
-            id="date-filter-msg"
-            class="alert alert-info"
-            style="
-              display: none;
-              max-width: 500px;
-              padding: 6px 12px;
-              font-size: 0.9em;
-            "
-          ></div>
-          <div id="vehicle-list" class="row">
-            <!-- Vehicle cards will be loaded here -->
-          </div>
+          <div id="date-filter-msg" class="alert alert-info res-date-msg"></div>
+          <div id="vehicle-list" class="row"></div>
         </div>
       </section>
+
       <!-- Reservation Success Modal -->
-      <div
-        id="reservation-modal"
-        style="
-          display: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 9999;
-          align-items: center;
-          justify-content: center;
-        "
-      >
-        <div
-          style="
-            background: #fff;
-            padding: 30px 40px;
-            border-radius: 10px;
-            box-shadow: 0 2px 20px #0003;
-            text-align: center;
-            max-width: 90vw;
-          "
-        >
-          <h2 style="margin-bottom: 20px" id="reservation-modal-title">
+      <div id="reservation-modal" class="res-modal">
+        <div class="res-modal-box">
+          <h2 class="res-modal-title" id="reservation-modal-title">
             Reservation successful!
           </h2>
           <div id="reservation-modal-body"></div>
-          <!-- <button id="close-modal-btn" ...>Okay</button> -->
         </div>
       </div>
     </main>
@@ -442,13 +260,7 @@
               <li><a href="cookies_settings.html">Cookies Settings</a></li>
             </ul>
           </div>
-        </div>
-      </div>
 
-      <div class="container">
-        <div class="copyright">
-          &copy; Copyright <strong><span>DriveShare Corporation</span></strong
-          >. All Rights Reserved
         </div>
         <div class="credits">
           Designed by <a href="Home.html#team">Meaad Hassan</a>

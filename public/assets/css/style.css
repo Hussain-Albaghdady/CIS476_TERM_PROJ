@@ -526,6 +526,10 @@ section {
   padding: 60px 0;
 }
 
+.vehicle-management {
+  padding: 30px 0;
+}
+
 section[id],
 .content-section[id] {
   scroll-margin-top: var(--header-offset, 80px);
@@ -1361,7 +1365,6 @@ section[id],
 # Reservation Section
 --------------------------------------------------------------*/
 .reservation-section {
-  background: #f3f2f2;
   width: 100%;
 }
 
@@ -1429,6 +1432,29 @@ section[id],
   color: #fff;
 }
 
+.add-new-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--btn-start, #e6820e);
+  border-radius: 6px;
+  color: var(--btn-start, #e6820e);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.add-new-btn:hover {
+  background: var(--btn-start, #e6820e);
+  color: #fff;
+}
+
 .reservation-form-container form p {
   margin-top: 10px;
   font-size: 20px;
@@ -1437,6 +1463,158 @@ section[id],
 
 .reservation-form-container form p a {
   color: rgb(0, 115, 255);
+}
+
+/* Override legacy reservation-form-container constraints */
+.reservation-form-container.res-form-wrapper {
+  max-width: none;
+  width: 100%;
+  flex: unset;
+  justify-content: flex-start;
+}
+
+.res-form-wrapper form {
+  width: 100% !important;
+  text-align: left !important;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.res-form-wrapper form input,
+.res-form-wrapper form select {
+  margin: 0 !important;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* vehicle-reservation.html extracted inline styles */
+.res-page-header {
+  background-color: #f9fafb;
+}
+
+.res-logo-fallback {
+  display: none;
+}
+
+.res-section-no-bottom {
+  padding-bottom: 0;
+}
+
+.res-container {
+  max-width: 1400px;
+  width: 95%;
+  margin: 0 auto;
+  padding-bottom: 0;
+}
+
+.res-form-wrapper {
+  max-width: none;
+  width: 100%;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.res-form {
+  width: 100%;
+  text-align: left;
+}
+
+.res-form-title {
+  margin-bottom: 12px;
+}
+
+.res-fields-row {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.res-field-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 140px;
+}
+
+.res-field-group:nth-child(4),
+.res-field-group:nth-child(5),
+.res-field-group:nth-child(6) {
+  min-width: 160px;
+}
+
+.res-label {
+  margin-bottom: 4px;
+}
+
+.res-input {
+  height: 42px;
+  box-sizing: border-box;
+}
+
+.res-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.res-msg-error {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.res-msg-success {
+  color: green;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.res-filter-row {
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.res-category-select {
+  min-width: 180px;
+}
+
+.res-date-msg {
+  display: none;
+  max-width: 500px;
+  padding: 6px 12px;
+  font-size: 0.9em;
+}
+
+.res-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.res-modal-box {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 90vw;
+}
+
+.res-modal-title {
+  margin-bottom: 20px;
 }
 
 .reservation-form-container form .error-msg {
@@ -2026,7 +2204,9 @@ section[id],
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   white-space: nowrap;
 }
 
@@ -3406,6 +3586,115 @@ body.auth-page #main {
 /* Reservation card select row */
 .reservation-select {
   margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.reservation-select input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.reservation-select label {
+  margin: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.watch-vehicle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 16px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  box-sizing: border-box;
+}
+
+.watch-vehicle-btn:hover {
+  background: #c0392b;
+}
+
+.watch-vehicle-btn .bx-heart {
+  font-size: 1.1rem;
+}
+
+.reserve-btn {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition: background 0.2s;
+}
+
+.watch-divider {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.watch-checkbox {
+  display: none;
+}
+
+.watch-btn {
+  cursor: pointer;
+  color: #000000;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: color 0.2s;
+  user-select: none;
+}
+
+.watch-btn:hover {
+  color: #e74c3c;
+}
+
+.watch-icon-filled {
+  display: none;
+}
+
+.watch-checkbox:checked + .watch-btn {
+  color: #e74c3c;
+}
+
+.watch-checkbox:checked + .watch-btn .watch-icon-empty {
+  display: none;
+}
+
+.watch-checkbox:checked + .watch-btn .watch-icon-filled {
+  display: inline;
+}
+
+.watch-btn .bx-heart,
+.watch-btn .bxs-heart {
+  font-size: 0.95rem;
 }
 
 #error-modal .modal-box button {
@@ -3616,4 +3905,3 @@ body.auth-page #main {
 #history-section {
   display: none;
 }
-

@@ -676,6 +676,12 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="reservation-select">
               <input type="checkbox" class="vehicle-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedVehicleSet.has(eq._id) ? "checked" : ""}>
               <label for="equip_${eq._id}">Select this Vehicle</label>
+              <span class="watch-divider">|</span>
+              <input type="checkbox" class="watch-checkbox" id="watch_${eq._id}">
+              <label for="watch_${eq._id}" class="watch-btn">
+                <i class="bx bx-heart watch-icon-empty"></i>
+                <i class="bx bxs-heart watch-icon-filled"></i> Watch
+              </label>
             </div>
             <p class="rate">Rate: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : "N/A"} / day</p>
           </div>
