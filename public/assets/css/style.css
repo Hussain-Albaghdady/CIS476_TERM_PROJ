@@ -1408,7 +1408,7 @@ section[id],
 .reservation-form-container form input,
 .reservation-form-container form select {
   width: 100%;
-  padding: 10px 15px;
+  padding: 4px 8px;
   font-size: 17px;
   margin: 8px 0;
   background: #eee;
@@ -1423,7 +1423,7 @@ section[id],
   background: rgb(0, 115, 255);
   color: rgb(255, 255, 255);
   text-transform: capitalize;
-  font-size: 20px;
+  font-size: 15px;
   cursor: pointer;
 }
 
@@ -1503,7 +1503,7 @@ section[id],
   padding: 0;
   position: sticky;
   top: 100px;
-  z-index: 996;
+  z-index: 10;
   background: #fff;
 }
 
@@ -1562,7 +1562,8 @@ section[id],
 }
 
 .res-input {
-  height: 42px;
+  height: 25px !important;
+  font-size: 0.5rem;
   box-sizing: border-box;
 }
 
@@ -1571,15 +1572,27 @@ section[id],
   gap: 12px;
   margin-top: 10px;
   justify-content: flex-start;
-  align-items: flex-end;
+  align-items: center;
 }
 
-.res-filter-inline {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
+.res-filter-label {
   margin-left: auto;
+  margin-bottom: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.res-category-select {
+  flex-shrink: 0;
+  width: 150px !important;
+  height: 30px !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+  font-size: 15px;
+  box-sizing: border-box;
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px;
 }
 
 .res-filter-inline .res-label {
@@ -1588,8 +1601,15 @@ section[id],
 }
 
 .res-filter-inline .res-category-select {
-  height: 42px;
+  height: 30px !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+  font-size: 15px;
   box-sizing: border-box;
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px;
+  width: 200px;
 }
 
 .res-msg-error {
@@ -1660,7 +1680,7 @@ section[id],
   }
 
   .res-input {
-    height: 36px;
+    height: 42px;
     font-size: 0.85rem;
     padding: 4px 8px;
   }
@@ -1674,12 +1694,25 @@ section[id],
   .res-actions-row {
     margin-top: 8px;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .watch-vehicle-btn,
   .reserve-btn {
     height: 36px !important;
     font-size: 0.85rem !important;
+    flex: 1;
+  }
+
+  .res-filter-label {
+    margin-left: 0;
+    flex-shrink: 0;
+  }
+
+  .res-category-select {
+    width: auto !important;
+    height: 36px !important;
+    padding: 4px 8px !important;
     flex: 1;
   }
 }
@@ -3077,8 +3110,9 @@ section[id],
 --------------------------------------------------------------*/
 #reservation-form input:not([type="hidden"]):not([type="submit"]),
 #reservation-form select {
-  height: 50px !important;
+  height: 43px !important;
   box-sizing: border-box;
+  font-size: 15px;
 }
 
 /*--------------------------------------------------------------
@@ -3703,13 +3737,14 @@ body.auth-page #main {
 .watch-vehicle-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 42px;
   padding: 0 16px;
   background: #e74c3c;
   color: #fff;
   border: none;
   border-radius: 6px;
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -3723,7 +3758,7 @@ body.auth-page #main {
 
 .watch-vehicle-btn .bx-heart,
 .reserve-btn i {
-  font-size: 1.1rem;
+  font-size: 15px;
   margin-right: 6px;
 }
 
@@ -3734,7 +3769,7 @@ body.auth-page #main {
   padding: 0 16px;
   border: none;
   border-radius: 6px;
-  font-size: 20px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
