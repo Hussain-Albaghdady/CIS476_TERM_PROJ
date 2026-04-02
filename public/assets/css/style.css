@@ -914,6 +914,28 @@ section[id],
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.event-item .card-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+}
+
+.event-item .rating-score {
+  font-weight: 700;
+  color: #222;
+}
+
+.event-item .rating-star {
+  color: #f5a623;
+  font-size: 1rem;
+}
+
+.event-item .rating-count {
+  color: #666;
+}
+
 .availability .event-item,
 .avaliablity .event-item {
   margin-bottom: 24px;
@@ -1920,6 +1942,65 @@ section[id],
   background: var(--btn-end);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#account .review-section .info-box {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+#account .review-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#account .review-vehicle {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--title);
+}
+
+#account .review-body {
+  font-size: 0.9rem;
+  color: #444;
+  margin: 0;
+  line-height: 1.5;
+}
+
+#account .review-date {
+  font-size: 0.78rem;
+  color: #999;
+}
+
+#account .review-owner {
+  font-size: 0.82rem;
+  color: #888;
+  font-style: italic;
+}
+
+#account .review-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+#account .review-rating-row .rating-score {
+  font-weight: 700;
+  color: #222;
+}
+
+#account .review-rating-row .rating-star {
+  color: #f5a623;
 }
 
 #account .section-action-header {
@@ -3535,3 +3616,4 @@ body.auth-page #main {
 #history-section {
   display: none;
 }
+

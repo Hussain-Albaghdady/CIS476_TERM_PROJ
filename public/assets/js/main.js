@@ -339,6 +339,11 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="card-text">
               <h2>${[item.year, item.make, item.model].filter(Boolean).join(" ") || item.category || "Vehicle"}</h2>
               <p class="hosted-by">Hosted By ${item.host_fname || "Unknown"}</p>
+              <p class="card-rating">
+                <span class="rating-score">${item.avg_rating ? Number(item.avg_rating).toFixed(1) : "N/A"}</span>
+                <span class="rating-star">&#9733;</span>
+                <span class="rating-count">(${item.review_count || 0})</span>
+              </p>
               <p class="desc">${item.description || ""}</p>
               ${item.range ? `<p class="range"><b>Range:</b> ${item.range} mi</p>` : ""}
               <p class="rate">Rate: $${item.rental_rate_per_day} / day</p>
@@ -659,6 +664,12 @@ document.addEventListener("DOMContentLoaded", function () {
           <img src="${imgUrl}" class="img-fluid" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}">
           <div class="card-text">
             <h2>${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h2>
+            <p class="hosted-by">Hosted By ${eq.host_fname || "Unknown"}</p>
+            <p class="card-rating">
+              <span class="rating-score">${eq.avg_rating ? Number(eq.avg_rating).toFixed(1) : "N/A"}</span>
+              <span class="rating-star">&#9733;</span>
+              <span class="rating-count">(${eq.review_count || 0})</span>
+            </p>
             <p class="desc">${eq.description || ""}</p>
             ${eq.range ? `<p class="range"><b>Range:</b> ${eq.range} mi</p>` : ""}
             ${eq.pickup_location ? `<p class="range"><b>Pick-Up:</b> ${eq.pickup_location}</p>` : ""}
@@ -704,8 +715,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (other !== this) {
               other.checked = false;
               other.disabled = true;
-              other.closest(".col-md-4").style.opacity = "0.4";
-              other.closest(".col-md-4").style.pointerEvents = "none";
+              other.closest(".event-item").style.opacity = "0.4";
+              other.closest(".event-item").style.pointerEvents = "none";
             }
           });
         } else {
@@ -724,8 +735,8 @@ document.addEventListener("DOMContentLoaded", function () {
           // Restore all other vehicle cards
           document.querySelectorAll(".vehicle-checkbox").forEach((other) => {
             other.disabled = false;
-            other.closest(".col-md-4").style.opacity = "";
-            other.closest(".col-md-4").style.pointerEvents = "";
+            other.closest(".event-item").style.opacity = "";
+            other.closest(".event-item").style.pointerEvents = "";
           });
         }
       });
