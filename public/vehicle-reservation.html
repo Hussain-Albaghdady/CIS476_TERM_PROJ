@@ -201,6 +201,19 @@
                 <button type="submit" name="submit" class="form-btn reserve-btn">
                   <i class="bx bx-calendar-check"></i> Reserve Selected Vehicle
                 </button>
+                <div class="res-filter-inline">
+                  <label for="vehicle-category" class="res-label">Filter by Type:</label>
+                  <select id="vehicle-category" class="res-input res-category-select">
+                    <option value="">-- All Types --</option>
+                    <option value="Compact SUV">Compact SUV</option>
+                    <option value="Minivan">Minivan</option>
+                    <option value="Passenger Van">Passenger Van</option>
+                    <option value="Pickup">Pickup</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Sports Car">Sports Car</option>
+                    <option value="SUV">SUV</option>
+                  </select>
+                </div>
               </div>
 
               <!-- Hidden inputs -->
@@ -217,21 +230,6 @@
       <section id="vehicle" class="vehicle-section py-4">
         <div class="container">
           <h3 class="mb-4">Available Vehicles</h3>
-          <div class="res-filter-row d-flex flex-wrap mb-3">
-            <div>
-              <label for="vehicle-category" class="form-label">Filter by Vehicle Type:</label>
-              <select id="vehicle-category" class="form-control res-category-select">
-                <option value="">-- All Types --</option>
-                <option value="Compact SUV">Compact SUV</option>
-                <option value="Minivan">Minivan</option>
-                <option value="Passenger Van">Passenger Van</option>
-                <option value="Pickup">Pickup</option>
-                <option value="Sedan">Sedan</option>
-                <option value="Sports Car">Sports Car</option>
-                <option value="SUV">SUV</option>
-              </select>
-            </div>
-          </div>
           <div id="date-filter-msg" class="alert alert-info res-date-msg"></div>
           <div id="vehicle-list" class="row"></div>
         </div>

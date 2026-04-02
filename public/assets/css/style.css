@@ -1476,10 +1476,10 @@ section[id],
 .res-form-wrapper form {
   width: 100% !important;
   text-align: left !important;
-  padding: 20px;
+  padding: 20px 30px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .res-form-wrapper form input,
@@ -1500,14 +1500,25 @@ section[id],
 }
 
 .res-section-no-bottom {
-  padding-bottom: 0;
+  padding: 0;
+  position: sticky;
+  top: 100px;
+  z-index: 996;
+  background: #fff;
+}
+
+.res-section-no-bottom .container {
+  max-width: 100%;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .res-container {
-  max-width: 1400px;
-  width: 95%;
-  margin: 0 auto;
-  padding-bottom: 0;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .res-form-wrapper {
@@ -1560,7 +1571,25 @@ section[id],
   gap: 12px;
   margin-top: 10px;
   justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.res-filter-inline {
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.res-filter-inline .res-label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.res-filter-inline .res-category-select {
+  height: 42px;
+  box-sizing: border-box;
 }
 
 .res-msg-error {
@@ -1589,6 +1618,70 @@ section[id],
   max-width: 500px;
   padding: 6px 12px;
   font-size: 0.9em;
+}
+
+/* Mobile: compact reservation form */
+@media (max-width: 768px) {
+  .res-section-no-bottom {
+    top: 70px;
+  }
+
+  .res-form-wrapper form {
+    padding: 10px 14px !important;
+  }
+
+  .res-form-title {
+    display: none;
+  }
+
+  .res-fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .res-field-group {
+    min-width: unset;
+  }
+
+  /* Billing address and payment span full width */
+  .res-field-group:nth-child(5),
+  .res-field-group:nth-child(6) {
+    grid-column: span 2;
+  }
+
+  .res-label {
+    font-size: 0.72rem;
+    margin-bottom: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #666;
+  }
+
+  .res-input {
+    height: 36px;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+
+  .add-new-btn {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    margin-top: 2px;
+  }
+
+  .res-actions-row {
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .watch-vehicle-btn,
+  .reserve-btn {
+    height: 36px !important;
+    font-size: 0.85rem !important;
+    flex: 1;
+  }
 }
 
 .res-modal {
@@ -3610,7 +3703,6 @@ body.auth-page #main {
 .watch-vehicle-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
   height: 42px;
   padding: 0 16px;
   background: #e74c3c;
@@ -3629,8 +3721,10 @@ body.auth-page #main {
   background: #c0392b;
 }
 
-.watch-vehicle-btn .bx-heart {
+.watch-vehicle-btn .bx-heart,
+.reserve-btn i {
   font-size: 1.1rem;
+  margin-right: 6px;
 }
 
 .reserve-btn {
