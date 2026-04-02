@@ -45,7 +45,13 @@
       <div class="modal-box">
         <span class="modal-msg" id="login-error-modal-message"></span>
         <br /><br />
-        <button onclick="document.getElementById('login-error-modal').style.display='none'">OK</button>
+        <button
+          onclick="
+            document.getElementById('login-error-modal').style.display = 'none'
+          "
+        >
+          OK
+        </button>
       </div>
     </div>
 
@@ -80,19 +86,42 @@
         <form action="/login" method="post">
           <div class="field-group">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" required placeholder="Enter your username" />
+            <input
+              type="text"
+              id="username"
+              name="username"
+              required
+              placeholder="Enter your username"
+            />
           </div>
           <div class="field-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required placeholder="Enter your password" />
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              placeholder="Enter your password"
+            />
           </div>
 
-          <input type="submit" name="submit" value="Sign In" class="btn-primary-ds login-submit" />
+          <input
+            type="submit"
+            name="submit"
+            value="Sign In"
+            class="btn-primary-ds login-submit"
+          />
 
           <hr class="login-divider" />
 
-          <a href="passwordresetform.html" class="btn-submit-ds login-action-btn">Forgot Password?</a>
-          <a href="register_form.html" class="btn-back-ds login-action-btn">Create an Account</a>
+          <a
+            href="passwordResetForm.html"
+            class="btn-submit-ds login-action-btn"
+            >Forgot Password?</a
+          >
+          <a href="register_form.html" class="btn-back-ds login-action-btn"
+            >Create an Account</a
+          >
         </form>
       </div>
     </main>
