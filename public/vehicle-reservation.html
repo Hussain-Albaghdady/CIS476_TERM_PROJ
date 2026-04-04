@@ -42,7 +42,7 @@
 
   <body>
     <!-- ======= Header ======= -->
-    <header id="header">
+    <header id="header" class="res-header">
       <div class="container">
         <div class="logo float-left">
           <a href="Home.html"
@@ -89,7 +89,9 @@
 
     <div id="page-header" class="res-page-header">
       <div class="container text-center" id="welcome">
-        <div class="d-flex flex-column justify-content-center align-items-center">
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+        >
           <h2 data-aos="fade-up">Welcome, <span>Renter</span></h2>
           <img
             id="logo-img"
@@ -98,7 +100,11 @@
             alt="logo"
             data-aos="zoom-out"
           />
-          <h1 id="logo-fallback" class="gradient-text res-logo-fallback" data-aos="fade-up">
+          <h1
+            id="logo-fallback"
+            class="gradient-text res-logo-fallback"
+            data-aos="fade-up"
+          >
             <span>DriveShare</span>
           </h1>
           <p data-aos="fade-up" data-aos-delay="100">
@@ -117,7 +123,11 @@
     </div>
 
     <!-- Mobile reservation toggle button -->
-    <button id="toggle-reservation-btn" aria-label="Toggle reservation form" aria-expanded="true">
+    <button
+      id="toggle-reservation-btn"
+      aria-label="Toggle reservation form"
+      aria-expanded="true"
+    >
       <i class="bx bx-calendar"></i> Reservation
     </button>
 
@@ -167,8 +177,15 @@
                   />
                 </div>
                 <div class="res-field-group">
-                  <label for="location" class="res-label">Pickup Location</label>
-                  <select id="location" name="location" required class="res-input">
+                  <label for="location" class="res-label"
+                    >Pickup Location</label
+                  >
+                  <select
+                    id="location"
+                    name="location"
+                    required
+                    class="res-input"
+                  >
                     <option value="">-- All Location --</option>
                     <option value="Dearborn">Dearborn</option>
                     <option value="Warren">Warren</option>
@@ -180,8 +197,15 @@
                 </div>
                 <div class="res-field-group">
                   <label for="address" class="res-label">Billing Address</label>
-                  <select id="address" name="address" required class="res-input">
-                    <option value="" disabled selected>-- Choose Address --</option>
+                  <select
+                    id="address"
+                    name="address"
+                    required
+                    class="res-input"
+                  >
+                    <option value="" disabled selected>
+                      -- Choose Address --
+                    </option>
                   </select>
                   <a href="account.html?open=address" class="add-new-btn">
                     + Add New Address
@@ -189,8 +213,15 @@
                 </div>
                 <div class="res-field-group">
                   <label for="payment" class="res-label">Payment Method</label>
-                  <select id="payment" name="payment" required class="res-input">
-                    <option value="" disabled selected>-- Choose Payment --</option>
+                  <select
+                    id="payment"
+                    name="payment"
+                    required
+                    class="res-input"
+                  >
+                    <option value="" disabled selected>
+                      -- Choose Payment --
+                    </option>
                   </select>
                   <a href="/account.html?open=payment" class="add-new-btn">
                     + Add New Payment Method
@@ -203,11 +234,20 @@
                 <button type="button" class="watch-vehicle-btn">
                   <i class="bx bx-heart"></i> Watch Selected Vehicle
                 </button>
-                <button type="submit" name="submit" class="form-btn reserve-btn">
+                <button
+                  type="submit"
+                  name="submit"
+                  class="form-btn reserve-btn"
+                >
                   <i class="bx bx-calendar-check"></i> Reserve Selected Vehicle
                 </button>
-                <label for="vehicle-category" class="res-label res-filter-label">Filter by Type:</label>
-                <select id="vehicle-category" class="res-input res-category-select">
+                <label for="vehicle-category" class="res-label res-filter-label"
+                  >Filter by Type:</label
+                >
+                <select
+                  id="vehicle-category"
+                  class="res-input res-category-select"
+                >
                   <option value="">-- All Types --</option>
                   <option value="Compact SUV">Compact SUV</option>
                   <option value="Minivan">Minivan</option>
@@ -261,7 +301,6 @@
               <li><a href="cookies_settings.html">Cookies Settings</a></li>
             </ul>
           </div>
-
         </div>
         <div class="credits">
           Designed by <a href="Home.html#team">Meaad Hassan</a>
@@ -287,38 +326,60 @@
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        var section = document.querySelector('.reservation-section');
-        var toggleBtn = document.getElementById('toggle-reservation-btn');
+      document.addEventListener("DOMContentLoaded", function () {
+        // Restrict dates to today and forward
+        var today = new Date().toISOString().split("T")[0];
+        var startInput = document.getElementById("start_date");
+        var endInput = document.getElementById("end_date");
+        if (startInput) startInput.min = today;
+        if (endInput) endInput.min = today;
+
+        // Keep return date min in sync with start date
+        if (startInput && endInput) {
+          startInput.addEventListener("change", function () {
+            endInput.min = this.value || today;
+            if (endInput.value && endInput.value < this.value) {
+              endInput.value = this.value;
+            }
+          });
+        }
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var section = document.querySelector(".reservation-section");
+        var toggleBtn = document.getElementById("toggle-reservation-btn");
         if (!section || !toggleBtn) return;
 
         var hidden = false;
-        toggleBtn.classList.add('res-toggle-open');
+        toggleBtn.classList.add("res-toggle-open");
 
-        toggleBtn.addEventListener('click', function () {
+        toggleBtn.addEventListener("click", function () {
           hidden = !hidden;
           if (hidden) {
-            section.classList.add('res-mobile-hidden');
-            toggleBtn.classList.remove('res-toggle-open');
-            toggleBtn.setAttribute('aria-expanded', 'false');
+            section.classList.add("res-mobile-hidden");
+            toggleBtn.classList.remove("res-toggle-open");
+            toggleBtn.setAttribute("aria-expanded", "false");
           } else {
-            section.classList.remove('res-mobile-hidden');
-            toggleBtn.classList.add('res-toggle-open');
-            toggleBtn.setAttribute('aria-expanded', 'true');
+            section.classList.remove("res-mobile-hidden");
+            toggleBtn.classList.add("res-toggle-open");
+            toggleBtn.setAttribute("aria-expanded", "true");
           }
         });
 
         // Hide billing/payment fields on mobile until a vehicle is selected
-        var fieldsRow = document.querySelector('.res-fields-row');
-        var vehicleList = document.getElementById('vehicle-list');
+        var fieldsRow = document.querySelector(".res-fields-row");
+        var vehicleList = document.getElementById("vehicle-list");
         if (fieldsRow && vehicleList) {
-          vehicleList.addEventListener('change', function (e) {
-            if (e.target && e.target.classList.contains('vehicle-checkbox')) {
-              var anyChecked = document.querySelector('.vehicle-checkbox:checked');
+          vehicleList.addEventListener("change", function (e) {
+            if (e.target && e.target.classList.contains("vehicle-checkbox")) {
+              var anyChecked = document.querySelector(
+                ".vehicle-checkbox:checked",
+              );
               if (anyChecked) {
-                fieldsRow.classList.add('vehicle-selected');
+                fieldsRow.classList.add("vehicle-selected");
               } else {
-                fieldsRow.classList.remove('vehicle-selected');
+                fieldsRow.classList.remove("vehicle-selected");
               }
             }
           });

@@ -209,7 +209,9 @@ h6,
     display: none;
   }
 }
-
+.res-header {
+  height: 125px !important;
+}
 /*--------------------------------------------------------------
 # Navigation Menu
 --------------------------------------------------------------*/
@@ -1644,7 +1646,7 @@ section[id],
 /* Mobile: compact reservation form */
 @media (max-width: 768px) {
   .res-section-no-bottom {
-    top: 100px;
+    top: 120px;
   }
 
   .res-form-wrapper form {
@@ -1688,10 +1690,10 @@ section[id],
   }
 
   .res-input {
-    height: 36px;
+    height: 36px !important;
     font-size: 0.8rem;
     padding: 4px 8px;
-    width: 100%;
+    width: 97% !important;
     box-sizing: border-box;
   }
 
@@ -1700,6 +1702,8 @@ section[id],
     font-size: 0.75rem;
     padding: 0 6px;
     line-height: 36px;
+    width: 90% !important;
+    box-sizing: border-box;
   }
 
   .add-new-btn {
@@ -1735,22 +1739,19 @@ section[id],
     flex: 1;
   }
 
-  /* Slide-hide the reservation section on mobile */
-  .reservation-section {
+  /* Slide-hide the reservation form on mobile — animate inner wrapper, not sticky section */
+  .reservation-section .res-form-wrapper {
     transition:
       max-height 0.35s ease,
-      opacity 0.3s ease,
-      padding 0.3s ease;
+      opacity 0.3s ease;
     overflow: hidden;
     max-height: 800px;
     opacity: 1;
   }
 
-  .reservation-section.res-mobile-hidden {
+  .reservation-section.res-mobile-hidden .res-form-wrapper {
     max-height: 0;
     opacity: 0;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
     pointer-events: none;
   }
 }
@@ -1766,7 +1767,7 @@ section[id],
     align-items: center;
     gap: 6px;
     position: fixed;
-    top: 66px;
+    top: 85px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1100;
