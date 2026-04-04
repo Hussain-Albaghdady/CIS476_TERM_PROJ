@@ -1682,11 +1682,18 @@ section[id],
   }
 
   .res-input {
-    height: 42px;
-    font-size: 0.85rem;
+    height: 36px;
+    font-size: 0.8rem;
     padding: 4px 8px;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  input[type="date"].res-input {
+    height: 36px;
+    font-size: 0.75rem;
+    padding: 0 6px;
+    line-height: 36px;
   }
 
   .add-new-btn {
