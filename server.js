@@ -181,15 +181,27 @@ const upload = multer({
 });
 
 app.use((req, res, next) => {
-  const origin = process.env.CORS_ORIGIN || "*";
-  res.header("Access-Control-Allow-Origin", origin);
+  const allowedOrigins = (process.env.CORS_ORIGIN || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const requestOrigin = req.headers.origin;
+  let originHeader = "*";
+  if (allowedOrigins.length === 0) {
+    originHeader = "*";
+  } else if (allowedOrigins.includes(requestOrigin)) {
+    originHeader = requestOrigin;
+  } else {
+    originHeader = allowedOrigins[0];
+  }
+  res.header("Access-Control-Allow-Origin", originHeader);
   res.header("Vary", "Origin");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization",
   );
-  if (origin !== "*") res.header("Access-Control-Allow-Credentials", "true");
+  if (originHeader !== "*") res.header("Access-Control-Allow-Credentials", "true");
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });

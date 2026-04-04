@@ -484,6 +484,9 @@ document.addEventListener("DOMContentLoaded", function () {
               <li id="dashboard-page-link">
                 <a href="account.html" id="dashboard-page-link-anchor">Dashboard</a>
               </li>
+              <li id="return-page-link">
+                <a href="my-account.html#return" id="return-page-link-anchor">New Dashboard</a>
+              </li>
               <li id="customer-page-link">
                 <a href="vehicle-reservation.html" id="customer-page-link-anchor">Rent Vehicles</a>
               </li>

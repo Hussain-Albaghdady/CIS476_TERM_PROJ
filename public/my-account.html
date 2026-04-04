@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>DriveShare — My Account</title>
+    <link href="assets/img/favicon_io/favicon-2.png" rel="icon" />
+    <link href="assets/img/favicon_io/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet" />
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet" />
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+    <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet" />
+    <link href="assets/vendor/venobox/venobox.css" rel="stylesheet" />
+    <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet" />
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+
+    <style>
+      /* ── Layout ─────────────────────────────────────────── */
+      .acct-wrap {
+        display: flex;
+        min-height: calc(100vh - 160px);
+        max-width: 1280px;
+        margin: 32px auto 48px;
+        padding: 0 16px;
+        gap: 28px;
+        align-items: flex-start;
+      }
+
+      /* ── Sidebar ─────────────────────────────────────────── */
+      .acct-sidebar {
+        flex-shrink: 0;
+        width: 240px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        overflow: hidden;
+        position: sticky;
+        top: 90px;
+      }
+
+      .acct-sidebar-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 18px;
+        border-bottom: 1px solid #e8eaed;
+        background: #f8f9fa;
+      }
+
+      .acct-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0541c4, #1a73e8);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        letter-spacing: 0.5px;
+      }
+
+      .acct-sidebar-name {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1a1a2e;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .acct-sidebar-sub {
+        font-size: 12px;
+        color: #6c757d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .acct-nav {
+        list-style: none;
+        margin: 0;
+        padding: 8px 0;
+      }
+
+      .acct-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 11px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #444;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+        border-left: 3px solid transparent;
+        user-select: none;
+      }
+
+      .acct-nav-item i {
+        font-size: 18px;
+        flex-shrink: 0;
+        color: #888;
+        transition: color 0.15s;
+      }
+
+      .acct-nav-item:hover {
+        background: #f0f4ff;
+        color: #0541c4;
+      }
+
+      .acct-nav-item:hover i {
+        color: #0541c4;
+      }
+
+      .acct-nav-item.active {
+        background: #eef2ff;
+        color: #0541c4;
+        border-left-color: #0541c4;
+        font-weight: 700;
+      }
+
+      .acct-nav-item.active i {
+        color: #0541c4;
+      }
+
+      .acct-nav-divider {
+        height: 1px;
+        background: #e8eaed;
+        margin: 6px 0;
+      }
+
+      .acct-nav-logout {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 11px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #dc3545;
+        cursor: pointer;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+        transition: background 0.15s;
+      }
+
+      .acct-nav-logout:hover {
+        background: #fff5f5;
+        color: #c0392b;
+        text-decoration: none;
+      }
+
+      .acct-nav-logout i {
+        font-size: 18px;
+        color: #dc3545;
+      }
+
+      /* ── Content Area ────────────────────────────────────── */
+      .acct-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .acct-panel {
+        display: none;
+      }
+
+      .acct-panel.active {
+        display: block;
+      }
+
+      .acct-panel-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e8eaed;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .acct-panel-title i {
+        color: #0541c4;
+        font-size: 24px;
+      }
+
+      /* ── Profile Panel ───────────────────────────────────── */
+      .profile-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        padding: 28px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 20px;
+      }
+
+      .profile-avatar-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0541c4, #1a73e8);
+        color: #fff;
+        font-size: 28px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .profile-info h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0 0 4px;
+      }
+
+      .profile-info .profile-username {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+
+      .profile-fields {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        overflow: hidden;
+      }
+
+      .profile-field-row {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f0f0f0;
+        gap: 16px;
+      }
+
+      .profile-field-row:last-child {
+        border-bottom: none;
+      }
+
+      .profile-field-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #eef2ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .profile-field-icon i {
+        font-size: 18px;
+        color: #0541c4;
+      }
+
+      .profile-field-label {
+        font-size: 12px;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+      }
+
+      .profile-field-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+
+      /* ── Panel cards / boxes ─────────────────────────────── */
+      .acct-box {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+
+      .acct-box-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* ── Manage Booking sub-section separator ────────────── */
+      .acct-sub-divider {
+        border: none;
+        border-top: 2px dashed #e8eaed;
+        margin: 28px 0;
+      }
+
+      .acct-sub-heading {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .acct-sub-heading i {
+        color: #0541c4;
+      }
+
+      /* ── Add-form panel (same open/close as original) ────── */
+      .add-form-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s ease;
+      }
+
+      .add-form-panel.open {
+        max-height: 1200px;
+      }
+
+      /* ── Responsive table wrapper ────────────────────────── */
+      .table-wrapper {
+        overflow-x: auto;
+      }
+
+      /* ── Mobile sidebar toggle ───────────────────────────── */
+      .acct-mobile-toggle {
+        display: none;
+        width: 100%;
+        padding: 12px 16px;
+        background: #0541c4;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .acct-mobile-toggle i {
+        font-size: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .acct-wrap {
+          flex-direction: column;
+          margin: 16px auto 32px;
+          gap: 0;
+        }
+
+        .acct-sidebar {
+          width: 100%;
+          position: static;
+          border-radius: 8px;
+          margin-bottom: 16px;
+        }
+
+        .acct-sidebar.collapsed .acct-nav,
+        .acct-sidebar.collapsed .acct-sidebar-user {
+          display: none;
+        }
+
+        .acct-mobile-toggle {
+          display: flex;
+        }
+
+        .profile-card {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header">
+      <div class="container">
+        <div class="logo float-left">
+          <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="" class="img-fluid" /></a>
+        </div>
+        <div class="mobile">
+          <div class="login float-right">
+            <h1><a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i> | Logout</a></h1>
+          </div>
+        </div>
+        <nav class="nav-menu float-right d-none d-lg-block">
+          <ul id="main-navbar-list">
+            <li><a href="Home.html">Home</a></li>
+            <li><a href="Home.html#about">About Us</a></li>
+            <li><a href="Home.html#location">Locations</a></li>
+            <li><a href="Home.html#contact">Contact Us</a></li>
+            <li id="login-link-li">
+              <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link">
+                <i class="icofont-logout"></i> | Logout
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <!-- End Header -->
+
+    <div id="page-header" style="background-color:#f9fafb">
+      <div class="container text-center" id="welcome">
+        <div class="d-flex flex-column justify-content-center align-items-center">
+          <h2 data-aos="fade-up">Welcome, <span>Customer</span></h2>
+          <img id="logo-img" src="assets/img/DriveShare_Full_Logo.png" class="img-fluid page-image" alt="" data-aos="zoom-out" />
+          <h1 id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display:none"><span>DriveShare</span></h1>
+          <p data-aos="fade-up" data-aos-delay="100">Rent a ride. Share the journey.<br /></p>
+        </div>
+      </div>
+      <div class="user-container">
+        <div class="content">
+          <h3 data-aos="fade-up" data-aos-delay="100">
+            <span class="label">Signed in as</span>
+            <span id="user-welcome-name" class="username">Customer</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= Main ======= -->
+    <main id="main" class="hidden-page">
+      <div class="acct-wrap">
+
+        <!-- ── Mobile toggle ── -->
+        <button class="acct-mobile-toggle" id="sidebar-toggle">
+          <i class="bx bx-menu"></i> <span id="sidebar-toggle-label">My Account</span>
+        </button>
+
+        <!-- ── Sidebar ── -->
+        <aside class="acct-sidebar" id="acct-sidebar">
+          <div class="acct-sidebar-user">
+            <div class="acct-avatar" id="sidebar-avatar">?</div>
+            <div style="min-width:0">
+              <div class="acct-sidebar-name" id="sidebar-name">Loading…</div>
+              <div class="acct-sidebar-sub" id="sidebar-username"></div>
+            </div>
+          </div>
+
+          <ul class="acct-nav">
+            <li class="acct-nav-item active" data-panel="profile">
+              <i class="bx bx-user-circle"></i> Profile
+            </li>
+            <li class="acct-nav-item" data-panel="orders">
+              <i class="bx bx-receipt"></i> Orders
+            </li>
+            <li class="acct-nav-item" data-panel="address">
+              <i class="bx bx-map"></i> Address
+            </li>
+            <li class="acct-nav-item" data-panel="payments">
+              <i class="bx bx-credit-card"></i> Payments
+            </li>
+            <li class="acct-nav-item" data-panel="reviews">
+              <i class="bx bx-star"></i> My Reviews
+            </li>
+            <li class="acct-nav-item" data-panel="owner-reviews">
+              <i class="bx bx-comment-check"></i> Reviews by Owner
+            </li>
+            <li class="acct-nav-item" data-panel="messaging">
+              <i class="bx bx-message-dots"></i> Messaging
+            </li>
+            <li class="acct-nav-divider"></li>
+            <li><a href="/logout" class="acct-nav-logout"><i class="bx bx-log-out"></i> Sign Out</a></li>
+          </ul>
+        </aside>
+
+        <!-- ── Content ── -->
+        <div class="acct-content">
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Profile                                     -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-profile" class="acct-panel active">
+            <div class="acct-panel-title"><i class="bx bx-user-circle"></i> Profile</div>
+
+            <div class="profile-card">
+              <div class="profile-avatar-lg" id="profile-avatar-lg">?</div>
+              <div class="profile-info">
+                <h3 id="profile-full-name">Loading…</h3>
+                <p class="profile-username" id="profile-username-sub"></p>
+              </div>
+            </div>
+
+            <div class="profile-fields">
+              <div class="profile-field-row">
+                <div class="profile-field-icon"><i class="bx bx-user"></i></div>
+                <div>
+                  <div class="profile-field-label">Full Name</div>
+                  <div class="profile-field-value" id="prof-name">—</div>
+                </div>
+              </div>
+              <div class="profile-field-row">
+                <div class="profile-field-icon"><i class="bx bx-at"></i></div>
+                <div>
+                  <div class="profile-field-label">Username</div>
+                  <div class="profile-field-value" id="prof-username">—</div>
+                </div>
+              </div>
+              <div class="profile-field-row">
+                <div class="profile-field-icon"><i class="bx bx-envelope"></i></div>
+                <div>
+                  <div class="profile-field-label">Email</div>
+                  <div class="profile-field-value" id="prof-email">—</div>
+                </div>
+              </div>
+              <div class="profile-field-row">
+                <div class="profile-field-icon"><i class="bx bx-phone"></i></div>
+                <div>
+                  <div class="profile-field-label">Phone</div>
+                  <div class="profile-field-value" id="prof-phone">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Orders                                      -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-orders" class="acct-panel">
+            <div class="acct-panel-title"><i class="bx bx-receipt"></i> Orders</div>
+
+            <!-- Order History -->
+            <div class="acct-box">
+              <div class="acct-box-title">Order History</div>
+              <div class="table-wrapper">
+                <table class="responsive-table">
+                  <thead>
+                    <tr>
+                      <th>OrderID</th>
+                      <th>Start Date</th>
+                      <th>Return Date</th>
+                      <th>Status</th>
+                      <th>Vehicle</th>
+                      <th>Mileage</th>
+                      <th>Pick-Up Location</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orders-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <hr class="acct-sub-divider" />
+
+            <!-- Manage Booking -->
+            <div class="acct-sub-heading"><i class="bx bx-calendar-edit"></i> Manage Your Booking</div>
+            <p style="color:#6c757d;margin-bottom:20px">Return an active rental or cancel an upcoming reservation.</p>
+
+            <div id="return-success" class="alert alert-success" style="display:none"></div>
+            <div id="return-error"   class="alert alert-danger"  style="display:none"></div>
+
+            <div class="acct-box">
+              <form id="return-form">
+                <div class="form-group">
+                  <label id="form-header" for="vehicleSelect">Your Active Booking</label>
+                  <select class="form-control" id="vehicleSelect" name="vehicleId" required>
+                    <option value="">Loading…</option>
+                  </select>
+                  <small id="vehicleHelp" class="form-text text-muted">Select the booking you wish to manage.</small>
+                </div>
+                <div class="form-group" id="mileage-group" style="display:none">
+                  <label for="returnMileage">Current Mileage at Return *</label>
+                  <label id="currentMileage" for="returnMileage">Mileage at Pickup: -</label>
+                  <input type="number" id="returnMileage" class="form-control" min="0" placeholder="Enter current odometer reading" />
+                  <small class="form-text text-muted">Must be equal to or greater than the mileage when you rented.</small>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <button id="submit" type="submit" class="btn btn-primary" style="display:none">Return Vehicle</button>
+                  <button id="cancel-booking-btn" type="button" class="btn btn-danger" style="display:none">Cancel Booking</button>
+                </div>
+              </form>
+              <div id="no-vehicle-message" class="alert alert-info" style="display:none;text-align:center;margin-top:12px">
+                You have no active bookings or upcoming reservations.
+              </div>
+            </div>
+          </div>
