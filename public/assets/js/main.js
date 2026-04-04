@@ -484,14 +484,14 @@ document.addEventListener("DOMContentLoaded", function () {
               <li id="dashboard-page-link">
                 <a href="account.html" id="dashboard-page-link-anchor">Dashboard</a>
               </li>
-              <li id="return-page-link">
-                <a href="my-account.html#return" id="return-page-link-anchor">New Dashboard</a>
+              <li id="my-account-page-link">
+                <a href="my-account.html" id="my-account-page-link-anchor">New Dashboard</a>
               </li>
               <li id="customer-page-link">
                 <a href="vehicle-reservation.html" id="customer-page-link-anchor">Rent Vehicles</a>
               </li>
-              <li id="return-page-link">
-                <a href="account.html#return" id="return-page-link-anchor">Manage Bookings</a>
+              <li id="manage-bookings-page-link">
+                <a href="account.html" id="manage-bookings-page-link-anchor" onclick="sessionStorage.setItem('scrollToReturn','1');sessionStorage.setItem('highlightManageBookings','1')">Manage Bookings</a>
               </li>
             </ul>
           `;
@@ -556,9 +556,17 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
         const current = window.location.pathname + window.location.hash;
-        if (current.endsWith("account.html")) {
+        if (current.includes("my-account.html")) {
           document
-            .querySelectorAll("#dashboard-page-link-anchor")
+            .querySelectorAll("#my-account-page-link-anchor")
+            .forEach((a) => a.parentElement.classList.add("active"));
+        }
+        if (current.endsWith("account.html") && !current.includes("my-account.html")) {
+          var highlightFlag = sessionStorage.getItem("highlightManageBookings");
+          sessionStorage.removeItem("highlightManageBookings");
+          var anchorId = highlightFlag ? "#manage-bookings-page-link-anchor" : "#dashboard-page-link-anchor";
+          document
+            .querySelectorAll(anchorId)
             .forEach((a) => a.parentElement.classList.add("active"));
         }
         if (current.endsWith("vehicle-reservation.html")) {
@@ -566,19 +574,15 @@ document.addEventListener("DOMContentLoaded", function () {
             .querySelectorAll("#customer-page-link-anchor")
             .forEach((a) => a.parentElement.classList.add("active"));
         }
-        if (current.endsWith("account.html#return")) {
-          document
-            .querySelectorAll("#return-page-link-anchor")
-            .forEach((a) => a.parentElement.classList.add("active"));
-        }
+
         if (current.endsWith("adminPage.html")) {
           document
             .querySelectorAll('a[href$="adminPage.html"]')
             .forEach((a) => a.parentElement.classList.add("active"));
         }
-        if (current.endsWith("maintainancePage.html")) {
+        if (current.endsWith("ownerPage.html")) {
           document
-            .querySelectorAll('a[href$="maintainancePage.html"]')
+            .querySelectorAll('a[href$="ownerPage.html"]')
             .forEach((a) => a.parentElement.classList.add("active"));
         }
       });

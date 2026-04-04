@@ -1555,6 +1555,7 @@ app.post("/api/return", requireLogin, async (req, res) => {
           $set: {
             vehicle_id: null,
             status: "Complete",
+            return_mileage: returnMileageInt,
             updated_at: new Date()
               .toISOString()
               .replace("T", " ")
@@ -1855,6 +1856,10 @@ app.get("/api/myreservations", async (req, res) => {
         (id) =>
           vehicleMap[id.toString()] || { name: "Unknown", mileage: undefined },
       );
+      let miles_driven = 0;
+      if (r.status !== "Cancelled" && r.return_mileage != null && r.mileage != null) {
+        miles_driven = Math.max(0, Number(r.return_mileage) - Number(r.mileage));
+      }
       return {
         order_id: r.orderId || "N/A",
         order_date: r.order_date,
@@ -1864,9 +1869,7 @@ app.get("/api/myreservations", async (req, res) => {
         location: r.location || "",
         total_cost: r.total_cost || 0,
         items: vehicleEntries.map((v) => v.name),
-        mileage: vehicleEntries
-          .map((v) => v.mileage)
-          .filter((m) => m !== undefined),
+        miles_driven,
       };
     });
 
