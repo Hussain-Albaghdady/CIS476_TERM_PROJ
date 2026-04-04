@@ -1644,7 +1644,7 @@ section[id],
 /* Mobile: compact reservation form */
 @media (max-width: 768px) {
   .res-section-no-bottom {
-    top: 70px;
+    top: 100px;
   }
 
   .res-form-wrapper form {
@@ -1670,6 +1670,12 @@ section[id],
   .res-field-group:nth-child(5),
   .res-field-group:nth-child(6) {
     grid-column: span 2;
+  }
+
+  /* Hide name, billing/payment until a vehicle is selected on mobile */
+  .res-fields-row:not(.vehicle-selected) .res-field-group:nth-child(5),
+  .res-fields-row:not(.vehicle-selected) .res-field-group:nth-child(6) {
+    display: none;
   }
 
   .res-label {
@@ -1711,8 +1717,10 @@ section[id],
   .watch-vehicle-btn,
   .reserve-btn {
     height: 36px !important;
-    font-size: 0.85rem !important;
+    font-size: calc(0.85rem + 3px) !important;
     flex: 1;
+    justify-content: center;
+    text-align: center;
   }
 
   .res-filter-label {
@@ -1725,6 +1733,69 @@ section[id],
     height: 36px !important;
     padding: 4px 8px !important;
     flex: 1;
+  }
+
+  /* Slide-hide the reservation section on mobile */
+  .reservation-section {
+    transition:
+      max-height 0.35s ease,
+      opacity 0.3s ease,
+      padding 0.3s ease;
+    overflow: hidden;
+    max-height: 800px;
+    opacity: 1;
+  }
+
+  .reservation-section.res-mobile-hidden {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    pointer-events: none;
+  }
+}
+
+/* Mobile toggle button — hidden on desktop */
+#toggle-reservation-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #toggle-reservation-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: fixed;
+    top: 66px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    white-space: nowrap;
+    transition:
+      background 0.2s,
+      opacity 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  #toggle-reservation-btn i {
+    font-size: 1rem;
+  }
+
+  #toggle-reservation-btn.res-toggle-open {
+    background: #27ae60;
+  }
+
+  #toggle-reservation-btn:hover {
+    opacity: 0.9;
   }
 }
 

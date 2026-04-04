@@ -116,6 +116,11 @@
       </div>
     </div>
 
+    <!-- Mobile reservation toggle button -->
+    <button id="toggle-reservation-btn" aria-label="Toggle reservation form" aria-expanded="true">
+      <i class="bx bx-calendar"></i> Reservation
+    </button>
+
     <main id="main" class="hidden-page">
       <!-- Reservation Section -->
       <section class="reservation-section res-section-no-bottom">
@@ -281,6 +286,45 @@
 
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var section = document.querySelector('.reservation-section');
+        var toggleBtn = document.getElementById('toggle-reservation-btn');
+        if (!section || !toggleBtn) return;
+
+        var hidden = false;
+        toggleBtn.classList.add('res-toggle-open');
+
+        toggleBtn.addEventListener('click', function () {
+          hidden = !hidden;
+          if (hidden) {
+            section.classList.add('res-mobile-hidden');
+            toggleBtn.classList.remove('res-toggle-open');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+          } else {
+            section.classList.remove('res-mobile-hidden');
+            toggleBtn.classList.add('res-toggle-open');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+          }
+        });
+
+        // Hide billing/payment fields on mobile until a vehicle is selected
+        var fieldsRow = document.querySelector('.res-fields-row');
+        var vehicleList = document.getElementById('vehicle-list');
+        if (fieldsRow && vehicleList) {
+          vehicleList.addEventListener('change', function (e) {
+            if (e.target && e.target.classList.contains('vehicle-checkbox')) {
+              var anyChecked = document.querySelector('.vehicle-checkbox:checked');
+              if (anyChecked) {
+                fieldsRow.classList.add('vehicle-selected');
+              } else {
+                fieldsRow.classList.remove('vehicle-selected');
+              }
+            }
+          });
+        }
+      });
+    </script>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         fetch("/userdetail")
