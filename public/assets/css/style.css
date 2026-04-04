@@ -2899,6 +2899,16 @@ section[id],
   color: white;
 }
 
+.history-row-cancelled td {
+  text-decoration: line-through;
+  opacity: 0.55;
+  color: #6c757d;
+}
+
+.history-row-cancelled td:last-child {
+  text-decoration: none;
+}
+
 .modal {
   position: fixed;
   top: 0;

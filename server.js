@@ -79,8 +79,8 @@ async function sendReservationEmail(to, reservation, vehicle, last4, baseUrl) {
                   <p style="margin:10px 0 0;font-weight:bold;font-size:22px;color:#ffffff;">${vehicleName}</p>
                   <p style="margin:12px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Current Mileage:</p>
                   <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${Number(vehicle.mileage).toLocaleString()} miles</p>
-                  <p style="margin:10px 0 0;font-size:13px;color:#ffffff;">Miles: Unlimited free Miles</p>
-                  <p style="margin:12px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Your Order Number:</p>
+                  <p style="margin:2px 0 0;font-size:13px;color:#ffffff;">Miles: Unlimited free Miles</p>
+                  <p style="margin:5px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Your Order Number:</p>
                   <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${reservation.orderId}</p>
                 </td>
                 <td width="55%" style="vertical-align:top;text-align:right;">
@@ -1033,6 +1033,9 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
     });
 
     relevant.forEach((r) => {
+      // Exclude cancelled reservations from all financial calculations
+      if (r.status === "Cancelled") return;
+
       const ids = toIdArray(r.history_vehicle_id)
         .map((id) => id.toString())
         .filter((id) => vehicleIdStrings.includes(id));
@@ -1164,6 +1167,7 @@ app.get(
           mileage: r.mileage || "—",
           pickupLocation: r.location || r.pickup_location || "—",
           total: perVehicleCost,
+          status: r.status || "—",
         };
       });
 
@@ -1619,6 +1623,9 @@ app.post("/api/cancel-reservation", requireLogin, async (req, res) => {
         },
       },
     );
+    console.log(
+      `[CANCEL] Reservation ${reservationId} (Order #${resv.orderId}) cancelled by user at ${new Date().toISOString()}`,
+    );
     return res.json({ success: true });
   } catch (err) {
     return res
@@ -1741,49 +1748,51 @@ app.get("/api/myrentals", async (req, res) => {
       .collection("Reservations")
       .find({ user_id: user._id })
       .toArray();
-    const vehicleIdSet = new Set();
-    reservations.forEach((resv) => {
-      toIdArray(resv.vehicle_id).forEach((id) => {
-        vehicleIdSet.add(id.toString());
-      });
-    });
-    if (vehicleIdSet.size === 0) {
+
+    // Filter to only active reservations first, then look up their vehicles
+    const activeReservations = reservations.filter(
+      (r) => r.status === "Booked" || r.status === "Reserved",
+    );
+    if (activeReservations.length === 0) {
       return res.json([]);
     }
-    const vehicleIds = Array.from(vehicleIdSet)
-      .map((id) => {
+
+    const vehicleIds = activeReservations
+      .map((r) => {
+        const rawId = r.vehicle_id || r.history_vehicle_id;
         try {
-          return ObjectId.isValid(id) ? new ObjectId(id) : null;
+          return rawId && ObjectId.isValid(rawId) ? new ObjectId(rawId) : null;
         } catch {
           return null;
         }
       })
       .filter(Boolean);
+
     const vehicles = await db
       .collection("Vehicles")
       .find({ _id: { $in: vehicleIds } })
       .toArray();
-    const result = vehicles
-      .map((eq) => {
-        const resv = reservations.find((r) =>
-          toIdArray(r.vehicle_id).some(
-            (id) => id.toString() === eq._id.toString(),
-          ),
-        );
-        return {
-          id: eq._id,
-          reservationId: resv?._id || null,
-          status: resv?.status || null,
-          name:
-            [eq.year, eq.make, eq.model].filter(Boolean).join(" ") ||
-            eq.name ||
-            "Unknown Vehicle",
-          description: eq.description || "",
-          image: eq.image || "",
-          mileage: eq.mileage ?? null,
-        };
-      })
-      .filter((r) => r.status === "Booked" || r.status === "Reserved");
+    const vehicleMap = {};
+    vehicles.forEach((v) => {
+      vehicleMap[v._id.toString()] = v;
+    });
+
+    const result = activeReservations.map((resv) => {
+      const vid = (resv.vehicle_id || resv.history_vehicle_id)?.toString();
+      const eq = vehicleMap[vid] || {};
+      return {
+        id: eq._id || resv.vehicle_id,
+        reservationId: resv._id,
+        status: resv.status,
+        name:
+          [eq.year, eq.make, eq.model].filter(Boolean).join(" ") ||
+          eq.name ||
+          "Unknown Vehicle",
+        description: eq.description || "",
+        image: eq.image_url || eq.image || "",
+        mileage: eq.mileage ?? null,
+      };
+    });
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch user rentals" });

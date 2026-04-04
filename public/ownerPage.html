@@ -1285,7 +1285,9 @@
         `;
               } else {
                 data.history.forEach(item => {
+                  const cancelled = item.status === 'Cancelled';
                   const tr = document.createElement('tr');
+                  if (cancelled) tr.classList.add('history-row-cancelled');
                   tr.innerHTML = `
             <td data-label="OrderID"><span>${item.orderId || '—'}</span></td>
             <td data-label="Renter"><span>${item.renter || '—'}</span></td>
@@ -1294,7 +1296,7 @@
             <td data-label="Return Date"><span>${formatDate(item.returnDate)}</span></td>
             <td data-label="Mileage"><span>${item.mileage !== undefined && item.mileage !== null && item.mileage !== ''? Number(item.mileage).toLocaleString() + ' mi': '—'}</span></td>
             <td data-label="Pick-Up Location"><span>${item.pickupLocation || '—'}</span></td>
-            <td data-label="Total"><span>$${Number(item.total || 0).toFixed(2)}</span></td>
+            <td data-label="Total"><span>${cancelled ? '<span class="badge badge-danger">Cancelled</span>' : '$' + Number(item.total || 0).toFixed(2)}</span></td>
           `;
                   ordersBody.appendChild(tr);
                 });

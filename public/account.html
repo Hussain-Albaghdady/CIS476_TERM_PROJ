@@ -477,6 +477,25 @@
           <section class="review-section">
             <div class="section-action-header">
               <h3>Reviews</h3>
+              <button
+                type="button"
+                class="btn-add-new"
+                onclick="toggleAddForm('add-Review-panel', this)"
+              >
+                <i class="bx bx-plus"></i>Review Your Rental
+              </button>
+            </div>
+            <div id="add-Review-panel" class="add-form-panel">
+              <form
+                id="add-Review-form"
+                method="POST"
+                action="/reviews"
+                autocomplete="off"
+              ></form>
+              <!-- This form can be implemented to submit reviews in the future -->
+              <p style="text-align: center; padding: 20px 0">
+                Review submission coming soon!
+              </p>
             </div>
             <div class="row" id="review-card-container">
               <!-- placeholder cards -->
@@ -489,7 +508,9 @@
                       <span class="rating-star">&#9733;</span>
                     </span>
                   </div>
-                  <p class="review-body">"Great car, very clean and comfortable for the trip."</p>
+                  <p class="review-body">
+                    "Great car, very clean and comfortable for the trip."
+                  </p>
                   <span class="review-date">March 12, 2025</span>
                 </div>
               </div>
@@ -502,7 +523,9 @@
                       <span class="rating-star">&#9733;</span>
                     </span>
                   </div>
-                  <p class="review-body">"Excellent experience, would rent again without hesitation."</p>
+                  <p class="review-body">
+                    "Excellent experience, would rent again without hesitation."
+                  </p>
                   <span class="review-date">January 4, 2025</span>
                 </div>
               </div>
@@ -528,7 +551,10 @@
                     <span class="rating-score">4.0</span>
                     <span class="rating-star">&#9733;</span>
                   </div>
-                  <p class="review-body">"Great renter, returned the car on time and in perfect condition."</p>
+                  <p class="review-body">
+                    "Great renter, returned the car on time and in perfect
+                    condition."
+                  </p>
                   <span class="review-date">March 13, 2025</span>
                 </div>
               </div>
@@ -542,7 +568,10 @@
                     <span class="rating-score">5.0</span>
                     <span class="rating-star">&#9733;</span>
                   </div>
-                  <p class="review-body">"Wonderful guest, very communicative and respectful of the vehicle."</p>
+                  <p class="review-body">
+                    "Wonderful guest, very communicative and respectful of the
+                    vehicle."
+                  </p>
                   <span class="review-date">January 5, 2025</span>
                 </div>
               </div>
@@ -561,31 +590,37 @@
                 <i class="bx bx-message-dots messaging-icon"></i>
                 <div>
                   <h5>In-App Messaging</h5>
-                  <p>DriveShare includes a messaging system to facilitate communication between car owners and renters.</p>
+                  <p>
+                    DriveShare includes a messaging system to facilitate
+                    communication between car owners and renters.
+                  </p>
                 </div>
               </div>
               <div class="messaging-info-row">
                 <i class="bx bx-bell messaging-icon"></i>
                 <div>
                   <h5>Notifications</h5>
-                  <p>Receive in-app notifications for booking requests, confirmations, and important updates.</p>
+                  <p>
+                    Receive in-app notifications for booking requests,
+                    confirmations, and important updates.
+                  </p>
                 </div>
               </div>
               <div class="messaging-placeholder">
                 <i class="bx bx-chat"></i>
-                <p>No messages yet. When an owner contacts you about a booking, it will appear here.</p>
+                <p>
+                  No messages yet. When an owner contacts you about a booking,
+                  it will appear here.
+                </p>
               </div>
             </div>
           </section>
         </div>
-
       </section>
       <section id="return" class="container" style="max-width: 800px">
         <div class="section-title" id="section-subtext">
           <h2 style="font-weight: bold">Manage Your Booking</h2>
-          <p>
-            Return an active rental or cancel an upcoming reservation
-          </p>
+          <p>Return an active rental or cancel an upcoming reservation</p>
         </div>
         <div
           id="return-success"
@@ -627,14 +662,25 @@
               placeholder="Enter current odometer reading"
             />
             <small class="form-text text-muted"
-              >Must be equal to or greater than the mileage when you rented.</small
+              >Must be equal to or greater than the mileage when you
+              rented.</small
             >
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button id="submit" type="submit" class="btn btn-primary" style="display:none">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap">
+            <button
+              id="submit"
+              type="submit"
+              class="btn btn-primary"
+              style="display: none"
+            >
               Return Vehicle
             </button>
-            <button id="cancel-booking-btn" type="button" class="btn btn-danger" style="display:none">
+            <button
+              id="cancel-booking-btn"
+              type="button"
+              class="btn btn-danger"
+              style="display: none"
+            >
               Cancel Booking
             </button>
           </div>
@@ -853,7 +899,7 @@
         });
       });
       // Load the user's reservations and display them in the orders section, including handling for cases where there are no reservations or if the API call fails
-      document.addEventListener("DOMContentLoaded", () => {
+      function loadOrders() {
         fetch("/api/myreservations")
           .then((res) => res.json())
           .then((reservations) => {
@@ -869,7 +915,7 @@
             <td data-label="Items">${r.items.join(", ")}</td>
             <td data-label="Mileage">${r.mileage && r.mileage.length ? r.mileage.map((m) => Number(m).toLocaleString() + " mi").join(", ") : "N/A"}</td>
             <td data-label="Pick-Up Location">${r.location}</td>
-            <td data-label="Total">$${r.total_cost}</td>
+            <td data-label="Total">$${Number(r.total_cost || 0).toFixed(2)}</td>
           `;
               tbody.appendChild(tr);
             });
@@ -877,7 +923,8 @@
           .catch((err) => {
             console.error("Error loading reservations:", err);
           });
-      });
+      }
+      document.addEventListener("DOMContentLoaded", loadOrders);
       // Load the user's saved payment methods and display them in the payment section, including handling for cases where there are no payment methods or if the API call fails
       document.addEventListener("DOMContentLoaded", () => {
         fetch("/api/mypayments")
@@ -1045,8 +1092,11 @@
               data.forEach((item) => {
                 const option = document.createElement("option");
                 option.value = item.id;
-                option.textContent = (item.name || "Unknown Vehicle") + (item.status ? " — " + item.status : "");
-                option.dataset.mileage = item.mileage != null ? item.mileage : "";
+                option.textContent =
+                  (item.name || "Unknown Vehicle") +
+                  (item.status ? " — " + item.status : "");
+                option.dataset.mileage =
+                  item.mileage != null ? item.mileage : "";
                 option.dataset.status = item.status || "";
                 option.dataset.reservationId = item.reservationId || "";
                 select.appendChild(option);
@@ -1054,10 +1104,18 @@
 
               function updateButtons() {
                 const selectedOption = select.options[select.selectedIndex];
-                const status = selectedOption ? selectedOption.dataset.status : "";
-                const mileageVal = selectedOption ? selectedOption.dataset.mileage : "";
+                const status = selectedOption
+                  ? selectedOption.dataset.status
+                  : "";
+                const mileageVal = selectedOption
+                  ? selectedOption.dataset.mileage
+                  : "";
                 const label = document.getElementById("currentMileage");
-                label.textContent = "Mileage at Pickup: " + (mileageVal !== "" ? Number(mileageVal).toLocaleString() + " mi" : "N/A");
+                label.textContent =
+                  "Mileage at Pickup: " +
+                  (mileageVal !== ""
+                    ? Number(mileageVal).toLocaleString() + " mi"
+                    : "N/A");
 
                 if (status === "Booked") {
                   mileageGroup.style.display = "";
@@ -1088,7 +1146,8 @@
               submit.style.display = "none";
               cancelBtn.style.display = "none";
               mileageGroup.style.display = "none";
-              noMsg.textContent = "You have no active bookings or upcoming reservations.";
+              noMsg.textContent =
+                "You have no active bookings or upcoming reservations.";
               msg.style.display = "none";
               subtext.style.display = "none";
               noMsg.style.display = "";
@@ -1104,49 +1163,61 @@
             select.style.display = "none";
             vehicleHelp.style.display = "none";
             document.getElementById("submit").style.display = "none";
-            document.getElementById("cancel-booking-btn").style.display = "none";
+            document.getElementById("cancel-booking-btn").style.display =
+              "none";
             mileageGroup.style.display = "none";
             msg.style.display = "none";
             subtext.style.display = "none";
-            noMsg.textContent = "Unable to load your bookings. Please make sure you are logged in.";
+            noMsg.textContent =
+              "Unable to load your bookings. Please make sure you are logged in.";
             noMsg.style.display = "";
           });
       }
       loadUserVehicle();
 
       // Cancel booking handler (Reserved only)
-      document.getElementById("cancel-booking-btn").addEventListener("click", function () {
-        const select = document.getElementById("vehicleSelect");
-        const selectedOption = select.options[select.selectedIndex];
-        const reservationId = selectedOption ? selectedOption.dataset.reservationId : "";
-        document.getElementById("return-success").style.display = "none";
-        document.getElementById("return-error").style.display = "none";
-        if (!reservationId) {
-          document.getElementById("return-error").textContent = "Could not find reservation to cancel.";
-          document.getElementById("return-error").style.display = "block";
-          return;
-        }
-        fetch("/api/cancel-reservation", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reservationId }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              document.getElementById("return-success").textContent = "Booking cancelled successfully.";
-              document.getElementById("return-success").style.display = "block";
-              loadUserVehicle();
-            } else {
-              document.getElementById("return-error").textContent = data.error || "Failed to cancel booking.";
-              document.getElementById("return-error").style.display = "block";
-            }
-          })
-          .catch(() => {
-            document.getElementById("return-error").textContent = "Server error. Please try again.";
+      document
+        .getElementById("cancel-booking-btn")
+        .addEventListener("click", function () {
+          const select = document.getElementById("vehicleSelect");
+          const selectedOption = select.options[select.selectedIndex];
+          const reservationId = selectedOption
+            ? selectedOption.dataset.reservationId
+            : "";
+          document.getElementById("return-success").style.display = "none";
+          document.getElementById("return-error").style.display = "none";
+          if (!reservationId) {
+            document.getElementById("return-error").textContent =
+              "Could not find reservation to cancel.";
             document.getElementById("return-error").style.display = "block";
-          });
-      });
+            return;
+          }
+          fetch("/api/cancel-reservation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reservationId }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                document.getElementById("return-success").textContent =
+                  "Booking cancelled successfully.";
+                document.getElementById("return-success").style.display =
+                  "block";
+                loadUserVehicle();
+                loadOrders();
+              } else {
+                document.getElementById("return-error").textContent =
+                  data.error || "Failed to cancel booking.";
+                document.getElementById("return-error").style.display = "block";
+              }
+            })
+            .catch(() => {
+              document.getElementById("return-error").textContent =
+                "Server error. Please try again.";
+              document.getElementById("return-error").style.display = "block";
+            });
+        });
 
       // Handle the return form submission
       document
@@ -1208,9 +1279,13 @@
           collContent.style.maxHeight = collContent.scrollHeight + "px";
         }
         if (isOpen) {
+          const labels = {
+            "add-address-panel": "Add Address",
+            "add-payment-panel": "Add Payment",
+            "add-Review-panel": "Review Your Rental",
+          };
           btn.innerHTML =
-            '<i class="bx bx-plus"></i> ' +
-            (panelId === "add-address-panel" ? "Add Address" : "Add Payment");
+            '<i class="bx bx-plus"></i> ' + (labels[panelId] || "Add");
         } else {
           btn.innerHTML = '<i class="bx bx-x"></i> Cancel';
         }
