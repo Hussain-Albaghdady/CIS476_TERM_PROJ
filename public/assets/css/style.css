@@ -1672,7 +1672,7 @@ section[id],
     grid-column: span 2;
   }
 
-  /* Hide name, billing/payment until a vehicle is selected on mobile */
+  /* Hide billing/payment until a vehicle is selected on mobile */
   .res-fields-row:not(.vehicle-selected) .res-field-group:nth-child(5),
   .res-fields-row:not(.vehicle-selected) .res-field-group:nth-child(6) {
     display: none;
