@@ -1,10 +1,134 @@
+require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const crypto = require("crypto");
 const multer = require("multer");
 const path = require("path");
+const nodemailer = require("nodemailer");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+
+const mailer = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
+  },
+});
+
+async function sendReservationEmail(to, reservation, vehicle, last4, baseUrl) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) return;
+
+  const vehicleName =
+    [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
+    "Your Vehicle";
+  const imageRaw = vehicle.image_url || vehicle.image || "";
+  const imageUrl = imageRaw ? `${baseUrl}/${imageRaw}` : "";
+  const confirmationNumber = String(reservation._id);
+  const total = Number(reservation.total_cost || 0).toFixed(2);
+
+  try {
+    await mailer.sendMail({
+      from: `"DriveShare" <${process.env.GMAIL_USER}>`,
+      to,
+      subject: `Reservation Confirmed — ${vehicleName}`,
+      html: `
+      <table width="640" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;border:1px solid #ddd;">
+
+        <!-- Header -->
+        <tr>
+          <td bgcolor="#ea8900" style="padding:18px 24px;">
+            <h2 style="color:#ffffff;margin:0;font-size:18px;font-weight:bold;">
+              Thank you ${reservation.customer_name.toUpperCase()}, your car has been reserved.
+            </h2>
+          </td>
+        </tr>
+
+        <!-- Dates + Confirmation -->
+        <tr>
+          <td bgcolor="#1a1a1a" style="padding:18px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="50%" style="color:#ffffff;vertical-align:top;padding-bottom:8px;">
+                  <span style="color:#4fc3f7;font-weight:bold;">Pick up:</span><br>
+                  <span style="color:#ffffff;">${reservation.start_date}</span>
+                </td>
+                <td width="50%" style="color:#ffffff;vertical-align:top;padding-bottom:8px;">
+                  <span style="color:#ffffff;font-weight:bold;">Your Confirmation Number:</span><br>
+                  <span style="color:#4fc3f7;font-weight:bold;font-size:14px;">${confirmationNumber}</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:#ffffff;vertical-align:top;">
+                  <span style="color:#4fc3f7;font-weight:bold;">Drop off:</span><br>
+                  <span style="color:#ffffff;">${reservation.end_date}</span>
+                </td>
+                <td></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Vehicle + Pricing -->
+        <tr>
+          <td bgcolor="#111111" style="padding:18px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="45%" style="vertical-align:top;padding-right:16px;">
+                  ${imageUrl ? `<img src="${imageUrl}" alt="${vehicleName}" width="200" style="display:block;width:200px;max-width:100%;border-radius:4px;">` : ""}
+                  <p style="margin:10px 0 0;font-weight:bold;font-size:22px;color:#ffffff;">${vehicleName}</p>
+                  <p style="margin:12px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Current Mileage:</p>
+                  <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${Number(vehicle.mileage).toLocaleString()} miles</p>
+                  <p style="margin:10px 0 0;font-size:13px;color:#ffffff;">Miles: Unlimited free Miles</p>
+                  <p style="margin:12px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Your Order Number:</p>
+                  <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${reservation.orderId}</p>
+                </td>
+                <td width="55%" style="vertical-align:top;text-align:right;">
+                  <p style="color:#4fc3f7;font-weight:bold;margin:0 0 4px;font-size:13px;">Estimated Total:</p>
+                  <p style="font-size:28px;font-weight:bold;margin:0;color:#ffffff;">$${total}</p>
+                  ${last4 ? `<p style="margin:8px 0 0;font-size:12px;color:#aaaaaa;">Charged to card ending in <strong style="color:#ffffff;">${last4}</strong></p>` : ""}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Location -->
+        <tr>
+          <td bgcolor="#1e3a5f" style="padding:14px 24px;">
+            <p style="color:#ffffff;margin:0 0 12px;font-size:15px;font-weight:bold;">Location Information</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="50%" style="vertical-align:top;padding-right:16px;">
+                  <span style="color:#4fc3f7;font-weight:bold;font-size:13px;">Pick Up Location</span><br>
+                  <span style="color:#ffffff;font-size:13px;">${reservation.location}</span>
+                </td>
+                <td width="50%" style="vertical-align:top;">
+                  <span style="color:#4fc3f7;font-weight:bold;font-size:13px;">Drop Off Location</span><br>
+                  <span style="color:#ffffff;font-size:13px;">${reservation.location}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td bgcolor="#111111" style="padding:12px 24px;text-align:center;">
+            <p style="color:#aaaaaa;font-size:12px;margin:0;">
+              Thank you for choosing DriveShare. Questions? Contact us at
+              <a href="mailto:${process.env.GMAIL_USER}" style="color:#4fc3f7;">${process.env.GMAIL_USER}</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      `,
+    });
+  } catch (err) {
+    console.error("Failed to send reservation email:", err.message);
+  }
+}
 
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -695,8 +819,9 @@ app.get("/api/vehicles/available", async (req, res) => {
     const vehicles = await db.collection("Vehicles").find({}).toArray();
 
     let bookedVehicleIds = new Set();
+
+    // Only check overlapping reservations when specific dates are provided
     if (start_date && end_date) {
-      // Find reservations that overlap the requested period (not Complete/Cancelled)
       const overlapping = await db
         .collection("Reservations")
         .find({
@@ -727,8 +852,7 @@ app.get("/api/vehicles/available", async (req, res) => {
     });
 
     const enriched = vehicles
-      .filter((v) => v.availability !== false) // host hasn't marked it unavailable
-      .filter((v) => !bookedVehicleIds.has(v._id.toString())) // not booked for requested dates
+      .filter((v) => !bookedVehicleIds.has(v._id.toString())) // hide only if dates conflict
       .map((v) => ({
         ...v,
         host_fname: v.host_username ? hostMap[v.host_username] || null : null,
@@ -813,7 +937,7 @@ app.get("/api/admin-financials", requireLogin, async (_req, res) => {
         stats[id].totalRentals++;
         stats[id].totalRevenue += perVehicleCost;
         stats[id].totalDays += days;
-        if (r.status === "Renting") stats[id].activeRentals++;
+        if (r.status === "Booked") stats[id].activeRentals++;
       });
     });
 
@@ -923,7 +1047,7 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
         stats[id].totalRentals++;
         stats[id].totalRevenue += perVehicleCost;
         stats[id].totalDays += days;
-        if (r.status === "Renting") stats[id].activeRentals++;
+        if (r.status === "Booked") stats[id].activeRentals++;
       });
     });
 
@@ -1132,7 +1256,7 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const reservationStatus = start_date <= today ? "Renting" : "Reserved";
+    const reservationStatus = start_date <= today ? "Booked" : "Reserved";
     const vehicle = await db.collection("Vehicles").findOne({ _id: objectId });
 
     if (!vehicle) {
@@ -1168,8 +1292,21 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     };
     await db.collection("Reservations").insertOne(data);
 
+    // Send confirmation email to renter
+    const renterUser = await db
+      .collection("RentalUsers")
+      .findOne({ username: req.session.user_name });
+    if (renterUser?.email) {
+      const usedPayment = (renterUser.payment || []).find(
+        (p) => p.payment_nickname === payment || p.last4 === payment,
+      );
+      const last4 = usedPayment?.last4 || null;
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      sendReservationEmail(renterUser.email, data, vehicle, last4, baseUrl);
+    }
+
     // Only mark vehicle unavailable immediately if reservation starts today
-    if (reservationStatus === "Renting") {
+    if (reservationStatus === "Booked") {
       await db.collection("Vehicles").updateOne(
         { _id: objectId },
         {
@@ -1366,7 +1503,7 @@ app.post("/api/return", requireLogin, async (req, res) => {
 
     const reservations = await db
       .collection("Reservations")
-      .find({ user_id: user._id })
+      .find({ user_id: user._id, status: "Booked" })
       .toArray();
     const reservation = reservations.find((resv) =>
       toIdArray(resv.vehicle_id).some((id) => id.toString() === vehicleId),
@@ -1374,36 +1511,42 @@ app.post("/api/return", requireLogin, async (req, res) => {
     if (!reservation) {
       return res.status(404).json({
         success: false,
-        error: "Reservation not found for this vehicle",
+        error: "No active booking found for this vehicle.",
       });
     }
 
-    await db.collection("Reservations").updateOne(
-      { _id: reservation._id },
-      {
-        $set: {
-          vehicle_id: null,
-          status: "Complete",
-          updated_at: new Date()
-            .toISOString()
-            .replace("T", " ")
-            .substring(0, 19),
-        },
-      },
-    );
-
+    // Validate mileage BEFORE updating anything
     let eqId = ObjectId.isValid(vehicleId)
       ? new ObjectId(vehicleId)
       : vehicleId;
     const vehicle = await db.collection("Vehicles").findOne({ _id: eqId });
     if (vehicle) {
       const returnMileageInt = parseInt(returnMileage);
-      if (vehicle.mileage !== undefined && returnMileageInt < vehicle.mileage) {
+      if (
+        isNaN(returnMileageInt) ||
+        (vehicle.mileage !== undefined && returnMileageInt < vehicle.mileage)
+      ) {
         return res.status(400).json({
           success: false,
-          error: `Return mileage (${returnMileageInt}) cannot be less than the vehicle's starting mileage (${vehicle.mileage})`,
+          error: `Return mileage (${returnMileageInt.toLocaleString()}) cannot be less than the pickup mileage (${Number(vehicle.mileage).toLocaleString()}).`,
         });
       }
+
+      // Mileage is valid — now complete the reservation
+      await db.collection("Reservations").updateOne(
+        { _id: reservation._id },
+        {
+          $set: {
+            vehicle_id: null,
+            status: "Complete",
+            updated_at: new Date()
+              .toISOString()
+              .replace("T", " ")
+              .substring(0, 19),
+          },
+        },
+      );
+
       const newQty = (vehicle.quantity_available || 0) + 1;
       await db.collection("Vehicles").updateOne(
         { _id: eqId },
@@ -1414,6 +1557,21 @@ app.post("/api/return", requireLogin, async (req, res) => {
             mileage: returnMileageInt,
           },
           $unset: { unavailable_until: "" },
+        },
+      );
+    } else {
+      // No vehicle record found — still complete the reservation
+      await db.collection("Reservations").updateOne(
+        { _id: reservation._id },
+        {
+          $set: {
+            vehicle_id: null,
+            status: "Complete",
+            updated_at: new Date()
+              .toISOString()
+              .replace("T", " ")
+              .substring(0, 19),
+          },
         },
       );
     }
@@ -1427,9 +1585,54 @@ app.post("/api/return", requireLogin, async (req, res) => {
   }
 });
 
+app.post("/api/cancel-reservation", requireLogin, async (req, res) => {
+  try {
+    const { reservationId } = req.body;
+    if (!reservationId || !ObjectId.isValid(reservationId)) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid reservation ID." });
+    }
+    const resv = await db
+      .collection("Reservations")
+      .findOne({ _id: new ObjectId(reservationId) });
+    if (!resv) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Reservation not found." });
+    }
+    if (resv.status !== "Reserved") {
+      return res.status(400).json({
+        success: false,
+        error: "Only Reserved bookings can be cancelled.",
+      });
+    }
+    await db.collection("Reservations").updateOne(
+      { _id: new ObjectId(reservationId) },
+      {
+        $set: {
+          status: "Cancelled",
+          updated_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .substring(0, 19),
+        },
+      },
+    );
+    return res.json({ success: true });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error: " + err.message });
+  }
+});
+
 setInterval(async () => {
   try {
     const now = new Date();
+    const today = now.toISOString().split("T")[0];
+
+    // Restore availability for vehicles whose rental period has ended
     await db.collection("Vehicles").updateMany(
       {
         unavailable_until: { $lte: now },
@@ -1438,6 +1641,63 @@ setInterval(async () => {
       },
       { $set: { availability: true }, $unset: { unavailable_until: "" } },
     );
+
+    // Self-heal: restore vehicles marked unavailable with no active reservation
+    const unavailableVehicles = await db
+      .collection("Vehicles")
+      .find({ availability: false })
+      .toArray();
+    for (const v of unavailableVehicles) {
+      const activeResv = await db.collection("Reservations").findOne({
+        $or: [{ vehicle_id: v._id }, { history_vehicle_id: v._id }],
+        status: { $in: ["Booked", "Reserved"] },
+      });
+      if (!activeResv) {
+        await db
+          .collection("Vehicles")
+          .updateOne(
+            { _id: v._id },
+            { $set: { availability: true }, $unset: { unavailable_until: "" } },
+          );
+        console.log(`Restored orphaned vehicle: ${v._id}`);
+      }
+    }
+
+    // Promote Reserved → Booked when start date is today, mark vehicle unavailable
+    const toPromote = await db
+      .collection("Reservations")
+      .find({
+        status: "Reserved",
+        start_date: { $lte: today },
+      })
+      .toArray();
+
+    for (const resv of toPromote) {
+      await db.collection("Reservations").updateOne(
+        { _id: resv._id },
+        {
+          $set: {
+            status: "Booked",
+            updated_at: new Date()
+              .toISOString()
+              .replace("T", " ")
+              .substring(0, 19),
+          },
+        },
+      );
+      const vehicleId = resv.history_vehicle_id || resv.vehicle_id;
+      if (vehicleId) {
+        await db.collection("Vehicles").updateOne(
+          { _id: vehicleId },
+          {
+            $set: {
+              availability: false,
+              unavailable_until: new Date(resv.end_date),
+            },
+          },
+        );
+      }
+    }
   } catch (err) {
     console.error("Error updating vehicle availability:", err);
   }
@@ -1503,16 +1763,27 @@ app.get("/api/myrentals", async (req, res) => {
       .collection("Vehicles")
       .find({ _id: { $in: vehicleIds } })
       .toArray();
-    const result = vehicles.map((eq) => ({
-      id: eq._id,
-      name:
-        [eq.year, eq.make, eq.model].filter(Boolean).join(" ") ||
-        eq.name ||
-        "Unknown Vehicle",
-      description: eq.description || "",
-      image: eq.image || "",
-      mileage: eq.mileage ?? null,
-    }));
+    const result = vehicles
+      .map((eq) => {
+        const resv = reservations.find((r) =>
+          toIdArray(r.vehicle_id).some(
+            (id) => id.toString() === eq._id.toString(),
+          ),
+        );
+        return {
+          id: eq._id,
+          reservationId: resv?._id || null,
+          status: resv?.status || null,
+          name:
+            [eq.year, eq.make, eq.model].filter(Boolean).join(" ") ||
+            eq.name ||
+            "Unknown Vehicle",
+          description: eq.description || "",
+          image: eq.image || "",
+          mileage: eq.mileage ?? null,
+        };
+      })
+      .filter((r) => r.status === "Booked" || r.status === "Reserved");
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch user rentals" });
@@ -1568,7 +1839,7 @@ app.get("/api/myreservations", async (req, res) => {
         order_date: r.order_date,
         start_date: r.start_date,
         end_date: r.end_date,
-        status: r.status || "Renting",
+        status: r.status || "Booked",
         location: r.location || "",
         total_cost: r.total_cost || 0,
         items: vehicleEntries.map((v) => v.name),

@@ -424,6 +424,58 @@
         </div>
       </section><!-- End Review Customers Section -->
 
+      <!-- ======= Messaging Section ======= -->
+      <section id="messaging" class="vehicle-management">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+          <div class="management-header-box">
+            <div class="section-title">
+              <h2>Messaging &amp; Communication</h2>
+              <p>Communicate with renters and manage booking notifications</p>
+            </div>
+            <div class="row mb-4 justify-content-center">
+              <div class="col-lg-4 col-md-5 text-center">
+                <button id="view-messaging-btn" class="btn btn-primary btn-lg">
+                  <i class="bx bx-message-dots"></i> View Messages
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="messaging-content" class="management-form" style="display: none;">
+            <div class="row justify-content-center">
+              <div class="col-lg-6 col-md-6 mb-4">
+                <div class="info-box w-100">
+                  <div class="messaging-info-row">
+                    <i class="bx bx-message-dots messaging-icon"></i>
+                    <div>
+                      <h5>In-App Messaging</h5>
+                      <p>DriveShare includes a messaging system to facilitate communication between car owners and renters.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 col-md-6 mb-4">
+                <div class="info-box w-100">
+                  <div class="messaging-info-row">
+                    <i class="bx bx-bell messaging-icon"></i>
+                    <div>
+                      <h5>Notifications</h5>
+                      <p>Send notifications for booking requests, confirmations, and important updates via in-app messages.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-12">
+                <div class="info-box w-100 text-center messaging-placeholder">
+                  <i class="bx bx-chat"></i>
+                  <p>No messages yet. Renter inquiries and booking requests will appear here.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section><!-- End Messaging Section -->
+
       <!-- ======= Availability Section ======= -->
       <section id="availability" class="availability section-bg">
         <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -435,7 +487,7 @@
 
           <div class="row">
             <div class="col-lg-12">
-              <ul id="event-flters">
+              <ul id="vehicle-flters">
                 <li data-filter="*" class="filter-active">All</li>
                 <li data-filter=".filter-Available">Available</li>
                 <li data-filter=".filter-Booked">Booked</li>
@@ -455,7 +507,7 @@
               </ul>
             </div>
           </div>
-          <div class="row event-container">
+          <div class="row vehicle-container">
             <!-- Dynamic vehicle cards will be injected here by JS -->
           </div>
       </section><!-- End Availability Section -->
@@ -1039,12 +1091,12 @@
         }
 
         function refreshMainVehicleDisplay() {
-          if (typeof $ !== 'undefined' && $('.event-container').length) {
+          if (typeof $ !== 'undefined' && $('.vehicle-container').length) {
             fetch('/api/my-vehicles')
               .then(res => res.json())
               .then(data => {
                 console.log("Refreshing vehicle display:", data);
-                const $container = $('.event-container');
+                const $container = $('.vehicle-container');
                 $container.empty();
                 if (!Array.isArray(data) || data.length === 0) {
                   $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No vehicle found. Check your API or database.</p></div>');
@@ -1087,7 +1139,7 @@
                       ? item.image
                       : "assets/img/no-image.png";
                   $container.append(`
-                  <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
+                  <div class="col-lg-4 col-md-6 vehicle-item ${filters.join(' ')}">
                     <div class="card">
                       <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category}" />
                       <div class="card-text">
@@ -1110,7 +1162,7 @@
                   if ($container.data('isotope')) {
                     $container.isotope('reloadItems').isotope('layout');
                   } else if (typeof Isotope !== "undefined") {
-                    $container.isotope({ itemSelector: '.event-item' });
+                    $container.isotope({ itemSelector: '.vehicle-item' });
                   }
                 };
                 const imgs = $container.find('img').toArray();
@@ -1289,7 +1341,77 @@
 
         viewReviewsBtn.addEventListener('click', function () {
           const isVisible = reviewCustomersSection.style.display !== 'none';
-          reviewCustomersSection.style.display = isVisible ? 'none' : 'block';
+          if (isVisible) {
+            reviewCustomersSection.style.display = 'none';
+          } else {
+            reviewCustomersSection.style.display = 'block';
+            loadReviewTables();
+          }
+        });
+
+        function loadReviewTables() {
+          // Review history table
+          fetch('/api/host-reviews')
+            .then(r => r.ok ? r.json() : [])
+            .then(data => {
+              const tbody = document.getElementById('review-customers-body');
+              tbody.innerHTML = '';
+              if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No reviews yet.</td></tr>';
+                return;
+              }
+              data.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                  <td data-label="Customer"><span>${r.customer || '—'}</span></td>
+                  <td data-label="Vehicle"><span>${r.vehicle || '—'}</span></td>
+                  <td data-label="Rental Date"><span>${r.rentalDate || '—'}</span></td>
+                  <td data-label="Rating"><span>${r.rating || '—'}</span></td>
+                  <td data-label="Review"><span>${r.review || '—'}</span></td>
+                  <td data-label="Submitted"><span>${r.submitted || '—'}</span></td>
+                  <td data-label="Actions"><span>${r.actions || '—'}</span></td>
+                `;
+                tbody.appendChild(tr);
+              });
+            })
+            .catch(() => {
+              document.getElementById('review-customers-body').innerHTML =
+                '<tr><td colspan="7" class="text-center text-muted">Could not load reviews.</td></tr>';
+            });
+
+          // Pending reviews table
+          fetch('/api/host-pending-reviews')
+            .then(r => r.ok ? r.json() : [])
+            .then(data => {
+              const tbody = document.getElementById('pending-reviews-body');
+              tbody.innerHTML = '';
+              if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No pending reviews.</td></tr>';
+                return;
+              }
+              data.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                  <td data-label="Customer"><span>${r.customer || '—'}</span></td>
+                  <td data-label="Vehicle"><span>${r.vehicle || '—'}</span></td>
+                  <td data-label="Rental Period"><span>${r.rentalPeriod || '—'}</span></td>
+                  <td data-label="Customer's Review"><span>${r.customerReview || '—'}</span></td>
+                  <td data-label="Action"><span>${r.action || '—'}</span></td>
+                `;
+                tbody.appendChild(tr);
+              });
+            })
+            .catch(() => {
+              document.getElementById('pending-reviews-body').innerHTML =
+                '<tr><td colspan="5" class="text-center text-muted">Could not load pending reviews.</td></tr>';
+            });
+        }
+
+        const viewMessagingBtn = document.getElementById('view-messaging-btn');
+        const messagingContent = document.getElementById('messaging-content');
+        viewMessagingBtn.addEventListener('click', function () {
+          const isVisible = messagingContent.style.display !== 'none';
+          messagingContent.style.display = isVisible ? 'none' : 'block';
         });
       });
     </script>

@@ -703,9 +703,9 @@ section[id],
   margin: 0 0 12px;
 }
 
-.availability #event-flters,
+.availability #vehicle-flters,
 .availability #type-flters,
-.avaliablity #event-flters,
+.avaliablity #vehicle-flters,
 .avaliablity #type-flters {
   padding: 0;
   margin: 0 0 24px 0;
@@ -713,9 +713,9 @@ section[id],
   text-align: center;
 }
 
-.availability #event-flters li,
+.availability #vehicle-flters li,
 .availability #type-flters li,
-.avaliablity #event-flters li,
+.avaliablity #vehicle-flters li,
 .avaliablity #type-flters li {
   display: inline-block;
   cursor: pointer;
@@ -734,33 +734,40 @@ section[id],
     box-shadow 0.2s ease;
 }
 
-.availability #event-flters li:hover,
-.availability #event-flters li.filter-active,
+.availability #vehicle-flters li:hover,
+.availability #vehicle-flters li.filter-active,
 .availability #type-flters li:hover,
 .availability #type-flters li.filter-active,
-.avaliablity #event-flters li:hover,
-.avaliablity #event-flters li.filter-active,
+.avaliablity #vehicle-flters li:hover,
+.avaliablity #vehicle-flters li.filter-active,
 .avaliablity #type-flters li:hover,
 .avaliablity #type-flters li.filter-active {
   background: var(--pill-active-bg);
   color: var(--pill-active-text);
 }
 
-.event-container {
+.vehicle-container {
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap) 0;
 }
 
-.event-item {
+.vehicle-item {
   display: flex;
   flex-direction: column;
   margin-bottom: var(--gap);
 }
 
-.availability .event-item .card,
-.avaliablity .event-item .card,
-.event-item .card {
+/* Lock only the select/watch row until dates are selected */
+#vehicle-list.vehicles-locked .reservation-select {
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.availability .vehicle-item .card,
+.avaliablity .vehicle-item .card,
+.vehicle-item .card {
   display: flex;
   flex-direction: column;
   justify-content: stretch;
@@ -775,12 +782,12 @@ section[id],
     transform 0.2s ease;
 }
 
-.event-item .card:hover {
+.vehicle-item .card:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
 }
 
-.event-item .card img {
+.vehicle-item .card img {
   width: 100%;
   height: 180px;
   object-fit: contain;
@@ -788,8 +795,8 @@ section[id],
   display: block;
 }
 
-.event-item .card-body,
-.event-item .card-text {
+.vehicle-item .card-body,
+.vehicle-item .card-text {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -797,18 +804,18 @@ section[id],
   padding: 16px;
 }
 
-.event-item .card-title {
+.vehicle-item .card-title {
   margin: 0 0 6px;
   font-size: 1.25rem;
   color: var(--title);
   font-weight: 600;
 }
 
-.event-container > [class*="col-"] {
+.vehicle-container > [class*="col-"] {
   display: flex;
 }
 
-.event-item .card {
+.vehicle-item .card {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -819,7 +826,7 @@ section[id],
   overflow: hidden;
 }
 
-.event-item .card-media {
+.vehicle-item .card-media {
   background: #f8f8f8;
   height: 180px;
   display: flex;
@@ -827,14 +834,14 @@ section[id],
   justify-content: center;
 }
 
-.event-item .card-media img {
+.vehicle-item .card-media img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   display: block;
 }
 
-.event-item .card-body {
+.vehicle-item .card-body {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -842,7 +849,7 @@ section[id],
   padding: 16px;
 }
 
-.event-item .card-title {
+.vehicle-item .card-title {
   margin: 0 0 6px;
   font-size: 1.25rem;
   color: #965320;
@@ -854,14 +861,14 @@ section[id],
   min-height: 1.5em;
 }
 
-.event-item h3 {
+.vehicle-item h3 {
   margin: 0 0 6px;
   font-size: 0.95rem;
   color: #838689;
   font-weight: 500;
 }
 
-.event-item .card-text {
+.vehicle-item .card-text {
   margin: 0 0 8px;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -872,13 +879,13 @@ section[id],
   overflow: visible;
 }
 
-.event-item .card:hover {
+.vehicle-item .card:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
   transition: 0.2s;
 }
 
-.event-item h2 {
+.vehicle-item h2 {
   margin: 0 0 6px;
   font-size: 1.25rem;
   color: var(--title);
@@ -886,7 +893,7 @@ section[id],
   -webkit-line-clamp: 1;
 }
 
-.event-item h3 {
+.vehicle-item h3 {
   margin: 0 0 6px;
   font-size: 0.95rem;
   color: var(--muted);
@@ -894,7 +901,7 @@ section[id],
   -webkit-line-clamp: 1;
 }
 
-.event-item .desc {
+.vehicle-item .desc {
   flex-grow: 1;
   margin: 0 0 40px;
   font-size: 0.95rem;
@@ -906,7 +913,7 @@ section[id],
   -webkit-line-clamp: 3;
 }
 
-.event-item .rate {
+.vehicle-item .rate {
   display: block;
   background-color: var(--btn-end);
   color: var(--background-color);
@@ -920,7 +927,7 @@ section[id],
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.event-item .card-rating {
+.vehicle-item .card-rating {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -928,22 +935,22 @@ section[id],
   font-size: 0.9rem;
 }
 
-.event-item .rating-score {
+.vehicle-item .rating-score {
   font-weight: 700;
   color: #222;
 }
 
-.event-item .rating-star {
+.vehicle-item .rating-star {
   color: #f5a623;
   font-size: 1rem;
 }
 
-.event-item .rating-count {
+.vehicle-item .rating-count {
   color: #666;
 }
 
-.availability .event-item,
-.avaliablity .event-item {
+.availability .vehicle-item,
+.avaliablity .vehicle-item {
   margin-bottom: 24px;
 }
 
@@ -958,7 +965,7 @@ section[id],
 }
 
 @media (max-width: 991.98px) {
-  .event-item {
+  .vehicle-item {
     margin-bottom: 20px;
   }
 
@@ -2329,6 +2336,67 @@ section[id],
   background: var(--btn-end);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Messaging Section */
+.messaging-section .messaging-info-box {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.messaging-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.messaging-info-row h5 {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.messaging-info-row p {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.messaging-icon {
+  font-size: 1.8rem;
+  color: #e74c3c;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.messaging-placeholder {
+  text-align: center;
+  padding: 24px 0 8px;
+  color: #aaa;
+}
+
+.messaging-placeholder .bx-chat {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.messaging-placeholder p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Owner page messaging info-box row */
+#messaging .info-box .messaging-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
 }
 
 #account .review-section .info-box {
@@ -4030,6 +4098,58 @@ body.auth-page #main {
   #history-section .responsive-table tbody td > button {
     margin-left: auto;
     text-align: right;
+  }
+}
+
+/* Owner Review Tables — Mobile Card Layout */
+@media (max-width: 768px) {
+  #review-customers-table thead,
+  #pending-reviews-table thead {
+    display: none;
+  }
+
+  #review-customers-table tbody tr,
+  #pending-reviews-table tbody tr {
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border: none;
+  }
+
+  #review-customers-table tbody td,
+  #pending-reviews-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.88rem;
+  }
+
+  #review-customers-table tbody td:last-child,
+  #pending-reviews-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  #review-customers-table tbody td::before,
+  #pending-reviews-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #555;
+    flex-shrink: 0;
+    margin-right: 12px;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  #review-customers-table .table-responsive,
+  #pending-reviews-table .table-responsive {
+    overflow-x: visible;
   }
 }
 

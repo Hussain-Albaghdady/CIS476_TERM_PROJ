@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
     time: 1000,
   });
 
-  $(".event-details-carousel").owlCarousel({
+  $(".vehicle-details-carousel").owlCarousel({
     autoplay: true,
     dots: true,
     loop: true,
@@ -225,8 +225,8 @@ document.addEventListener("DOMContentLoaded", function () {
   $(window).on("load", function () {
     aos_init();
   });
-  var $grid = $(".event-container").isotope({
-    itemSelector: ".event-item",
+  var $grid = $(".vehicle-container").isotope({
+    itemSelector: ".vehicle-item",
   });
 
   var filters = {
@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
     type: "",
   };
 
-  $("#event-flters").on("click", "li", function () {
+  $("#vehicle-flters").on("click", "li", function () {
     var $this = $(this);
     var filterValue = $this.attr("data-filter");
 
@@ -272,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return allFilters.length ? allFilters.join("") : "*";
   }
   $(document).ready(function () {
-    const $container = $(".event-container");
+    const $container = $(".vehicle-container");
     if (!$container.length) return;
 
     let homeAllVehicles = [];
@@ -333,7 +333,7 @@ document.addEventListener("DOMContentLoaded", function () {
               ? item.image_url
               : "assets/img/no-image.png";
         $container.append(`
-        <div class="col-lg-4 col-md-6 event-item ${filters.join(" ")}">
+        <div class="col-lg-4 col-md-6 vehicle-item ${filters.join(" ")}">
           <div class="card">
             <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category || "Vehicle"}" />
             <div class="card-text">
@@ -355,7 +355,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if ($container.data("isotope")) {
         $container.isotope("reloadItems").isotope();
       } else if (typeof Isotope !== "undefined") {
-        $container.isotope({ itemSelector: ".event-item" });
+        $container.isotope({ itemSelector: ".vehicle-item" });
       }
     }
 
@@ -488,7 +488,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <a href="vehicle-reservation.html" id="customer-page-link-anchor">Rent Vehicles</a>
               </li>
               <li id="return-page-link">
-                <a href="account.html#return" id="return-page-link-anchor">Return Vehicles</a>
+                <a href="account.html#return" id="return-page-link-anchor">Manage Bookings</a>
               </li>
             </ul>
           `;
@@ -659,7 +659,7 @@ document.addEventListener("DOMContentLoaded", function () {
               ? eq.image_url
               : "assets/img/no-image.png";
         return `
-      <div class="col-lg-4 col-md-6 event-item mb-4">
+      <div class="col-lg-4 col-md-6 vehicle-item mb-4">
         <div class="card">
           <img src="${imgUrl}" class="img-fluid" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}">
           <div class="card-text">
@@ -721,8 +721,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (other !== this) {
               other.checked = false;
               other.disabled = true;
-              other.closest(".event-item").style.opacity = "0.4";
-              other.closest(".event-item").style.pointerEvents = "none";
+              other.closest(".vehicle-item").style.opacity = "0.4";
+              other.closest(".vehicle-item").style.pointerEvents = "none";
             }
           });
         } else {
@@ -741,8 +741,8 @@ document.addEventListener("DOMContentLoaded", function () {
           // Restore all other vehicle cards
           document.querySelectorAll(".vehicle-checkbox").forEach((other) => {
             other.disabled = false;
-            other.closest(".event-item").style.opacity = "";
-            other.closest(".event-item").style.pointerEvents = "";
+            other.closest(".vehicle-item").style.opacity = "";
+            other.closest(".vehicle-item").style.pointerEvents = "";
           });
         }
       });

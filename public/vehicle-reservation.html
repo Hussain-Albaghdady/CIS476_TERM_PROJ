@@ -341,7 +341,32 @@
             if (endInput.value && endInput.value < this.value) {
               endInput.value = this.value;
             }
+            updateVehicleLock();
           });
+          endInput.addEventListener("change", updateVehicleLock);
+        }
+
+        // Gray out vehicle cards until both dates are selected
+        var vehicleList = document.getElementById("vehicle-list");
+
+        function updateVehicleLock() {
+          var datesReady = startInput.value && endInput.value;
+          if (!vehicleList) return;
+          if (datesReady) {
+            vehicleList.classList.remove("vehicles-locked");
+          } else {
+            vehicleList.classList.add("vehicles-locked");
+          }
+          // Disable/enable all rendered checkboxes
+          vehicleList.querySelectorAll(".vehicle-checkbox").forEach(function (cb) {
+            cb.disabled = !datesReady;
+          });
+        }
+
+        // Re-apply lock whenever new vehicle cards are rendered (MutationObserver)
+        if (vehicleList) {
+          vehicleList.classList.add("vehicles-locked");
+          new MutationObserver(updateVehicleLock).observe(vehicleList, { childList: true, subtree: true });
         }
       });
     </script>
