@@ -1464,8 +1464,9 @@ section[id],
 .reservation-form-container form p a {
   color: rgb(0, 115, 255);
 }
-
-/* Override legacy reservation-form-container constraints */
+.reservation-form-container form p a:hover {
+  color: rgb(0, 48, 107);
+}
 .reservation-form-container.res-form-wrapper {
   max-width: none;
   width: 100%;
@@ -1661,7 +1662,8 @@ section[id],
   }
 
   .res-field-group {
-    min-width: unset;
+    min-width: 0;
+    width: 100%;
   }
 
   /* Billing address and payment span full width */
@@ -1683,6 +1685,8 @@ section[id],
     height: 42px;
     font-size: 0.85rem;
     padding: 4px 8px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .add-new-btn {
