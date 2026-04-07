@@ -2089,8 +2089,6 @@ app.patch("/api/vehicle/:id/availability", requireLogin, async (req, res) => {
   }
 });
 
-const { ObjectId } = require("mongodb");
-
 // ADD VEHICLE
 app.post("/api/add-vehicle", requireLogin, async (req, res) => {
   try {
