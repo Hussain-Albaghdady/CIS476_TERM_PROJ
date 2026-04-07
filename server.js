@@ -2089,6 +2089,126 @@ app.patch("/api/vehicle/:id/availability", requireLogin, async (req, res) => {
   }
 });
 
+// ADD VEHICLE
+app.post("/api/add-vehicle", requireLogin, async (req, res) => {
+  try {
+    if (req.session.user.user_type !== "host") {
+      return res.status(403).json({ error: "Only hosts can add vehicles" });
+    }
+
+    const { make, model, year, price, mileage, image_url, category } = req.body;
+
+    const vehicle = {
+      make,
+      model,
+      year: Number(year),
+      rental_rate_per_day: Number(price),
+      mileage: Number(mileage),
+      image_url,
+      category,
+      host_username: req.session.user.username,
+      availability: true,
+      created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
+      updated_at: new Date().toISOString().replace("T", " ").substring(0, 19)
+
+    };
+
+    await db.collection("Vehicles").insertOne(vehicle);
+
+    res.json({ success: true, vehicle });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to add vehicle" });
+  }
+});
+
+// ADD TO WATCHLIST
+app.post("/api/watch", requireLogin, async (req, res) => {
+  try {
+    const { vehicle_id, target_price } = req.body;
+
+    await db.collection("WatchList").insertOne({
+      username: req.session.user.username,
+      vehicle_id: new ObjectId(vehicle_id),
+      target_price: target_price ? Number(target_price) : null,
+      created_at: new Date()
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to watch vehicle" });
+  }
+});
+
+// GET WATCHLIST
+app.get("/api/watch", requireLogin, async (req, res) => {
+  const list = await db.collection("WatchList").find({
+    username: req.session.user.username
+  }).toArray();
+
+  res.json(list);
+});
+
+// ADD REVIEW
+app.post("/api/reviews", requireLogin, async (req, res) => {
+  try {
+    const { vehicle_id, rating, comment } = req.body;
+
+    await db.collection("Reviews").insertOne({
+      vehicle_id: new ObjectId(vehicle_id),
+      username: req.session.user.username,
+      rating: Number(rating),
+      comment,
+      created_at: new Date()
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add review" });
+  }
+});
+
+// GET REVIEWS
+app.get("/api/reviews/:vehicleId", async (req, res) => {
+  const reviews = await db.collection("Reviews").find({
+    vehicle_id: new ObjectId(req.params.vehicleId)
+  }).toArray();
+
+  res.json(reviews);
+});
+
+// SEND MESSAGE
+app.post("/api/messages", requireLogin, async (req, res) => {
+  try {
+    const { to, message, vehicle_id } = req.body;
+
+    await db.collection("Messages").insertOne({
+      from: req.session.user.username,
+      to,
+      vehicle_id: new ObjectId(vehicle_id),
+      message,
+      timestamp: new Date()
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+// GET MESSAGES
+app.get("/api/messages", requireLogin, async (req, res) => {
+  const messages = await db.collection("Messages").find({
+    $or: [
+      { from: req.session.user.username },
+      { to: req.session.user.username }
+    ]
+  }).toArray();
+
+  res.json(messages);
+});
+
+
 app.delete("/api/vehicle/:id", requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
