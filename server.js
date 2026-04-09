@@ -2294,5 +2294,341 @@ app.put(
       console.error("Update Vehicle error:", err);
       res.status(500).json({ error: "Failed to update Vehicle" });
     }
+
+
+// ── Send a message ──────────────────────────────────────────
+app.post("/api/messages/send", requireLogin, async (req, res) => {
+  try {
+    const { to_username, subject, body, vehicle_id } = req.body;
+    const from_username = req.session.user_name;
+
+    if (!to_username || !body) {
+      return res.status(400).json({ error: "Recipient and message body are required." });
+    }
+
+    // Verify recipient exists (check both RentalUsers and HostUsers)
+    const recipient =
+      (await db.collection("RentalUsers").findOne({ username: to_username })) ||
+      (await db.collection("HostUsers").findOne({ username: to_username }));
+
+    if (!recipient) {
+      return res.status(404).json({ error: "Recipient not found." });
+    }
+
+    const message = {
+      from_username,
+      to_username,
+      subject: subject || "(no subject)",
+      body,
+      vehicle_id: vehicle_id || null,
+      read: false,
+      createdAt: new Date(),
+    };
+
+    const result = await db.collection("Messages").insertOne(message);
+
+    // Send email notification to recipient if they have an email
+    if (recipient.email && process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+      try {
+        await mailer.sendMail({
+          from: `"DriveShare" <${process.env.GMAIL_USER}>`,
+          to: recipient.email,
+          subject: `New message from ${from_username} — ${message.subject}`,
+          html: `
+            <div style="font-family:Arial,sans-serif; max-width:560px; margin:0 auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+              <div style="background:#e8604c; padding:16px 24px;">
+                <h2 style="color:#fff; margin:0; font-size:18px;">New Message on DriveShare</h2>
+              </div>
+              <div style="padding:24px;">
+                <p style="margin:0 0 8px;"><strong>From:</strong> ${from_username}</p>
+                <p style="margin:0 0 8px;"><strong>Subject:</strong> ${message.subject}</p>
+                <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+                <p style="color:#333; line-height:1.6;">${body.replace(/\n/g, "<br>")}</p>
+                <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+                <p style="color:#888; font-size:12px;">
+                  Log in to <a href="https://driveshare-6b05ff2378e7.herokuapp.com" style="color:#e8604c;">DriveShare</a> to reply.
+                </p>
+              </div>
+            </div>
+          `,
+        });
+      } catch (emailErr) {
+        console.error("Message email notification failed:", emailErr.message);
+        // Don't fail the request if email fails
+      }
+    }
+
+    res.json({ success: true, messageId: result.insertedId });
+  } catch (err) {
+    console.error("Send message error:", err);
+    res.status(500).json({ error: "Failed to send message." });
+  }
+});
+
+// ── Get inbox (messages TO the logged-in user) ──────────────
+app.get("/api/messages/inbox", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const messages = await db
+      .collection("Messages")
+      .find({ to_username: username })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Enrich with vehicle info if present
+    const enriched = await Promise.all(
+      messages.map(async (m) => {
+        let vehicleLabel = null;
+        if (m.vehicle_id && ObjectId.isValid(m.vehicle_id)) {
+          const v = await db
+            .collection("Vehicles")
+            .findOne({ _id: new ObjectId(m.vehicle_id) });
+          if (v) vehicleLabel = [v.year, v.make, v.model].filter(Boolean).join(" ");
+        }
+        return { ...m, vehicleLabel };
+      })
+    );
+
+    res.json(enriched);
+  } catch (err) {
+    console.error("Inbox error:", err);
+    res.status(500).json({ error: "Failed to load inbox." });
+  }
+});
+
+// ── Get sent messages (messages FROM the logged-in user) ────
+app.get("/api/messages/sent", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const messages = await db
+      .collection("Messages")
+      .find({ from_username: username })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const enriched = await Promise.all(
+      messages.map(async (m) => {
+        let vehicleLabel = null;
+        if (m.vehicle_id && ObjectId.isValid(m.vehicle_id)) {
+          const v = await db
+            .collection("Vehicles")
+            .findOne({ _id: new ObjectId(m.vehicle_id) });
+          if (v) vehicleLabel = [v.year, v.make, v.model].filter(Boolean).join(" ");
+        }
+        return { ...m, vehicleLabel };
+      })
+    );
+
+    res.json(enriched);
+  } catch (err) {
+    console.error("Sent messages error:", err);
+    res.status(500).json({ error: "Failed to load sent messages." });
+  }
+});
+
+// ── Mark message as read ────────────────────────────────────
+app.patch("/api/messages/:id/read", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID." });
+    await db
+      .collection("Messages")
+      .updateOne({ _id: new ObjectId(id) }, { $set: { read: true } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to mark as read." });
+  }
+});
+
+// ── Unread count (for notification badge) ───────────────────
+app.get("/api/messages/unread-count", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const count = await db
+      .collection("Messages")
+      .countDocuments({ to_username: username, read: false });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ count: 0 });
+  }
+});
+
+// ── Get host username for a vehicle (so renter can message them) ──
+app.get("/api/vehicle/:id/host", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid vehicle ID." });
+    const vehicle = await db
+      .collection("Vehicles")
+      .findOne({ _id: new ObjectId(id) });
+    if (!vehicle) return res.status(404).json({ error: "Vehicle not found." });
+    res.json({ host_username: vehicle.host_username });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get host info." });
+  }
+});
+
+// ── Host reviews (for ownerPage.html) ───────────────────────
+app.get("/api/host-reviews", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const reviews = await db
+      .collection("Reviews")
+      .find({ reviewed_username: username, review_type: "car" })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const enriched = await Promise.all(
+      reviews.map(async (r) => {
+        let vehicleLabel = "Unknown";
+        if (r.car_id) {
+          const v = await db
+            .collection("Vehicles")
+            .findOne({ _id: new ObjectId(r.car_id) });
+          if (v) vehicleLabel = [v.year, v.make, v.model].filter(Boolean).join(" ");
+        }
+        return {
+          customer: r.reviewer_username,
+          vehicle: vehicleLabel,
+          rentalDate: r.createdAt
+            ? new Date(r.createdAt).toLocaleDateString()
+            : "—",
+          rating: "★".repeat(r.rating) + "☆".repeat(5 - r.rating),
+          review: r.comment || "—",
+          submitted: r.createdAt
+            ? new Date(r.createdAt).toLocaleDateString()
+            : "—",
+          actions: "—",
+        };
+      })
+    );
+
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json([]);
+  }
+});
+
+// ── Host pending reviews (completed rentals not yet reviewed) ──
+app.get("/api/host-pending-reviews", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+
+    // Get all completed reservations for this host's vehicles
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ host_username: username })
+      .toArray();
+    const vehicleIds = vehicles.map((v) => v._id);
+
+    const completed = await db
+      .collection("Reservations")
+      .find({
+        history_vehicle_id: { $in: vehicleIds },
+        status: "Complete",
+      })
+      .toArray();
+
+    // Find which ones the host hasn't reviewed yet
+    const existingReviews = await db
+      .collection("Reviews")
+      .find({ reviewer_username: username, review_type: "renter" })
+      .toArray();
+    const reviewedBookingIds = new Set(
+      existingReviews.map((r) => r.booking_id?.toString())
+    );
+
+    const pending = completed.filter(
+      (r) => !reviewedBookingIds.has(r._id.toString())
+    );
+
+    const vehicleMap = {};
+    vehicles.forEach((v) => {
+      vehicleMap[v._id.toString()] = [v.year, v.make, v.model]
+        .filter(Boolean)
+        .join(" ");
+    });
+
+    const result = pending.map((r) => {
+      const vid = (r.history_vehicle_id || r.vehicle_id)?.toString();
+      return {
+        customer: r.customer_name || "—",
+        vehicle: vehicleMap[vid] || "Unknown",
+        rentalPeriod: `${r.start_date || "—"} → ${r.end_date || "—"}`,
+        customerReview: "Not yet reviewed",
+        action: `<button class="btn btn-sm btn-primary" onclick="openReviewModal('${r._id}','${r.customer_name}')">Write Review</button>`,
+        bookingId: r._id,
+      };
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json([]);
+  }
+});
+
+// ── Submit a review ─────────────────────────────────────────
+app.post("/api/reviews", requireLogin, async (req, res) => {
+  try {
+    const { booking_id, reviewed_username, review_type, rating, comment } =
+      req.body;
+    const reviewer_username = req.session.user_name;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5." });
+    }
+
+    // Get booking to find car_id
+    let car_id = null;
+    if (booking_id && ObjectId.isValid(booking_id)) {
+      const booking = await db
+        .collection("Reservations")
+        .findOne({ _id: new ObjectId(booking_id) });
+      if (booking) {
+        car_id = booking.history_vehicle_id || booking.vehicle_id;
+      }
+    }
+
+    const review = {
+      booking_id: ObjectId.isValid(booking_id) ? new ObjectId(booking_id) : null,
+      car_id,
+      reviewer_username,
+      reviewed_username,
+      review_type: review_type || "car",
+      rating: parseInt(rating),
+      comment: comment || "",
+      createdAt: new Date(),
+    };
+
+    await db.collection("Reviews").insertOne(review);
+
+    // Update vehicle avg rating
+    if (car_id) {
+      const allReviews = await db
+        .collection("Reviews")
+        .find({ car_id, review_type: "car" })
+        .toArray();
+      const avg =
+        allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+      await db.collection("Vehicles").updateOne(
+        { _id: new ObjectId(car_id.toString()) },
+        {
+          $set: {
+            avg_rating: Math.round(avg * 10) / 10,
+            review_count: allReviews.length,
+          },
+        }
+      );
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Review error:", err);
+    res.status(500).json({ error: "Failed to submit review." });
+  }
+});
+
   },
+
+  
 );
