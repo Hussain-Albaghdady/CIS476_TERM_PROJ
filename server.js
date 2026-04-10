@@ -357,6 +357,38 @@ async function connectToDB() {
 }
 
 connectToDB();
+// this is the singleton pattern for managing user sessions 
+const SessionManagerSingleton = (() => {
+  let instance = null;
+  function createInstance() {
+    return {
+      activeSessions: new Map(),
+      addSession(username, sessionId) {
+        this.activeSessions.set(username, sessionId);
+        console.log(`[SessionManager] Session started: ${username}`);
+      },
+      removeSession(username) {
+        this.activeSessions.delete(username);
+        console.log(`[SessionManager] Session ended: ${username}`);
+      },
+      isActive(username) {
+        return this.activeSessions.has(username);
+      }
+    };
+  }
+  return {
+    getInstance() {
+      if (!instance) {
+        instance = createInstance();
+        console.log('[SessionManager] Singleton instance created.');
+      }
+      return instance;
+    }
+  };
+})();
+const sessionManager = SessionManagerSingleton.getInstance();
+
+
 async function getNextSequence(counterName) {
   try {
     const counter = await db
@@ -756,6 +788,7 @@ app.post("/login", async (req, res) => {
       force_password_change: user.force_password_change || false,
     };
     req.session.user_name = user.username;
+    sessionManager.addSession(user.username, req.sessionID);
     req.session.userData = {
       fname: user.fname,
       lname: user.lname,
@@ -798,8 +831,9 @@ app.get("/logout", requireLogin, (req, res) => {
   if (user) {
     console.log("User Logged Out", user.fname + " " + user.lname);
   } else {
-    console.log("Logout failed: User not Failed");
+    console.log("Logout failed: User not Found");
   }
+  if (req.session.user?.username) sessionManager.removeSession(req.session.user.username);
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout failed:", err);
@@ -2149,24 +2183,7 @@ app.get("/api/watch", requireLogin, async (req, res) => {
   res.json(list);
 });
 
-// ADD REVIEW
-app.post("/api/reviews", requireLogin, async (req, res) => {
-  try {
-    const { vehicle_id, rating, comment } = req.body;
 
-    await db.collection("Reviews").insertOne({
-      vehicle_id: new ObjectId(vehicle_id),
-      username: req.session.user.username,
-      rating: Number(rating),
-      comment,
-      created_at: new Date()
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to add review" });
-  }
-});
 
 // GET REVIEWS
 app.get("/api/reviews/:vehicleId", async (req, res) => {
