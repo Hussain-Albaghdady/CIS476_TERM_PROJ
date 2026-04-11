@@ -1824,6 +1824,126 @@ setInterval(async () => {
         );
       }
     }
+
+
+
+// 
+//  OBSERVER PATTERN  for  Notifications
+
+// Get all vehicles that are currently available
+const availableVehicles = await db
+  .collection("Vehicles")
+  .find({ availability: true })
+  .toArray();
+
+for (const vehicle of availableVehicles) {
+  const vehicleLabel = [vehicle.year, vehicle.make, vehicle.model]
+    .filter(Boolean).join(" ");
+
+  // Find all watchers for this vehicle
+  const watchers = await db
+    .collection("WatchList")
+    .find({ vehicle_id: vehicle._id })
+    .toArray();
+
+  for (const watcher of watchers) {
+    const notifications = [];
+
+    // Check 1: Vehicle became available (notify_available)
+    if (watcher.notify_available !== false) {
+      notifications.push({
+        type: "car_available",
+        message: `Good news! ${vehicleLabel} is now available for rental.`,
+        link: "/vehicle-reservation.html"
+      });
+    }
+
+    // Check 2: Price dropped below watcher's target price
+    if (
+      watcher.target_price &&
+      vehicle.rental_rate_per_day <= watcher.target_price
+    ) {
+      notifications.push({
+        type: "price_drop",
+        message: `Price alert! ${vehicleLabel} is now $${vehicle.rental_rate_per_day}/day — at or below your target of $${watcher.target_price}/day.`,
+        link: "/vehicle-reservation.html"
+      });
+    }
+
+    // Send each notification
+    for (const notif of notifications) {
+    
+      //  to avoid spamming
+      const recentNotif = await db.collection("Notifications").findOne({
+        username: watcher.username,
+        type: notif.type,
+        vehicle_id: vehicle._id,
+        createdAt: { $gte: new Date(Date.now() - 60 * 60 * 1000) }
+      });
+
+      if (recentNotif) continue; // Already notified recently, skip
+
+      // Save in-app notification
+      await db.collection("Notifications").insertOne({
+        username: watcher.username,
+        type: notif.type,
+        message: notif.message,
+        link: notif.link,
+        vehicle_id: vehicle._id,
+        read: false,
+        createdAt: new Date()
+      });
+
+      console.log(`[Observer] Notified ${watcher.username}: ${notif.message}`);
+
+      // Send email notification
+      const renter =
+        (await db.collection("RentalUsers").findOne({ username: watcher.username })) ||
+        (await db.collection("HostUsers").findOne({ username: watcher.username }));
+
+      if (renter?.email && process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+        try {
+          await mailer.sendMail({
+            from: `"DriveShare" <${process.env.GMAIL_USER}>`,
+            to: renter.email,
+            subject: `DriveShare Alert: ${vehicleLabel}`,
+            html: `
+              <div style="font-family:Arial,sans-serif; max-width:560px; margin:0 auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+                <div style="background:#e8604c; padding:16px 24px;">
+                  <h2 style="color:#fff; margin:0; font-size:18px;">
+                    ${notif.type === "price_drop" ? "💰 Price Drop Alert" : "🚗 Vehicle Available"}
+                  </h2>
+                </div>
+                <div style="padding:24px;">
+                  <p style="font-size:15px; color:#333;">${notif.message}</p>
+                  <a href="https://driveshare-6b05ff2378e7.herokuapp.com/vehicle-reservation.html"
+                    style="display:inline-block; margin-top:16px; padding:10px 24px; background:#e8604c; color:#fff; border-radius:6px; text-decoration:none; font-weight:bold;">
+                    View Vehicle
+                  </a>
+                </div>
+                <div style="padding:12px 24px; background:#f9f9f9; font-size:12px; color:#888;">
+                  You're receiving this because you're watching ${vehicleLabel} on DriveShare.
+                </div>
+              </div>
+            `
+          });
+          console.log(`[Observer] Email sent to ${renter.email}`);
+        } catch (emailErr) {
+          console.error(`[Observer] Email failed for ${watcher.username}:`, emailErr.message);
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
   } catch (err) {
     console.error("Error updating vehicle availability:", err);
   }
@@ -2717,7 +2837,157 @@ app.post("/api/reviews", requireLogin, async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+//  OBSERVER PATTERN API Routes
+
+
+app.post("/api/watchlist", requireLogin, async (req, res) => {
+  try {
+    const { vehicleId, maxPrice } = req.body;
+    const username = req.session.user_name;
+
+    if (!vehicleId || !ObjectId.isValid(vehicleId)) {
+      return res.status(400).json({ error: "Invalid vehicle ID." });
+    }
+
+    // Remove existing watch for this vehicle first (upsert behavior)
+    await db.collection("WatchList").deleteOne({
+      username,
+      vehicle_id: new ObjectId(vehicleId)
+    });
+
+    // Add new watch entry
+    await db.collection("WatchList").insertOne({
+      username,
+      vehicle_id: new ObjectId(vehicleId),
+      target_price: maxPrice ? Number(maxPrice) : null,
+      notify_available: true,
+      createdAt: new Date()
+    });
+
+    console.log(`[Observer] ${username} is now watching vehicle ${vehicleId}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Watchlist error:", err);
+    res.status(500).json({ error: "Failed to watch vehicle." });
+  }
+});
+
+// ── Get current user's watchlist ─────────────────────────────
+app.get("/api/watchlist", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const list = await db
+      .collection("WatchList")
+      .find({ username })
+      .toArray();
+
+    // Enrich with vehicle details
+    const enriched = await Promise.all(
+      list.map(async (w) => {
+        const v = await db
+          .collection("Vehicles")
+          .findOne({ _id: w.vehicle_id });
+        return {
+          ...w,
+          vehicle: v
+            ? {
+                label: [v.year, v.make, v.model].filter(Boolean).join(" "),
+                price: v.rental_rate_per_day,
+                availability: v.availability,
+                image_url: v.image_url || ""
+              }
+            : null
+        };
+      })
+    );
+
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get watchlist." });
+  }
+});
+
+// Remove from watchlist 
+app.delete("/api/watchlist/:vehicleId", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const { vehicleId } = req.params;
+
+    if (!ObjectId.isValid(vehicleId)) {
+      return res.status(400).json({ error: "Invalid vehicle ID." });
+    }
+
+    await db.collection("WatchList").deleteOne({
+      username,
+      vehicle_id: new ObjectId(vehicleId)
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to remove from watchlist." });
+  }
+});
+
+// Get notifications for logged-in user 
+app.get("/api/notifications", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const notifications = await db
+      .collection("Notifications")
+      .find({ username })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .toArray();
+
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get notifications." });
+  }
+});
+
+//  Mark notification as read
+app.patch("/api/notifications/:id/read", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id))
+      return res.status(400).json({ error: "Invalid ID." });
+
+    await db
+      .collection("Notifications")
+      .updateOne({ _id: new ObjectId(id) }, { $set: { read: true } });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to mark as read." });
+  }
+});
+
+//  Unread notification count 
+app.get("/api/notifications/unread-count", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const count = await db
+      .collection("Notifications")
+      .countDocuments({ username, read: false });
+
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ count: 0 });
+  }
+});
+
+
+
+
+
   },
+
 
   
 );
