@@ -840,13 +840,6 @@
         financialSection.style.display = isVisible ? 'none' : 'block';
         if (!isVisible) loadFinancials();
       });
-      const viewReviewsBtn = document.getElementById('view-reviews-btn');
-      const reviewManagementSection = document.getElementById('review-management-section');
-
-      viewReviewsBtn.addEventListener('click', function () {
-        const isVisible = reviewManagementSection.style.display !== 'none';
-        reviewManagementSection.style.display = isVisible ? 'none' : 'block';
-      });
       function loadFinancials() {
         fetch('/api/admin-financials')
           .then(res => res.json())
