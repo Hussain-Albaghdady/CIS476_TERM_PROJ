@@ -2022,22 +2022,26 @@
               return;
             }
             container.innerHTML = list.map(function (entry) {
-              var priceLabel = entry.target_price
-                ? "Alert below $" + Number(entry.target_price).toFixed(2) + "/day"
-                : "Availability only";
-              var badge = entry.available
-                ? '<span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:12px;font-size:12px;">Available</span>'
-                : '<span style="background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:12px;font-size:12px;">Unavailable</span>';
+              var v = entry.vehicle || {};
+              var badge = v.availability
+                ? '<span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:12px;font-size:12px;white-space:nowrap;">Available</span>'
+                : '<span style="background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:12px;font-size:12px;white-space:nowrap;">Unavailable</span>';
+              var datesLine = (entry.start_date && entry.end_date)
+                ? '<div style="font-size:12px;color:#555;margin-top:3px;"><i class="bx bx-calendar"></i> ' + entry.start_date + ' &rarr; ' + entry.end_date + '</div>'
+                : "";
+              var targetLine = entry.target_price
+                ? '<div style="font-size:12px;color:#ea8900;margin-top:2px;"><i class="bx bx-tag"></i> Target: $' + Number(entry.target_price).toFixed(2) + '/day</div>'
+                : "";
               return (
                 '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f0f0f0;">' +
-                (entry.image_url
-                  ? '<img src="' + entry.image_url + '" style="width:64px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;" />'
+                (v.image_url
+                  ? '<img src="' + v.image_url + '" style="width:64px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;" />'
                   : '<div style="width:64px;height:44px;background:#eee;border-radius:6px;flex-shrink:0;"></div>') +
                 '<div style="flex:1;min-width:0;">' +
-                  '<div style="font-weight:600;font-size:14px;">' + (entry.vehicle_name || "Vehicle") + "</div>" +
-                  '<div style="font-size:12px;color:#6c757d;margin-top:2px;">' +
-                    "$" + (entry.current_price ? Number(entry.current_price).toFixed(2) : "—") + "/day &nbsp;·&nbsp; " + priceLabel +
-                  "</div>" +
+                  '<div style="font-weight:600;font-size:14px;">' + (v.label || "Unknown Vehicle") + "</div>" +
+                  '<div style="font-size:12px;color:#6c757d;margin-top:2px;">$' + (v.rental_rate_per_day ? Number(v.rental_rate_per_day).toFixed(2) : "—") + "/day</div>" +
+                  datesLine +
+                  targetLine +
                 "</div>" +
                 badge +
                 '<button data-vid="' + entry.vehicle_id + '" class="unwatch-btn" ' +

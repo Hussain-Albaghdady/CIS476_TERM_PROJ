@@ -616,12 +616,14 @@
       confirmBtn.addEventListener("click", function () {
         if (!currentWatchId) return;
         var targetPrice = watchMaxPrice.value ? Number(watchMaxPrice.value) : null;
+        var startDate = document.getElementById("start_date")?.value || null;
+        var endDate   = document.getElementById("end_date")?.value || null;
         confirmBtn.disabled = true;
         fetch("/api/watch", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ vehicle_id: currentWatchId, target_price: targetPrice }),
+          body: JSON.stringify({ vehicle_id: currentWatchId, target_price: targetPrice, start_date: startDate, end_date: endDate }),
         })
           .then(function (r) { return r.json(); })
           .then(function (data) {

@@ -148,6 +148,29 @@
           </section>
         </div>
 
+        <button class="collapsible">My Watchlist</button>
+        <div class="content">
+          <section class="account-section">
+            <h3>Vehicles You're Watching</h3>
+            <div class="table-wrapper">
+              <table class="responsive-table">
+                <thead>
+                  <tr>
+                    <th>Vehicle</th>
+                    <th>Pick Up</th>
+                    <th>Drop Off</th>
+                    <th>Rate/Day</th>
+                    <th>Target Price</th>
+                    <th>Availability</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="watchlist-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
         <button class="collapsible">Address Saved</button>
         <div class="content">
           <section class="address-section" id="address-section">
@@ -486,49 +509,54 @@
               </button>
             </div>
             <div id="add-Review-panel" class="add-form-panel">
-              <form
-                id="add-Review-form"
-                method="POST"
-                action="/reviews"
-                autocomplete="off"
-              ></form>
-              <!-- This form can be implemented to submit reviews in the future -->
-              <p style="text-align: center; padding: 20px 0">
-                Review submission coming soon!
-              </p>
+              <div class="acct-box-title">New Review</div>
+              <div id="review-alert-success" class="alert alert-success" style="display:none"></div>
+              <div id="review-alert-error" class="alert alert-danger" style="display:none"></div>
+              <form id="review-form" onsubmit="submitReview(event)">
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="review-vehicle">Vehicle *</label>
+                    <select class="form-control" id="review-vehicle" required>
+                      <option value="">— Select a completed rental —</option>
+                    </select>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label>Rating *</label>
+                    <div class="review-star-picker" id="review-star-picker" style="display:flex;align-items:center;height:38px;gap:4px;">
+                      <span class="rev-star" data-val="1" style="font-size:2rem;line-height:1;">&#9733;</span>
+                      <span class="rev-star" data-val="2" style="font-size:2rem;line-height:1;">&#9733;</span>
+                      <span class="rev-star" data-val="3" style="font-size:2rem;line-height:1;">&#9733;</span>
+                      <span class="rev-star" data-val="4" style="font-size:2rem;line-height:1;">&#9733;</span>
+                      <span class="rev-star" data-val="5" style="font-size:2rem;line-height:1;">&#9733;</span>
+                    </div>
+                    <input type="hidden" id="review-rating" value="" required />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="review-title">Review Title *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="review-title"
+                    placeholder="e.g. Great experience!"
+                    required
+                  />
+                </div>
+               <div class="form-group">
+                  <label for="review-body">Your Review *</label>
+                  <textarea
+                    class="form-control"
+                    id="review-body"
+                    rows="4"
+                    placeholder="Share your experience with this vehicle..."
+                    required
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
+              </form>
             </div>
             <div class="row" id="review-card-container">
-              <!-- placeholder cards -->
-              <div class="col-md-6 d-flex align-items-stretch">
-                <div class="info-box w-100">
-                  <div class="review-card-header">
-                    <span class="review-vehicle">2022 Toyota Camry</span>
-                    <span class="card-rating">
-                      <span class="rating-score">4.5</span>
-                      <span class="rating-star">&#9733;</span>
-                    </span>
-                  </div>
-                  <p class="review-body">
-                    "Great car, very clean and comfortable for the trip."
-                  </p>
-                  <span class="review-date">March 12, 2025</span>
-                </div>
-              </div>
-              <div class="col-md-6 d-flex align-items-stretch">
-                <div class="info-box w-100">
-                  <div class="review-card-header">
-                    <span class="review-vehicle">2020 Honda CR-V</span>
-                    <span class="card-rating">
-                      <span class="rating-score">5.0</span>
-                      <span class="rating-star">&#9733;</span>
-                    </span>
-                  </div>
-                  <p class="review-body">
-                    "Excellent experience, would rent again without hesitation."
-                  </p>
-                  <span class="review-date">January 4, 2025</span>
-                </div>
-              </div>
+              <!-- loaded dynamically -->
             </div>
           </section>
         </div>
@@ -924,7 +952,7 @@
             <td data-label="Return Date">${new Date(r.end_date).toLocaleDateString()}</td>
             <td data-label="Status">${r.status}</td>
             <td data-label="Items">${r.items.join(", ")}</td>
-            <td data-label="Mileage">${r.status === "Cancelled" ? "0 mi" : (r.miles_driven != null ? Number(r.miles_driven).toLocaleString() + " mi" : "N/A")}</td>
+            <td data-label="Mileage">${r.status === "Cancelled" ? "0 mi" : r.miles_driven != null ? Number(r.miles_driven).toLocaleString() + " mi" : "N/A"}</td>
             <td data-label="Pick-Up Location">${r.location}</td>
             <td data-label="Total">$${Number(r.total_cost || 0).toFixed(2)}</td>
           `;
@@ -936,6 +964,80 @@
           });
       }
       document.addEventListener("DOMContentLoaded", loadOrders);
+
+      // Watchlist
+      function loadWatchlist() {
+        fetch("/api/watch", { credentials: "include" })
+          .then((res) => res.json())
+          .then((list) => {
+            const tbody = document.getElementById("watchlist-body");
+            tbody.innerHTML = "";
+            if (!list.length) {
+              tbody.innerHTML =
+                '<tr><td colspan="7" style="text-align:center;color:#888;">You are not watching any vehicles.</td></tr>';
+              return;
+            }
+            list.forEach((entry) => {
+              const v = entry.vehicle || {};
+              const label = v.label || "Unknown Vehicle";
+              const rate =
+                v.rental_rate_per_day != null
+                  ? "$" + Number(v.rental_rate_per_day).toFixed(2)
+                  : "N/A";
+              const available = v.availability
+                ? '<span style="color:#27ae60;font-weight:bold;">Available</span>'
+                : '<span style="color:#e74c3c;">Unavailable</span>';
+              const targetPrice = entry.target_price
+                ? "$" + Number(entry.target_price).toFixed(2)
+                : "—";
+              const pickUp = entry.start_date || "—";
+              const dropOff = entry.end_date || "—";
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td data-label="Vehicle">${label}</td>
+                <td data-label="Pick Up">${pickUp}</td>
+                <td data-label="Drop Off">${dropOff}</td>
+                <td data-label="Rate/Day">${rate}</td>
+                <td data-label="Target Price">${targetPrice}</td>
+                <td data-label="Availability">${available}</td>
+                <td data-label="Actions">
+                  <button class="delete-btn unwatch-btn" data-vehicle-id="${entry.vehicle_id}" style="background:#e8604c;">Unwatch</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch((err) => console.error("Error loading watchlist:", err));
+      }
+      document.addEventListener("DOMContentLoaded", loadWatchlist);
+
+      document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("unwatch-btn")) {
+          const vehicleId = e.target.dataset.vehicleId;
+          if (!confirm("Stop watching this vehicle?")) return;
+          fetch("/api/watch", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ vehicle_id: vehicleId }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.success) {
+                e.target.closest("tr").remove();
+                const tbody = document.getElementById("watchlist-body");
+                if (!tbody.children.length) {
+                  tbody.innerHTML =
+                    '<tr><td colspan="7" style="text-align:center;color:#888;">You are not watching any vehicles.</td></tr>';
+                }
+              } else {
+                alert(data.error || "Failed to unwatch.");
+              }
+            })
+            .catch((err) => console.error("Unwatch error:", err));
+        }
+      });
+
       // Load the user's saved payment methods and display them in the payment section, including handling for cases where there are no payment methods or if the API call fails
       document.addEventListener("DOMContentLoaded", () => {
         fetch("/api/mypayments")
@@ -1407,6 +1509,165 @@
               .catch(() => alert("Server error. Please try again."));
           });
         }
+      });
+
+      // ── Review form: star picker ──────────────────────────────────
+      (function () {
+        const stars = document.querySelectorAll("#review-star-picker .rev-star");
+        const ratingInput = document.getElementById("review-rating");
+
+        function setStars(val) {
+          stars.forEach((s) => {
+            s.style.color = parseInt(s.dataset.val) <= val ? "#f5a623" : "#ccc";
+          });
+          ratingInput.value = val;
+        }
+
+        stars.forEach((s) => {
+          s.style.cursor = "pointer";
+          s.addEventListener("click", () => setStars(parseInt(s.dataset.val)));
+          s.addEventListener("mouseover", () =>
+            stars.forEach((x) => {
+              x.style.color =
+                parseInt(x.dataset.val) <= parseInt(s.dataset.val)
+                  ? "#f5a623"
+                  : "#ccc";
+            })
+          );
+          s.addEventListener("mouseout", () =>
+            setStars(parseInt(ratingInput.value) || 0)
+          );
+        });
+
+        // Reset star colors to grey initially
+        setStars(0);
+      })();
+
+      // ── Load completed rentals into the vehicle dropdown ─────────
+      function loadCompletedRentalsDropdown() {
+        fetch("/api/customer-completed-rentals")
+          .then((r) => r.json())
+          .then((rentals) => {
+            const sel = document.getElementById("review-vehicle");
+            sel.innerHTML =
+              '<option value="">— Select a completed rental —</option>';
+            if (!Array.isArray(rentals) || rentals.length === 0) {
+              sel.innerHTML +=
+                '<option disabled>No completed rentals available to review</option>';
+              return;
+            }
+            rentals.forEach((r) => {
+              const opt = document.createElement("option");
+              opt.value = r.bookingId;
+              opt.dataset.host = r.hostUsername || "";
+              opt.textContent =
+                r.vehicleName + (r.endDate ? "  (" + r.endDate + ")" : "");
+              sel.appendChild(opt);
+            });
+          })
+          .catch(() => {});
+      }
+
+      // ── Load and render customer's existing reviews ───────────────
+      function loadMyReviews() {
+        fetch("/api/my-reviews")
+          .then((r) => r.json())
+          .then((reviews) => {
+            const container = document.getElementById("review-card-container");
+            container.innerHTML = "";
+            if (!Array.isArray(reviews) || reviews.length === 0) {
+              container.innerHTML =
+                '<p class="text-muted mt-3 ml-3">You have not submitted any reviews yet.</p>';
+              return;
+            }
+            reviews.forEach((rev) => {
+              const stars = "★".repeat(rev.rating) + "☆".repeat(5 - rev.rating);
+              container.innerHTML += `
+                <div class="col-md-6 d-flex align-items-stretch mb-3">
+                  <div class="info-box w-100">
+                    <div class="review-card-header">
+                      <span class="review-vehicle">${rev.vehicleName}</span>
+                      <span class="card-rating">
+                        <span class="rating-score">${rev.rating}.0</span>
+                        <span class="rating-star">&#9733;</span>
+                      </span>
+                    </div>
+                    ${rev.title ? `<strong>${rev.title}</strong>` : ""}
+                    <p class="review-body">"${rev.comment}"</p>
+                    <span class="review-date">${rev.date}</span>
+                  </div>
+                </div>`;
+            });
+          })
+          .catch(() => {});
+      }
+
+      // ── Submit review ─────────────────────────────────────────────
+      function submitReview(e) {
+        e.preventDefault();
+        const sel = document.getElementById("review-vehicle");
+        const booking_id = sel.value;
+        const selectedOpt = sel.options[sel.selectedIndex];
+        const reviewed_username = selectedOpt ? selectedOpt.dataset.host : "";
+        const rating = parseInt(document.getElementById("review-rating").value);
+        const title = document.getElementById("review-title").value.trim();
+        const comment = document.getElementById("review-body").value.trim();
+
+        const successEl = document.getElementById("review-alert-success");
+        const errorEl = document.getElementById("review-alert-error");
+        successEl.style.display = "none";
+        errorEl.style.display = "none";
+
+        if (!booking_id) {
+          errorEl.textContent = "Please select a vehicle.";
+          errorEl.style.display = "block";
+          return;
+        }
+        if (!rating || rating < 1 || rating > 5) {
+          errorEl.textContent = "Please select a star rating.";
+          errorEl.style.display = "block";
+          return;
+        }
+
+        fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            booking_id,
+            reviewed_username,
+            review_type: "car",
+            rating,
+            title,
+            comment,
+          }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              successEl.textContent = "Review submitted successfully!";
+              successEl.style.display = "block";
+              document.getElementById("review-form").reset();
+              document
+                .querySelectorAll("#review-star-picker .rev-star")
+                .forEach((s) => (s.style.color = "#ccc"));
+              document.getElementById("review-rating").value = "";
+              loadCompletedRentalsDropdown();
+              loadMyReviews();
+            } else {
+              errorEl.textContent = data.error || "Failed to submit review.";
+              errorEl.style.display = "block";
+            }
+          })
+          .catch(() => {
+            errorEl.textContent = "Server error. Please try again.";
+            errorEl.style.display = "block";
+          });
+      }
+
+      // ── Wire up on page load ──────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", function () {
+        loadCompletedRentalsDropdown();
+        loadMyReviews();
       });
 
       // Add Payment form submission
