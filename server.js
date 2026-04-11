@@ -3221,7 +3221,7 @@ app.put(
         const username = req.session.user_name;
         const reviews = await db
           .collection("Reviews")
-          .find({ reviewed_username: username, review_type: "car" })
+          .find({ reviewer_username: username, review_type: "renter" })
           .sort({ createdAt: -1 })
           .toArray();
 
@@ -3237,18 +3237,25 @@ app.put(
                   .filter(Boolean)
                   .join(" ");
             }
+            // Look up the rental period from the booking
+            let rentalDate = "—";
+            if (r.booking_id) {
+              const booking = await db
+                .collection("Reservations")
+                .findOne({ _id: new ObjectId(r.booking_id) });
+              if (booking)
+                rentalDate = `${booking.start_date || "—"} – ${booking.end_date || "—"}`;
+            }
             return {
-              customer: r.reviewer_username,
+              id: r._id.toString(),
+              customer: r.reviewed_username || "—",
               vehicle: vehicleLabel,
-              rentalDate: r.createdAt
-                ? new Date(r.createdAt).toLocaleDateString()
-                : "—",
-              rating: "★".repeat(r.rating) + "☆".repeat(5 - r.rating),
+              rentalDate,
+              rating: r.rating,
               review: r.comment || "—",
               submitted: r.createdAt
-                ? new Date(r.createdAt).toLocaleDateString()
+                ? new Date(r.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
                 : "—",
-              actions: "—",
             };
           }),
         );
@@ -3256,6 +3263,79 @@ app.put(
         res.json(enriched);
       } catch (err) {
         res.status(500).json([]);
+      }
+    });
+
+    // ── Host review stats ────────────────────────────────────────
+    app.get("/api/host-review-stats", requireLogin, async (req, res) => {
+      try {
+        const username = req.session.user_name;
+        const given = await db
+          .collection("Reviews")
+          .find({ reviewer_username: username, review_type: "renter" })
+          .toArray();
+        const reviewsGiven = given.length;
+        const avgRating =
+          reviewsGiven > 0
+            ? Math.round((given.reduce((s, r) => s + r.rating, 0) / reviewsGiven) * 10) / 10
+            : null;
+
+        // Count pending (completed rentals not yet reviewed by host)
+        const vehicles = await db.collection("Vehicles").find({ host_username: username }).toArray();
+        const vehicleIds = vehicles.map((v) => v._id);
+        const completed = await db.collection("Reservations").find({
+          $or: [
+            { history_vehicle_id: { $in: vehicleIds } },
+            { vehicle_id: { $in: vehicleIds } },
+          ],
+          status: "Complete",
+        }).toArray();
+        const reviewedIds = new Set(given.map((r) => r.booking_id?.toString()));
+        const pendingCount = completed.filter((r) => !reviewedIds.has(r._id.toString())).length;
+
+        res.json({ reviewsGiven, avgRating, pendingCount });
+      } catch (err) {
+        res.status(500).json({ reviewsGiven: 0, avgRating: null, pendingCount: 0 });
+      }
+    });
+
+    // ── Edit a review (host only) ────────────────────────────────
+    app.patch("/api/reviews/:id", requireLogin, async (req, res) => {
+      try {
+        const username = req.session.user_name;
+        const id = req.params.id;
+        if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
+        const review = await db.collection("Reviews").findOne({ _id: new ObjectId(id) });
+        if (!review) return res.status(404).json({ error: "Review not found" });
+        if (review.reviewer_username !== username)
+          return res.status(403).json({ error: "Unauthorized" });
+        const { rating, comment } = req.body;
+        if (!rating || rating < 1 || rating > 5)
+          return res.status(400).json({ error: "Rating must be 1–5" });
+        await db.collection("Reviews").updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { rating: parseInt(rating), comment: comment || "" } }
+        );
+        res.json({ success: true });
+      } catch (err) {
+        res.status(500).json({ error: "Failed to update review" });
+      }
+    });
+
+    // ── Delete a review (host only) ──────────────────────────────
+    app.delete("/api/reviews/:id", requireLogin, async (req, res) => {
+      try {
+        const username = req.session.user_name;
+        const id = req.params.id;
+        if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
+        const review = await db.collection("Reviews").findOne({ _id: new ObjectId(id) });
+        if (!review) return res.status(404).json({ error: "Review not found" });
+        if (review.reviewer_username !== username)
+          return res.status(403).json({ error: "Unauthorized" });
+        await db.collection("Reviews").deleteOne({ _id: new ObjectId(id) });
+        res.json({ success: true });
+      } catch (err) {
+        res.status(500).json({ error: "Failed to delete review" });
       }
     });
 
@@ -3274,7 +3354,10 @@ app.put(
         const completed = await db
           .collection("Reservations")
           .find({
-            history_vehicle_id: { $in: vehicleIds },
+            $or: [
+              { history_vehicle_id: { $in: vehicleIds } },
+              { vehicle_id: { $in: vehicleIds } },
+            ],
             status: "Complete",
           })
           .toArray();
@@ -3299,14 +3382,23 @@ app.put(
             .join(" ");
         });
 
+        // Check if the customer left a car review for each booking
+        const customerReviewMap = {};
+        for (const r of pending) {
+          const cRev = await db.collection("Reviews").findOne({
+            booking_id: r._id,
+            review_type: "car",
+          });
+          customerReviewMap[r._id.toString()] = cRev ? `${cRev.rating}★ – "${cRev.comment}"` : "No review yet";
+        }
+
         const result = pending.map((r) => {
           const vid = (r.history_vehicle_id || r.vehicle_id)?.toString();
           return {
             customer: r.customer_name || "—",
             vehicle: vehicleMap[vid] || "Unknown",
-            rentalPeriod: `${r.start_date || "—"} → ${r.end_date || "—"}`,
-            customerReview: "Not yet reviewed",
-            action: `<button class="btn btn-sm btn-primary" onclick="openReviewModal('${r._id}','${r.customer_name}')">Write Review</button>`,
+            rentalPeriod: `${r.start_date || "—"} – ${r.end_date || "—"}`,
+            customerReview: customerReviewMap[r._id.toString()],
             bookingId: r._id,
           };
         });

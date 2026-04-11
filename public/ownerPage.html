@@ -379,50 +379,137 @@
             </div>
           </div>
 
-          <div id="review-customers-section" class="management-form" style="display: none;">
+          <!-- Stat cards + tables (toggled) -->
+          <div id="review-section-body" style="display:none;">
+            <!-- Outer card wrapping everything -->
+            <div style="background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.10);padding:30px;">
 
-            <!-- Reviews Table -->
-            <h3>Customer Review History</h3>
-            <div class="table-responsive">
-              <table class="table table-striped" id="review-customers-table">
-                <thead>
-                  <tr>
-                    <th>Customer</th>
-                    <th>Vehicle</th>
-                    <th>Rental Date</th>
-                    <th>Rating</th>
-                    <th>Review</th>
-                    <th>Submitted</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="review-customers-body"></tbody>
-              </table>
-            </div>
+              <!-- Stat cards row -->
+              <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                  <div style="background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.10);padding:24px;text-align:center;">
+                    <i class="icofont-star" style="color:#f5a623;font-size:2rem;"></i>
+                    <p style="color:#888;margin:8px 0 4px;font-size:0.95rem;">Reviews Given</p>
+                    <p id="stat-reviews-given" style="color:#28a745;font-size:1.8rem;font-weight:700;margin:0;">0</p>
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div style="background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.10);padding:24px;text-align:center;">
+                    <i class="bx bx-bar-chart-alt-2" style="font-size:2rem;"></i>
+                    <p style="color:#888;margin:8px 0 4px;font-size:0.95rem;">Avg. Rating Given</p>
+                    <p id="stat-avg-rating" style="color:#f5a623;font-size:1.8rem;font-weight:700;margin:0;">—</p>
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div style="background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.10);padding:24px;text-align:center;">
+                    <i class="bx bx-user" style="font-size:2rem;"></i>
+                    <p style="color:#888;margin:8px 0 4px;font-size:0.95rem;">Pending Reviews</p>
+                    <p id="stat-pending-reviews" style="color:#28a745;font-size:1.8rem;font-weight:700;margin:0;">0</p>
+                  </div>
+                </div>
+              </div>
 
-            <!-- Pending Reviews -->
-            <div id="pending-reviews-section">
-              <h3>Pending Reviews</h3>
-              <p class="text-muted">Customers from completed rentals you have not yet reviewed.</p>
+              <!-- Review History Table -->
+              <h3>Customer Review History</h3>
               <div class="table-responsive">
-                <table class="table table-striped" id="pending-reviews-table">
+                <table class="table table-striped" id="review-customers-table">
                   <thead>
                     <tr>
                       <th>Customer</th>
                       <th>Vehicle</th>
-                      <th>Rental Period</th>
-                      <th>Customer's Review</th>
-                      <th>Action</th>
+                      <th>Rental Date</th>
+                      <th>Rating</th>
+                      <th>Review</th>
+                      <th>Submitted</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="pending-reviews-body"></tbody>
+                  <tbody id="review-customers-body"></tbody>
                 </table>
               </div>
-            </div>
 
-          </div>
+              <!-- Pending Reviews -->
+              <div id="pending-reviews-section" class="mt-4">
+                <h3>Pending Reviews</h3>
+                <p class="text-muted">Customers from completed rentals you have not yet reviewed.</p>
+                <div class="table-responsive">
+                  <table class="table table-striped" id="pending-reviews-table">
+                    <thead>
+                      <tr>
+                        <th>Customer</th>
+                        <th>Vehicle</th>
+                        <th>Rental Period</th>
+                        <th>Customer's Review</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pending-reviews-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div><!-- end outer card -->
+          </div><!-- end review-section-body -->
         </div>
       </section><!-- End Review Customers Section -->
+
+      <!-- Write / Edit Review Modal -->
+      <div id="write-review-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="review-modal-title">Write Review</h3>
+            <span class="close" id="close-review-modal">&times;</span>
+          </div>
+          <div class="modal-body">
+            <div id="review-modal-alert-success" class="alert alert-success" style="display:none;"></div>
+            <div id="review-modal-alert-error" class="alert alert-danger" style="display:none;"></div>
+            <form id="write-review-form">
+              <input type="hidden" id="modal-booking-id" />
+              <input type="hidden" id="modal-review-id" />
+              <div class="form-group">
+                <label>Customer</label>
+                <input type="text" id="modal-customer-name" class="form-control" readonly />
+              </div>
+              <div class="form-group">
+                <label>Rating *</label>
+                <div id="modal-star-picker" style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                  <span class="modal-rev-star" data-val="1" style="font-size:2rem;cursor:pointer;color:#ccc;">&#9733;</span>
+                  <span class="modal-rev-star" data-val="2" style="font-size:2rem;cursor:pointer;color:#ccc;">&#9733;</span>
+                  <span class="modal-rev-star" data-val="3" style="font-size:2rem;cursor:pointer;color:#ccc;">&#9733;</span>
+                  <span class="modal-rev-star" data-val="4" style="font-size:2rem;cursor:pointer;color:#ccc;">&#9733;</span>
+                  <span class="modal-rev-star" data-val="5" style="font-size:2rem;cursor:pointer;color:#ccc;">&#9733;</span>
+                </div>
+                <input type="hidden" id="modal-rating" value="" />
+              </div>
+              <div class="form-group">
+                <label for="modal-comment">Review *</label>
+                <textarea id="modal-comment" class="form-control" rows="4" placeholder="Share your experience with this renter..." required></textarea>
+              </div>
+              <div class="form-buttons">
+                <button type="submit" class="btn btn-primary"><i class="icofont-check"></i> Submit Review</button>
+                <button type="button" id="cancel-review-modal" class="btn btn-secondary"><i class="icofont-close"></i> Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete Review Confirm Modal -->
+      <div id="delete-review-modal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:400px;">
+          <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <span class="close" id="close-delete-review-modal">&times;</span>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete this review? This cannot be undone.</p>
+            <div class="form-buttons">
+              <button id="confirm-delete-review-btn" class="btn btn-danger">Delete</button>
+              <button id="cancel-delete-review-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- ======= Messaging Section ======= -->
       <section id="messaging" class="vehicle-management">
@@ -1338,40 +1425,65 @@
           loadVehicleHistory(vehicleId, vehicleLabel);
         });
 
+        // ── Toggle review section ─────────────────────────────────
         const viewReviewsBtn = document.getElementById('view-reviews-btn');
-        const reviewCustomersSection = document.getElementById('review-customers-section');
+        const reviewSectionBody = document.getElementById('review-section-body');
+        let reviewsLoaded = false;
 
         viewReviewsBtn.addEventListener('click', function () {
-          const isVisible = reviewCustomersSection.style.display !== 'none';
+          const isVisible = reviewSectionBody.style.display !== 'none';
           if (isVisible) {
-            reviewCustomersSection.style.display = 'none';
+            reviewSectionBody.style.display = 'none';
+            viewReviewsBtn.innerHTML = '<i class="icofont-star"></i> View Customer Reviews';
           } else {
-            reviewCustomersSection.style.display = 'block';
-            loadReviewTables();
+            reviewSectionBody.style.display = 'block';
+            viewReviewsBtn.innerHTML = '<i class="icofont-close"></i> Hide Reviews';
+            if (!reviewsLoaded) {
+              loadReviewStats();
+              loadReviewTables();
+              reviewsLoaded = true;
+            }
           }
         });
 
+        // ── Review stats ─────────────────────────────────────────
+        function loadReviewStats() {
+          fetch('/api/host-review-stats')
+            .then(r => r.ok ? r.json() : {})
+            .then(data => {
+              document.getElementById('stat-reviews-given').textContent = data.reviewsGiven ?? 0;
+              document.getElementById('stat-avg-rating').textContent = data.avgRating != null ? data.avgRating + ' ★' : '—';
+              document.getElementById('stat-pending-reviews').textContent = data.pendingCount ?? 0;
+            })
+            .catch(() => {});
+        }
+
+        // ── Review tables ─────────────────────────────────────────
         function loadReviewTables() {
-          // Review history table
+          // History table
           fetch('/api/host-reviews')
             .then(r => r.ok ? r.json() : [])
             .then(data => {
               const tbody = document.getElementById('review-customers-body');
               tbody.innerHTML = '';
               if (!data.length) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No reviews yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No reviews given yet.</td></tr>';
                 return;
               }
               data.forEach(r => {
+                const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                  <td data-label="Customer"><span>${r.customer || '—'}</span></td>
-                  <td data-label="Vehicle"><span>${r.vehicle || '—'}</span></td>
-                  <td data-label="Rental Date"><span>${r.rentalDate || '—'}</span></td>
-                  <td data-label="Rating"><span>${r.rating || '—'}</span></td>
-                  <td data-label="Review"><span>${r.review || '—'}</span></td>
-                  <td data-label="Submitted"><span>${r.submitted || '—'}</span></td>
-                  <td data-label="Actions"><span>${r.actions || '—'}</span></td>
+                  <td data-label="Customer">${r.customer || '—'}</td>
+                  <td data-label="Vehicle">${r.vehicle || '—'}</td>
+                  <td data-label="Rental Date">${r.rentalDate || '—'}</td>
+                  <td data-label="Rating"><strong>${r.rating}</strong> <span style="color:#f5a623;">${stars}</span></td>
+                  <td data-label="Review">"${r.review || '—'}"</td>
+                  <td data-label="Submitted">${r.submitted || '—'}</td>
+                  <td data-label="Actions">
+                    <a href="#" class="text-primary mr-2" onclick="openEditReviewModal('${r.id}','${r.customer}',${r.rating},\`${r.review}\`);return false;">Edit</a>
+                    <a href="#" class="text-danger" onclick="openDeleteReviewModal('${r.id}');return false;">Delete</a>
+                  </td>
                 `;
                 tbody.appendChild(tr);
               });
@@ -1381,7 +1493,7 @@
                 '<tr><td colspan="7" class="text-center text-muted">Could not load reviews.</td></tr>';
             });
 
-          // Pending reviews table
+          // Pending table
           fetch('/api/host-pending-reviews')
             .then(r => r.ok ? r.json() : [])
             .then(data => {
@@ -1394,11 +1506,13 @@
               data.forEach(r => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                  <td data-label="Customer"><span>${r.customer || '—'}</span></td>
-                  <td data-label="Vehicle"><span>${r.vehicle || '—'}</span></td>
-                  <td data-label="Rental Period"><span>${r.rentalPeriod || '—'}</span></td>
-                  <td data-label="Customer's Review"><span>${r.customerReview || '—'}</span></td>
-                  <td data-label="Action"><span>${r.action || '—'}</span></td>
+                  <td data-label="Customer">${r.customer || '—'}</td>
+                  <td data-label="Vehicle">${r.vehicle || '—'}</td>
+                  <td data-label="Rental Period">${r.rentalPeriod || '—'}</td>
+                  <td data-label="Customer's Review"><span class="text-muted">${r.customerReview || '—'}</span></td>
+                  <td data-label="Action">
+                    <button class="btn btn-sm btn-success" onclick="openReviewModal('${r.bookingId}','${r.customer}')">Write Review</button>
+                  </td>
                 `;
                 tbody.appendChild(tr);
               });
@@ -1408,6 +1522,153 @@
                 '<tr><td colspan="5" class="text-center text-muted">Could not load pending reviews.</td></tr>';
             });
         }
+
+        // ── Modal star picker ─────────────────────────────────────
+        (function () {
+          const stars = document.querySelectorAll('#modal-star-picker .modal-rev-star');
+          const ratingInput = document.getElementById('modal-rating');
+          function setStars(val) {
+            stars.forEach(s => {
+              s.style.color = parseInt(s.dataset.val) <= val ? '#f5a623' : '#ccc';
+            });
+            ratingInput.value = val;
+          }
+          stars.forEach(s => {
+            s.addEventListener('click', () => setStars(parseInt(s.dataset.val)));
+            s.addEventListener('mouseover', () =>
+              stars.forEach(x => { x.style.color = parseInt(x.dataset.val) <= parseInt(s.dataset.val) ? '#f5a623' : '#ccc'; })
+            );
+            s.addEventListener('mouseout', () => setStars(parseInt(ratingInput.value) || 0));
+          });
+          window._setModalStars = setStars;
+        })();
+
+        // ── Open write-review modal (new review) ──────────────────
+        window.openReviewModal = function (bookingId, customerName) {
+          document.getElementById('review-modal-title').textContent = 'Write Review';
+          document.getElementById('modal-booking-id').value = bookingId;
+          document.getElementById('modal-review-id').value = '';
+          document.getElementById('modal-customer-name').value = customerName;
+          document.getElementById('modal-comment').value = '';
+          document.getElementById('modal-rating').value = '';
+          document.getElementById('review-modal-alert-success').style.display = 'none';
+          document.getElementById('review-modal-alert-error').style.display = 'none';
+          window._setModalStars(0);
+          document.getElementById('write-review-modal').style.display = 'block';
+        };
+
+        // ── Open edit-review modal ────────────────────────────────
+        window.openEditReviewModal = function (reviewId, customerName, rating, comment) {
+          document.getElementById('review-modal-title').textContent = 'Edit Review';
+          document.getElementById('modal-booking-id').value = '';
+          document.getElementById('modal-review-id').value = reviewId;
+          document.getElementById('modal-customer-name').value = customerName;
+          document.getElementById('modal-comment').value = comment;
+          document.getElementById('review-modal-alert-success').style.display = 'none';
+          document.getElementById('review-modal-alert-error').style.display = 'none';
+          window._setModalStars(parseInt(rating) || 0);
+          document.getElementById('write-review-modal').style.display = 'block';
+        };
+
+        document.getElementById('close-review-modal').addEventListener('click', () => {
+          document.getElementById('write-review-modal').style.display = 'none';
+        });
+        document.getElementById('cancel-review-modal').addEventListener('click', () => {
+          document.getElementById('write-review-modal').style.display = 'none';
+        });
+
+        // ── Submit write/edit review form ─────────────────────────
+        document.getElementById('write-review-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          const bookingId = document.getElementById('modal-booking-id').value;
+          const reviewId = document.getElementById('modal-review-id').value;
+          const rating = parseInt(document.getElementById('modal-rating').value);
+          const comment = document.getElementById('modal-comment').value.trim();
+          const successEl = document.getElementById('review-modal-alert-success');
+          const errorEl = document.getElementById('review-modal-alert-error');
+          successEl.style.display = 'none';
+          errorEl.style.display = 'none';
+
+          if (!rating || rating < 1 || rating > 5) {
+            errorEl.textContent = 'Please select a star rating.';
+            errorEl.style.display = 'block';
+            return;
+          }
+
+          if (reviewId) {
+            // Edit: PATCH not implemented — re-use POST with same booking_id by updating via a dedicated patch
+            // For now use a simple PUT-style update via POST with review_id flag
+            fetch(`/api/reviews/${reviewId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ rating, comment }),
+            })
+              .then(r => r.json())
+              .then(data => {
+                if (data.success) {
+                  successEl.textContent = 'Review updated!';
+                  successEl.style.display = 'block';
+                  setTimeout(() => {
+                    document.getElementById('write-review-modal').style.display = 'none';
+                    loadReviewTables();
+                    loadReviewStats();
+                  }, 1000);
+                } else {
+                  errorEl.textContent = data.error || 'Failed to update review.';
+                  errorEl.style.display = 'block';
+                }
+              })
+              .catch(() => { errorEl.textContent = 'Server error.'; errorEl.style.display = 'block'; });
+          } else {
+            fetch('/api/reviews', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ booking_id: bookingId, review_type: 'renter', rating, comment }),
+            })
+              .then(r => r.json())
+              .then(data => {
+                if (data.success) {
+                  successEl.textContent = 'Review submitted!';
+                  successEl.style.display = 'block';
+                  setTimeout(() => {
+                    document.getElementById('write-review-modal').style.display = 'none';
+                    loadReviewTables();
+                    loadReviewStats();
+                  }, 1000);
+                } else {
+                  errorEl.textContent = data.error || 'Failed to submit review.';
+                  errorEl.style.display = 'block';
+                }
+              })
+              .catch(() => { errorEl.textContent = 'Server error.'; errorEl.style.display = 'block'; });
+          }
+        });
+
+        // ── Delete review ─────────────────────────────────────────
+        let _deleteReviewId = null;
+        window.openDeleteReviewModal = function (reviewId) {
+          _deleteReviewId = reviewId;
+          document.getElementById('delete-review-modal').style.display = 'block';
+        };
+        document.getElementById('close-delete-review-modal').addEventListener('click', () => {
+          document.getElementById('delete-review-modal').style.display = 'none';
+        });
+        document.getElementById('cancel-delete-review-btn').addEventListener('click', () => {
+          document.getElementById('delete-review-modal').style.display = 'none';
+        });
+        document.getElementById('confirm-delete-review-btn').addEventListener('click', () => {
+          if (!_deleteReviewId) return;
+          fetch(`/api/reviews/${_deleteReviewId}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+              document.getElementById('delete-review-modal').style.display = 'none';
+              if (data.success) { loadReviewTables(); loadReviewStats(); }
+              else alert(data.error || 'Failed to delete review.');
+            })
+            .catch(() => { document.getElementById('delete-review-modal').style.display = 'none'; alert('Server error.'); });
+        });
+
+        // Stats and tables load lazily when the section is first opened
 
         const viewMessagingBtn = document.getElementById('view-messaging-btn');
         const messagingContent = document.getElementById('messaging-content');
