@@ -2007,7 +2007,7 @@ for (const vehicle of availableVehicles) {
         username: watcher.username,
         type: notif.type,
         vehicle_id: vehicle._id,
-        createdAt: { $gte: new Date(Date.now() - 60 * 60 * 1000) }
+        createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
       });
 
       if (recentNotif) continue; // Already notified recently, skip
@@ -2045,7 +2045,7 @@ for (const vehicle of availableVehicles) {
                 </div>
                 <div style="padding:24px;">
                   <p style="font-size:15px; color:#333;">${notif.message}</p>
-                  <a href="https://driveshare-6b05ff2378e7.herokuapp.com/vehicle-reservation.html"
+                  <a href="https://driveshare-6b05ff2378e7.herokuapp.com/vehicle-reservation.html?vehicleId=${vehicle._id}&unwatch=1"
                     style="display:inline-block; margin-top:16px; padding:10px 24px; background:#e8604c; color:#fff; border-radius:6px; text-decoration:none; font-weight:bold;">
                     View Vehicle
                   </a>

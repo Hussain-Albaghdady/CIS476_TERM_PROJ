@@ -643,6 +643,7 @@
               setTimeout(function () {
                 watchModal.style.display = "none";
                 currentWatchId = null;
+                location.reload();
               }, 2200);
             } else {
               watchResult.textContent = data.error || "Something went wrong.";
@@ -673,9 +674,41 @@
               );
             } else {
               document.getElementById("main").classList.remove("hidden-page");
+              // Handle unwatch intent from email link (direct or post-login via sessionStorage)
+              var params = new URLSearchParams(window.location.search);
+              var unwatchId = (params.get("unwatch") === "1" && params.get("vehicleId"))
+                ? params.get("vehicleId")
+                : sessionStorage.getItem("pendingUnwatch");
+              if (unwatchId) {
+                sessionStorage.removeItem("pendingUnwatch");
+                fetch("/api/watch", {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ vehicle_id: unwatchId }),
+                })
+                  .then(function (r) { return r.json(); })
+                  .then(function (d) {
+                    var banner = document.createElement("div");
+                    banner.textContent = d.success
+                      ? "You've been removed from the watch list for this vehicle."
+                      : (d.error || "Could not remove watch.");
+                    banner.style.cssText = "position:fixed;top:16px;left:50%;transform:translateX(-50%);background:" +
+                      (d.success ? "#27ae60" : "#e74c3c") +
+                      ";color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,.2);";
+                    document.body.appendChild(banner);
+                    setTimeout(function () { banner.remove(); }, 4000);
+                  })
+                  .catch(function () {});
+              }
             }
           })
           .catch(() => {
+            // Preserve unwatch intent across login redirect
+            var params = new URLSearchParams(window.location.search);
+            if (params.get("unwatch") === "1" && params.get("vehicleId")) {
+              sessionStorage.setItem("pendingUnwatch", params.get("vehicleId"));
+            }
             window.location.href = "/loginform.html";
           });
       });
