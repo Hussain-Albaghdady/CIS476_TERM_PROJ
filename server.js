@@ -16,151 +16,6 @@ const mailer = nodemailer.createTransport({
   },
 });
 
-async function sendReservationEmail(
-  to,
-  reservation,
-  vehicle,
-  last4,
-  baseUrl,
-  username,
-) {
-  // Save in-app notification (Observer pattern — same as notifyWatchers)
-  if (username && db) {
-    try {
-      const vehicleName =
-        [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
-        "Your Vehicle";
-      await db.collection("Notifications").insertOne({
-        username,
-        type: "reservation_confirmed",
-        message: `Your reservation for ${vehicleName} (${reservation.start_date} → ${reservation.end_date}) has been confirmed. Confirmation #${reservation._id}.`,
-        link: "/vehicle-reservation.html",
-        vehicle_id: vehicle._id,
-        reservation_id: reservation._id,
-        read: false,
-        createdAt: new Date(),
-      });
-    } catch (err) {
-      console.error(
-        "[Observer] Failed to save reservation notification:",
-        err.message,
-      );
-    }
-  }
-
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) return;
-
-  const vehicleName =
-    [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
-    "Your Vehicle";
-  const imageRaw = vehicle.image_url || vehicle.image || "";
-  const imageUrl = imageRaw ? `${baseUrl}/${imageRaw}` : "";
-  const confirmationNumber = String(reservation._id);
-  const total = Number(reservation.total_cost || 0).toFixed(2);
-
-  try {
-    await mailer.sendMail({
-      from: `"DriveShare" <${process.env.GMAIL_USER}>`,
-      to,
-      subject: `Reservation Confirmed — ${vehicleName}`,
-      html: `
-      <table width="640" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;border:1px solid #ddd;">
-
-        <!-- Header -->
-        <tr>
-          <td bgcolor="#ea8900" style="padding:18px 24px;">
-            <h2 style="color:#ffffff;margin:0;font-size:18px;font-weight:bold;">
-              Thank you ${reservation.customer_name.toUpperCase()}, your car has been reserved.
-            </h2>
-          </td>
-        </tr>
-
-        <!-- Dates + Confirmation -->
-        <tr>
-          <td bgcolor="#1a1a1a" style="padding:18px 24px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td width="50%" style="color:#ffffff;vertical-align:top;padding-bottom:8px;">
-                  <span style="color:#4fc3f7;font-weight:bold;">Pick up:</span><br>
-                  <span style="color:#ffffff;">${reservation.start_date}</span>
-                </td>
-                <td width="50%" style="color:#ffffff;vertical-align:top;padding-bottom:8px;">
-                  <span style="color:#ffffff;font-weight:bold;">Your Confirmation Number:</span><br>
-                  <span style="color:#4fc3f7;font-weight:bold;font-size:14px;">${confirmationNumber}</span>
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#ffffff;vertical-align:top;">
-                  <span style="color:#4fc3f7;font-weight:bold;">Drop off:</span><br>
-                  <span style="color:#ffffff;">${reservation.end_date}</span>
-                </td>
-                <td></td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Vehicle + Pricing -->
-        <tr>
-          <td bgcolor="#111111" style="padding:18px 24px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td width="45%" style="vertical-align:top;padding-right:16px;">
-                  ${imageUrl ? `<img src="${imageUrl}" alt="${vehicleName}" width="200" style="display:block;width:200px;max-width:100%;border-radius:4px;">` : ""}
-                  <p style="margin:10px 0 0;font-weight:bold;font-size:22px;color:#ffffff;">${vehicleName}</p>
-                  <p style="margin:12px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Current Mileage:</p>
-                  <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${Number(vehicle.mileage).toLocaleString()} miles</p>
-                  <p style="margin:2px 0 0;font-size:13px;color:#ffffff;">Miles: Unlimited free Miles</p>
-                  <p style="margin:5px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Your Order Number:</p>
-                  <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${reservation.orderId}</p>
-                </td>
-                <td width="55%" style="vertical-align:top;text-align:right;">
-                  <p style="color:#4fc3f7;font-weight:bold;margin:0 0 4px;font-size:13px;">Estimated Total:</p>
-                  <p style="font-size:28px;font-weight:bold;margin:0;color:#ffffff;">$${total}</p>
-                  ${last4 ? `<p style="margin:8px 0 0;font-size:12px;color:#aaaaaa;">Charged to card ending in <strong style="color:#ffffff;">${last4}</strong></p>` : ""}
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Location -->
-        <tr>
-          <td bgcolor="#1e3a5f" style="padding:14px 24px;">
-            <p style="color:#ffffff;margin:0 0 12px;font-size:15px;font-weight:bold;">Location Information</p>
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td width="50%" style="vertical-align:top;padding-right:16px;">
-                  <span style="color:#4fc3f7;font-weight:bold;font-size:13px;">Pick Up Location</span><br>
-                  <span style="color:#ffffff;font-size:13px;">${reservation.location}</span>
-                </td>
-                <td width="50%" style="vertical-align:top;">
-                  <span style="color:#4fc3f7;font-weight:bold;font-size:13px;">Drop Off Location</span><br>
-                  <span style="color:#ffffff;font-size:13px;">${reservation.location}</span>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Footer -->
-        <tr>
-          <td bgcolor="#111111" style="padding:12px 24px;text-align:center;">
-            <p style="color:#aaaaaa;font-size:12px;margin:0;">
-              Thank you for choosing DriveShare. Questions? Contact us at
-              <a href="mailto:${process.env.GMAIL_USER}" style="color:#4fc3f7;">${process.env.GMAIL_USER}</a>
-            </p>
-          </td>
-        </tr>
-
-      </table>
-      `,
-    });
-  } catch (err) {
-    console.error("Failed to send reservation email:", err.message);
-  }
-}
-
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
@@ -489,6 +344,7 @@ app.post("/contact_us", async (req, res) => {
     );
   }
 });
+
 app.post("/sign_up", async (req, res) => {
   const {
     fname,
@@ -1496,7 +1352,150 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       .json({ error: "Failed to create reservation: " + err.message });
   }
 });
+async function sendReservationEmail(
+  to,
+  reservation,
+  vehicle,
+  last4,
+  baseUrl,
+  username,
+) {
+  // Save in-app notification (Observer pattern — same as notifyWatchers)
+  if (username && db) {
+    try {
+      const vehicleName =
+        [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
+        "Your Vehicle";
+      await db.collection("Notifications").insertOne({
+        username,
+        type: "reservation_confirmed",
+        message: `Your reservation for ${vehicleName} (${reservation.start_date} → ${reservation.end_date}) has been confirmed. Confirmation #${reservation._id}.`,
+        link: "/vehicle-reservation.html",
+        vehicle_id: vehicle._id,
+        reservation_id: reservation._id,
+        read: false,
+        createdAt: new Date(),
+      });
+    } catch (err) {
+      console.error(
+        "[Observer] Failed to save reservation notification:",
+        err.message,
+      );
+    }
+  }
 
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) return;
+
+  const vehicleName =
+    [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
+    "Your Vehicle";
+  const imageRaw = vehicle.image_url || vehicle.image || "";
+  const imageUrl = imageRaw ? `${baseUrl}/${imageRaw}` : "";
+  const confirmationNumber = String(reservation._id);
+  const total = Number(reservation.total_cost || 0).toFixed(2);
+
+  try {
+    await mailer.sendMail({
+      from: `"DriveShare" <${process.env.GMAIL_USER}>`,
+      to,
+      subject: `Reservation Confirmed — ${vehicleName}`,
+      html: `
+      <table width="640" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;border:1px solid #ddd;">
+
+        <!-- Header -->
+        <tr>
+          <td bgcolor="#ea8900" style="padding:18px 24px;">
+            <h2 style="color:#ffffff;margin:0;font-size:18px;font-weight:bold;">
+              Thank you ${reservation.customer_name.toUpperCase()}, your car has been reserved.
+            </h2>
+          </td>
+        </tr>
+
+        <!-- Dates + Confirmation -->
+        <tr>
+          <td bgcolor="#1a1a1a" style="padding:18px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="50%" style="color:#ffffff;vertical-align:top;padding-bottom:8px;">
+                  <span style="color:#4fc3f7;font-weight:bold;">Pick up:</span><br>
+                  <span style="color:#ffffff;">${reservation.start_date}</span>
+                </td>
+                <td width="50%" style="color:#ffffff;vertical-align:top;padding-bottom:8px;">
+                  <span style="color:#ffffff;font-weight:bold;">Your Confirmation Number:</span><br>
+                  <span style="color:#4fc3f7;font-weight:bold;font-size:14px;">${confirmationNumber}</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:#ffffff;vertical-align:top;">
+                  <span style="color:#4fc3f7;font-weight:bold;">Drop off:</span><br>
+                  <span style="color:#ffffff;">${reservation.end_date}</span>
+                </td>
+                <td></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Vehicle + Pricing -->
+        <tr>
+          <td bgcolor="#111111" style="padding:18px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="45%" style="vertical-align:top;padding-right:16px;">
+                  ${imageUrl ? `<img src="${imageUrl}" alt="${vehicleName}" width="200" style="display:block;width:200px;max-width:100%;border-radius:4px;">` : ""}
+                  <p style="margin:10px 0 0;font-weight:bold;font-size:22px;color:#ffffff;">${vehicleName}</p>
+                  <p style="margin:12px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Current Mileage:</p>
+                  <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${Number(vehicle.mileage).toLocaleString()} miles</p>
+                  <p style="margin:2px 0 0;font-size:13px;color:#ffffff;">Miles: Unlimited free Miles</p>
+                  <p style="margin:5px 0 0;font-weight:bold;font-size:13px;color:#ffffff;">Your Order Number:</p>
+                  <p style="margin:2px 0 0;color:#4fc3f7;font-weight:bold;font-size:14px;">${reservation.orderId}</p>
+                </td>
+                <td width="55%" style="vertical-align:top;text-align:right;">
+                  <p style="color:#4fc3f7;font-weight:bold;margin:0 0 4px;font-size:13px;">Estimated Total:</p>
+                  <p style="font-size:28px;font-weight:bold;margin:0;color:#ffffff;">$${total}</p>
+                  ${last4 ? `<p style="margin:8px 0 0;font-size:12px;color:#aaaaaa;">Charged to card ending in <strong style="color:#ffffff;">${last4}</strong></p>` : ""}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Location -->
+        <tr>
+          <td bgcolor="#1e3a5f" style="padding:14px 24px;">
+            <p style="color:#ffffff;margin:0 0 12px;font-size:15px;font-weight:bold;">Location Information</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="50%" style="vertical-align:top;padding-right:16px;">
+                  <span style="color:#4fc3f7;font-weight:bold;font-size:13px;">Pick Up Location</span><br>
+                  <span style="color:#ffffff;font-size:13px;">${reservation.location}</span>
+                </td>
+                <td width="50%" style="vertical-align:top;">
+                  <span style="color:#4fc3f7;font-weight:bold;font-size:13px;">Drop Off Location</span><br>
+                  <span style="color:#ffffff;font-size:13px;">${reservation.location}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td bgcolor="#111111" style="padding:12px 24px;text-align:center;">
+            <p style="color:#aaaaaa;font-size:12px;margin:0;">
+              Thank you for choosing DriveShare. Questions? Contact us at
+              <a href="mailto:${process.env.GMAIL_USER}" style="color:#4fc3f7;">${process.env.GMAIL_USER}</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      `,
+    });
+  } catch (err) {
+    console.error("Failed to send reservation email:", err.message);
+  }
+}
 // ── Proxy Pattern: Payment Integration ──────────────────────────────────────
 // PaymentGateway  – abstract subject interface
 // StripeGateway   – real subject: calls Stripe API (falls back to local store
@@ -2845,7 +2844,9 @@ app.get("/api/watch", requireLogin, async (req, res) => {
           created_at: entry.created_at,
           vehicle: vehicle
             ? {
-                label: [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" "),
+                label: [vehicle.year, vehicle.make, vehicle.model]
+                  .filter(Boolean)
+                  .join(" "),
                 rental_rate_per_day: vehicle.rental_rate_per_day ?? null,
                 availability: vehicle.availability ?? false,
                 image_url: vehicle.image_url ?? "",
@@ -3254,7 +3255,11 @@ app.put(
               rating: r.rating,
               review: r.comment || "—",
               submitted: r.createdAt
-                ? new Date(r.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+                ? new Date(r.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })
                 : "—",
             };
           }),
@@ -3277,22 +3282,36 @@ app.put(
         const reviewsGiven = given.length;
         const avgRating =
           reviewsGiven > 0
-            ? Math.round((given.reduce((s, r) => s + r.rating, 0) / reviewsGiven) * 10) / 10
+            ? Math.round(
+                (given.reduce((s, r) => s + r.rating, 0) / reviewsGiven) * 10,
+              ) / 10
             : null;
 
         // Count pending (completed rentals not yet reviewed by host)
-        const vehicles = await db.collection("Vehicles").find({ host_username: username }).toArray();
+        const vehicles = await db
+          .collection("Vehicles")
+          .find({ host_username: username })
+          .toArray();
         const vehicleIdStrings = new Set(vehicles.map((v) => v._id.toString()));
-        const allCompleted = await db.collection("Reservations").find({ status: "Complete" }).toArray();
+        const allCompleted = await db
+          .collection("Reservations")
+          .find({ status: "Complete" })
+          .toArray();
         const completed = allCompleted.filter((r) =>
-          toIdArray(r.history_vehicle_id || r.vehicle_id).some((id) => vehicleIdStrings.has(id.toString()))
+          toIdArray(r.history_vehicle_id || r.vehicle_id).some((id) =>
+            vehicleIdStrings.has(id.toString()),
+          ),
         );
         const reviewedIds = new Set(given.map((r) => r.booking_id?.toString()));
-        const pendingCount = completed.filter((r) => !reviewedIds.has(r._id.toString())).length;
+        const pendingCount = completed.filter(
+          (r) => !reviewedIds.has(r._id.toString()),
+        ).length;
 
         res.json({ reviewsGiven, avgRating, pendingCount });
       } catch (err) {
-        res.status(500).json({ reviewsGiven: 0, avgRating: null, pendingCount: 0 });
+        res
+          .status(500)
+          .json({ reviewsGiven: 0, avgRating: null, pendingCount: 0 });
       }
     });
 
@@ -3301,18 +3320,23 @@ app.put(
       try {
         const username = req.session.user_name;
         const id = req.params.id;
-        if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
-        const review = await db.collection("Reviews").findOne({ _id: new ObjectId(id) });
+        if (!ObjectId.isValid(id))
+          return res.status(400).json({ error: "Invalid ID" });
+        const review = await db
+          .collection("Reviews")
+          .findOne({ _id: new ObjectId(id) });
         if (!review) return res.status(404).json({ error: "Review not found" });
         if (review.reviewer_username !== username)
           return res.status(403).json({ error: "Unauthorized" });
         const { rating, comment } = req.body;
         if (!rating || rating < 1 || rating > 5)
           return res.status(400).json({ error: "Rating must be 1–5" });
-        await db.collection("Reviews").updateOne(
-          { _id: new ObjectId(id) },
-          { $set: { rating: parseInt(rating), comment: comment || "" } }
-        );
+        await db
+          .collection("Reviews")
+          .updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { rating: parseInt(rating), comment: comment || "" } },
+          );
         res.json({ success: true });
       } catch (err) {
         res.status(500).json({ error: "Failed to update review" });
@@ -3324,8 +3348,11 @@ app.put(
       try {
         const username = req.session.user_name;
         const id = req.params.id;
-        if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
-        const review = await db.collection("Reviews").findOne({ _id: new ObjectId(id) });
+        if (!ObjectId.isValid(id))
+          return res.status(400).json({ error: "Invalid ID" });
+        const review = await db
+          .collection("Reviews")
+          .findOne({ _id: new ObjectId(id) });
         if (!review) return res.status(404).json({ error: "Review not found" });
         if (review.reviewer_username !== username)
           return res.status(403).json({ error: "Unauthorized" });
@@ -3349,9 +3376,14 @@ app.put(
         const vehicleIds = vehicles.map((v) => v._id);
 
         const vehicleIdStrings = new Set(vehicleIds.map((id) => id.toString()));
-        const allCompleted = await db.collection("Reservations").find({ status: "Complete" }).toArray();
+        const allCompleted = await db
+          .collection("Reservations")
+          .find({ status: "Complete" })
+          .toArray();
         const completed = allCompleted.filter((r) =>
-          toIdArray(r.history_vehicle_id || r.vehicle_id).some((id) => vehicleIdStrings.has(id.toString()))
+          toIdArray(r.history_vehicle_id || r.vehicle_id).some((id) =>
+            vehicleIdStrings.has(id.toString()),
+          ),
         );
 
         // Find which ones the host hasn't reviewed yet
@@ -3381,7 +3413,9 @@ app.put(
             booking_id: r._id,
             review_type: "car",
           });
-          customerReviewMap[r._id.toString()] = cRev ? `${cRev.rating}★ – "${cRev.comment}"` : "No review yet";
+          customerReviewMap[r._id.toString()] = cRev
+            ? `${cRev.rating}★ – "${cRev.comment}"`
+            : "No review yet";
         }
 
         const result = pending.map((r) => {
@@ -3404,8 +3438,14 @@ app.put(
     // ── Submit a review ─────────────────────────────────────────
     app.post("/api/reviews", requireLogin, async (req, res) => {
       try {
-        const { booking_id, reviewed_username, review_type, rating, title, comment } =
-          req.body;
+        const {
+          booking_id,
+          reviewed_username,
+          review_type,
+          rating,
+          title,
+          comment,
+        } = req.body;
         const reviewer_username = req.session.user_name;
 
         if (!rating || rating < 1 || rating > 5) {
@@ -3424,8 +3464,14 @@ app.put(
           if (booking) {
             car_id = booking.history_vehicle_id || booking.vehicle_id;
             // Derive reviewed_username from the renter when not provided
-            if (!resolved_reviewed_username && review_type === "renter" && booking.user_id) {
-              const renter = await db.collection("RentalUsers").findOne({ _id: booking.user_id });
+            if (
+              !resolved_reviewed_username &&
+              review_type === "renter" &&
+              booking.user_id
+            ) {
+              const renter = await db
+                .collection("RentalUsers")
+                .findOne({ _id: booking.user_id });
               resolved_reviewed_username = renter?.username || null;
             }
           }
@@ -3475,75 +3521,94 @@ app.put(
     });
 
     // ── Customer: get completed rentals for review dropdown ──────
-    app.get("/api/customer-completed-rentals", requireLogin, async (req, res) => {
-      try {
-        const username = req.session.user_name;
-        console.log("[completed-rentals] username:", username);
-        const user = await db.collection("RentalUsers").findOne({ username });
-        console.log("[completed-rentals] user found:", user ? user._id : "NOT FOUND");
+    app.get(
+      "/api/customer-completed-rentals",
+      requireLogin,
+      async (req, res) => {
+        try {
+          const username = req.session.user_name;
+          console.log("[completed-rentals] username:", username);
+          const user = await db.collection("RentalUsers").findOne({ username });
+          console.log(
+            "[completed-rentals] user found:",
+            user ? user._id : "NOT FOUND",
+          );
 
-        const today = new Date().toISOString().split("T")[0];
-        const completed = await db
-          .collection("Reservations")
-          .find({
-            user_id: user._id,
-            $or: [
-              { status: "Complete" },
-              { status: { $in: ["Booked", "Reserved"] }, end_date: { $lte: today } },
-            ],
-          })
-          .sort({ end_date: -1 })
-          .toArray();
+          const today = new Date().toISOString().split("T")[0];
+          const completed = await db
+            .collection("Reservations")
+            .find({
+              user_id: user._id,
+              $or: [
+                { status: "Complete" },
+                {
+                  status: { $in: ["Booked", "Reserved"] },
+                  end_date: { $lte: today },
+                },
+              ],
+            })
+            .sort({ end_date: -1 })
+            .toArray();
 
-        console.log("[completed-rentals] completed count:", completed.length);
-        if (completed.length === 0) return res.json([]);
+          console.log("[completed-rentals] completed count:", completed.length);
+          if (completed.length === 0) return res.json([]);
 
-        const vehicleIds = completed
-          .map((r) => {
-            const rawId = r.history_vehicle_id || r.vehicle_id;
-            try {
-              return rawId && ObjectId.isValid(rawId) ? new ObjectId(rawId) : null;
-            } catch { return null; }
-          })
-          .filter(Boolean);
+          const vehicleIds = completed
+            .map((r) => {
+              const rawId = r.history_vehicle_id || r.vehicle_id;
+              try {
+                return rawId && ObjectId.isValid(rawId)
+                  ? new ObjectId(rawId)
+                  : null;
+              } catch {
+                return null;
+              }
+            })
+            .filter(Boolean);
 
-        const vehicles = await db
-          .collection("Vehicles")
-          .find({ _id: { $in: vehicleIds } })
-          .toArray();
-        const vehicleMap = {};
-        vehicles.forEach((v) => { vehicleMap[v._id.toString()] = v; });
-
-        // Filter out rentals already reviewed by this customer
-        const existingReviews = await db
-          .collection("Reviews")
-          .find({ reviewer_username: username, review_type: "car" })
-          .toArray();
-        const reviewedBookingIds = new Set(
-          existingReviews.map((r) => r.booking_id?.toString())
-        );
-
-        const result = completed
-          .filter((r) => !reviewedBookingIds.has(r._id.toString()))
-          .map((r) => {
-            const vid = (r.history_vehicle_id || r.vehicle_id)?.toString();
-            const v = vehicleMap[vid] || {};
-            const name = [v.year, v.make, v.model].filter(Boolean).join(" ") || v.name || "Unknown Vehicle";
-            return {
-              bookingId: r._id,
-              vehicleName: name,
-              hostUsername: v.host_username || null,
-              endDate: r.end_date || null,
-            };
+          const vehicles = await db
+            .collection("Vehicles")
+            .find({ _id: { $in: vehicleIds } })
+            .toArray();
+          const vehicleMap = {};
+          vehicles.forEach((v) => {
+            vehicleMap[v._id.toString()] = v;
           });
 
-        console.log("[completed-rentals] result count:", result.length);
-        res.json(result);
-      } catch (err) {
-        console.error("customer-completed-rentals error:", err);
-        res.status(500).json({ error: "Failed to fetch completed rentals." });
-      }
-    });
+          // Filter out rentals already reviewed by this customer
+          const existingReviews = await db
+            .collection("Reviews")
+            .find({ reviewer_username: username, review_type: "car" })
+            .toArray();
+          const reviewedBookingIds = new Set(
+            existingReviews.map((r) => r.booking_id?.toString()),
+          );
+
+          const result = completed
+            .filter((r) => !reviewedBookingIds.has(r._id.toString()))
+            .map((r) => {
+              const vid = (r.history_vehicle_id || r.vehicle_id)?.toString();
+              const v = vehicleMap[vid] || {};
+              const name =
+                [v.year, v.make, v.model].filter(Boolean).join(" ") ||
+                v.name ||
+                "Unknown Vehicle";
+              return {
+                bookingId: r._id,
+                vehicleName: name,
+                hostUsername: v.host_username || null,
+                endDate: r.end_date || null,
+              };
+            });
+
+          console.log("[completed-rentals] result count:", result.length);
+          res.json(result);
+        } catch (err) {
+          console.error("customer-completed-rentals error:", err);
+          res.status(500).json({ error: "Failed to fetch completed rentals." });
+        }
+      },
+    );
 
     // ── Customer: get reviews submitted by this customer ──────────
     app.get("/api/my-reviews", requireLogin, async (req, res) => {
@@ -3557,26 +3622,45 @@ app.put(
 
         const carIds = reviews
           .map((r) => {
-            try { return r.car_id && ObjectId.isValid(r.car_id) ? new ObjectId(r.car_id) : null; }
-            catch { return null; }
+            try {
+              return r.car_id && ObjectId.isValid(r.car_id)
+                ? new ObjectId(r.car_id)
+                : null;
+            } catch {
+              return null;
+            }
           })
           .filter(Boolean);
 
         const vehicleMap = {};
         if (carIds.length > 0) {
-          const vDocs = await db.collection("Vehicles").find({ _id: { $in: carIds } }).toArray();
-          vDocs.forEach((v) => { vehicleMap[v._id.toString()] = v; });
+          const vDocs = await db
+            .collection("Vehicles")
+            .find({ _id: { $in: carIds } })
+            .toArray();
+          vDocs.forEach((v) => {
+            vehicleMap[v._id.toString()] = v;
+          });
         }
 
         const result = reviews.map((r) => {
           const v = vehicleMap[r.car_id?.toString()] || {};
-          const vehicleName = [v.year, v.make, v.model].filter(Boolean).join(" ") || v.name || "Unknown Vehicle";
+          const vehicleName =
+            [v.year, v.make, v.model].filter(Boolean).join(" ") ||
+            v.name ||
+            "Unknown Vehicle";
           return {
             vehicleName,
             rating: r.rating,
             title: r.title || "",
             comment: r.comment || "",
-            date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—",
+            date: r.createdAt
+              ? new Date(r.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "—",
           };
         });
 
@@ -3600,27 +3684,44 @@ app.put(
         // Look up vehicle names via car_id and reviewer's host info
         const carIds = reviews
           .map((r) => {
-            try { return r.car_id && ObjectId.isValid(r.car_id) ? new ObjectId(r.car_id) : null; }
-            catch { return null; }
+            try {
+              return r.car_id && ObjectId.isValid(r.car_id)
+                ? new ObjectId(r.car_id)
+                : null;
+            } catch {
+              return null;
+            }
           })
           .filter(Boolean);
 
         const vehicleMap = {};
         if (carIds.length > 0) {
-          const vDocs = await db.collection("Vehicles").find({ _id: { $in: carIds } }).toArray();
-          vDocs.forEach((v) => { vehicleMap[v._id.toString()] = v; });
+          const vDocs = await db
+            .collection("Vehicles")
+            .find({ _id: { $in: carIds } })
+            .toArray();
+          vDocs.forEach((v) => {
+            vehicleMap[v._id.toString()] = v;
+          });
         }
 
         const result = reviews.map((r) => {
           const v = vehicleMap[r.car_id?.toString()] || {};
-          const vehicleName = [v.year, v.make, v.model].filter(Boolean).join(" ") || v.name || "Unknown Vehicle";
+          const vehicleName =
+            [v.year, v.make, v.model].filter(Boolean).join(" ") ||
+            v.name ||
+            "Unknown Vehicle";
           return {
             vehicleName,
             reviewerUsername: r.reviewer_username || "—",
             rating: r.rating,
             comment: r.comment || "",
             date: r.createdAt
-              ? new Date(r.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+              ? new Date(r.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
               : "—",
           };
         });
