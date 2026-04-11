@@ -1496,6 +1496,7 @@ async function sendReservationEmail(
     console.error("Failed to send reservation email:", err.message);
   }
 }
+
 // ── Proxy Pattern: Payment Integration ──────────────────────────────────────
 // PaymentGateway  – abstract subject interface
 // StripeGateway   – real subject: calls Stripe API (falls back to local store
