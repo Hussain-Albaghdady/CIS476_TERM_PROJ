@@ -723,6 +723,20 @@
                 You have no active bookings or upcoming reservations.
               </div>
             </div>
+            <hr class="acct-sub-divider" />
+
+            <!-- Watchlist -->
+            <div class="acct-sub-heading">
+              <i class="bx bx-heart"></i> My Watchlist
+            </div>
+            <p style="color:#6c757d; margin-bottom:20px;">
+              Vehicles you're watching. You'll be notified when they become available or the price drops to your target.
+            </p>
+            <div class="acct-box" id="watchlist-box">
+              <div id="watchlist-body">
+                <p style="color:#6c757d; text-align:center; padding:16px;">Loading watchlist…</p>
+              </div>
+            </div>
           </div>
           <!-- END PANEL: Orders -->
 
@@ -1261,7 +1275,7 @@
           /* lazy-load panel data */
           if (panel === "address") loadAddresses();
           if (panel === "payments") loadPayments();
-          if (panel === "orders") loadOrders();
+          if (panel === "orders") { loadOrders(); loadWatchlist(); }
         });
       });
 
@@ -1994,8 +2008,72 @@
           .replace(/"/g, "&quot;");
       }
 
+      /* ── Load watchlist ─────────────────────────────────────────────── */
+      function loadWatchlist() {
+        var container = document.getElementById("watchlist-body");
+        if (!container) return;
+        container.innerHTML = '<p style="color:#6c757d;text-align:center;padding:16px;">Loading…</p>';
+        fetch("/api/watch", { credentials: "include" })
+          .then(function (r) { return r.json(); })
+          .then(function (list) {
+            if (!list || list.length === 0) {
+              container.innerHTML =
+                '<p style="color:#6c757d;text-align:center;padding:16px;">You are not watching any vehicles yet.</p>';
+              return;
+            }
+            container.innerHTML = list.map(function (entry) {
+              var priceLabel = entry.target_price
+                ? "Alert below $" + Number(entry.target_price).toFixed(2) + "/day"
+                : "Availability only";
+              var badge = entry.available
+                ? '<span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:12px;font-size:12px;">Available</span>'
+                : '<span style="background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:12px;font-size:12px;">Unavailable</span>';
+              return (
+                '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f0f0f0;">' +
+                (entry.image_url
+                  ? '<img src="' + entry.image_url + '" style="width:64px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;" />'
+                  : '<div style="width:64px;height:44px;background:#eee;border-radius:6px;flex-shrink:0;"></div>') +
+                '<div style="flex:1;min-width:0;">' +
+                  '<div style="font-weight:600;font-size:14px;">' + (entry.vehicle_name || "Vehicle") + "</div>" +
+                  '<div style="font-size:12px;color:#6c757d;margin-top:2px;">' +
+                    "$" + (entry.current_price ? Number(entry.current_price).toFixed(2) : "—") + "/day &nbsp;·&nbsp; " + priceLabel +
+                  "</div>" +
+                "</div>" +
+                badge +
+                '<button data-vid="' + entry.vehicle_id + '" class="unwatch-btn" ' +
+                  'style="margin-left:8px;border:none;background:none;color:#e74c3c;cursor:pointer;font-size:13px;white-space:nowrap;">' +
+                  '<i class="bx bx-x"></i> Unwatch</button>' +
+                "</div>"
+              );
+            }).join("") +
+            '<p style="font-size:12px;color:#aaa;margin-top:10px;">You\'ll receive an email notification at your registered address.</p>';
+
+            // Wire unwatch buttons
+            container.querySelectorAll(".unwatch-btn").forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                var vid = this.getAttribute("data-vid");
+                fetch("/api/watch", {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ vehicle_id: vid }),
+                })
+                  .then(function (r) { return r.json(); })
+                  .then(function (data) {
+                    if (data.success) loadWatchlist();
+                  });
+              });
+            });
+          })
+          .catch(function () {
+            container.innerHTML =
+              '<p style="color:red;text-align:center;padding:16px;">Failed to load watchlist.</p>';
+          });
+      }
+
       /* ── Bootstrap on page load ─────────────────────────────────────── */
       loadOrders();
+      loadWatchlist();
       loadActiveRentals();
     </script>
   </body>

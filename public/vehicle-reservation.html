@@ -434,6 +434,16 @@
           vehicleList.querySelectorAll(".vehicle-checkbox").forEach(function (cb) {
             cb.disabled = !datesReady;
           });
+          // Disable/enable watch-checkboxes — watch requires dates selected
+          vehicleList.querySelectorAll(".watch-checkbox").forEach(function (cb) {
+            cb.disabled = !datesReady;
+          });
+          // Dim the Watch toolbar button when dates aren't ready
+          var watchBtn = document.querySelector(".watch-vehicle-btn");
+          if (watchBtn) {
+            watchBtn.style.opacity = datesReady ? "" : "0.5";
+            watchBtn.style.pointerEvents = datesReady ? "" : "none";
+          }
         }
 
         // Re-apply lock whenever new vehicle cards are rendered (MutationObserver)
@@ -484,6 +494,171 @@
         }
       });
     </script>
+    <!-- ── Watch Button Logic ─────────────────────────────────────────── -->
+    <script>
+    (function () {
+      var watchModal       = document.getElementById("watch-modal");
+      var watchVehicleName = document.getElementById("watch-vehicle-name");
+      var watchMaxPrice    = document.getElementById("watch-max-price");
+      var watchResult      = document.getElementById("watch-result");
+      var confirmBtn       = document.getElementById("confirm-watch-btn");
+      var cancelBtn        = document.getElementById("cancel-watch-btn");
+      var currentWatchId   = null;
+
+      // watchedIds  = vehicles confirmed as watched on the server
+      // watchPendingId = vehicle the user has selected via the card Watch button (not yet confirmed)
+      var watchedIds     = new Set();
+      var watchPendingId    = null;
+      var watchPendingLabel = null;
+
+      // Load which vehicle the user already watches so its heart stays filled
+      fetch("/api/watch", { credentials: "include" })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (list) {
+          list.forEach(function (entry) {
+            watchedIds.add(String(entry.vehicle_id));
+            var cb = document.getElementById("watch_" + entry.vehicle_id);
+            if (cb) {
+              cb.checked = true;
+              watchPendingId = String(entry.vehicle_id);
+              var card = cb.closest(".vehicle-item");
+              watchPendingLabel = card
+                ? (card.querySelector("h2")?.textContent?.trim() || watchPendingId)
+                : watchPendingId;
+            }
+          });
+        })
+        .catch(function () {});
+
+      function openModal(vehicleId, label) {
+        currentWatchId = vehicleId;
+        watchVehicleName.textContent = label || "Selected Vehicle";
+        watchMaxPrice.value = "";
+        watchResult.textContent = "";
+        watchResult.style.color = "";
+        confirmBtn.disabled = false;
+        watchModal.style.display = "flex";
+      }
+
+      function closeModal() {
+        watchModal.style.display = "none";
+        // If the user cancelled without confirming, deselect card if it wasn't already watched
+        if (currentWatchId && !watchedIds.has(currentWatchId)) {
+          var cb = document.getElementById("watch_" + currentWatchId);
+          if (cb) cb.checked = false;
+          if (watchPendingId === currentWatchId) {
+            watchPendingId = null;
+            watchPendingLabel = null;
+          }
+        }
+        currentWatchId = null;
+      }
+
+      // Close on backdrop click
+      watchModal.addEventListener("click", function (e) {
+        if (e.target === watchModal) closeModal();
+      });
+      cancelBtn.addEventListener("click", closeModal);
+
+      // "Watch Selected Vehicle" toolbar button — opens the modal to confirm
+      document.querySelector(".watch-vehicle-btn").addEventListener("click", function () {
+        var startDate = document.getElementById("start_date")?.value;
+        var endDate   = document.getElementById("end_date")?.value;
+        if (!startDate || !endDate) {
+          alert("Please select a start date and return date first.");
+          return;
+        }
+        if (!watchPendingId) {
+          alert("Please select a vehicle to watch first.");
+          return;
+        }
+        openModal(watchPendingId, watchPendingLabel);
+      });
+
+      // Heart checkboxes on each vehicle card — selection only, no modal
+      document.getElementById("vehicle-list").addEventListener("change", function (e) {
+        var cb = e.target;
+        if (!cb.classList.contains("watch-checkbox")) return;
+        var vehicleId = cb.id.replace("watch_", "");
+
+        if (cb.checked) {
+          // Uncheck every other watch-checkbox (only one watch selection at a time)
+          document.querySelectorAll(".watch-checkbox").forEach(function (other) {
+            if (other !== cb) other.checked = false;
+          });
+          // Set as the pending watch vehicle
+          watchPendingId = vehicleId;
+          var card = cb.closest(".vehicle-item");
+          watchPendingLabel = card
+            ? (card.querySelector("h2")?.textContent?.trim() || vehicleId)
+            : vehicleId;
+        } else {
+          // Unchecking — if already confirmed watched, remove it
+          if (watchedIds.has(vehicleId)) {
+            fetch("/api/watch", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ vehicle_id: vehicleId }),
+            }).then(function () {
+              watchedIds.delete(vehicleId);
+              cb.checked = false;
+            });
+          }
+          if (watchPendingId === vehicleId) {
+            watchPendingId = null;
+            watchPendingLabel = null;
+          }
+        }
+      });
+
+      // Confirm watch via modal button
+      confirmBtn.addEventListener("click", function () {
+        if (!currentWatchId) return;
+        var targetPrice = watchMaxPrice.value ? Number(watchMaxPrice.value) : null;
+        confirmBtn.disabled = true;
+        fetch("/api/watch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ vehicle_id: currentWatchId, target_price: targetPrice }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.success) {
+              // Update tracked watched set (server enforces one watch at a time)
+              watchedIds.clear();
+              watchedIds.add(currentWatchId);
+              // Reset all watch-checkbox hearts to unfilled — watch is backend-only state
+              document.querySelectorAll(".watch-checkbox").forEach(function (cb) {
+                cb.checked = false;
+              });
+              // Clear pending selection
+              watchPendingId = null;
+              watchPendingLabel = null;
+              watchResult.textContent = data.alreadyWatching
+                ? "You're already watching this vehicle."
+                : "Watching! We'll email you when it's available" + (targetPrice ? " or the price drops below $" + targetPrice : "") + ".";
+              watchResult.style.color = "#27ae60";
+              setTimeout(function () {
+                watchModal.style.display = "none";
+                currentWatchId = null;
+              }, 2200);
+            } else {
+              watchResult.textContent = data.error || "Something went wrong.";
+              watchResult.style.color = "#e74c3c";
+              confirmBtn.disabled = false;
+            }
+          })
+          .catch(function () {
+            watchResult.textContent = "Network error. Please try again.";
+            watchResult.style.color = "#e74c3c";
+            confirmBtn.disabled = false;
+          });
+      });
+    })();
+    </script>
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         fetch("/userdetail")

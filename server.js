@@ -1449,79 +1449,208 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
   }
 });
 
-app.post("/payments", requireLogin, async (req, res) => {
-  try {
+// ── Proxy Pattern: Payment Integration ──────────────────────────────────────
+// PaymentGateway  – abstract subject interface
+// StripeGateway   – real subject: calls Stripe API (falls back to local store
+//                   when STRIPE_SECRET_KEY is not configured)
+// PaymentProxy    – proxy: enforces access control, detects duplicates, logs
+//                   every operation, then delegates to the real gateway
+
+const stripeClient = process.env.STRIPE_SECRET_KEY
+  ? require("stripe")(process.env.STRIPE_SECRET_KEY)
+  : null;
+
+// ── Abstract subject ─────────────────────────────────────────────────────────
+class PaymentGateway {
+  async saveCard(_details)          { throw new Error("saveCard() not implemented"); }
+  async listCards(_username)        { throw new Error("listCards() not implemented"); }
+  async deleteCard(_username, _key) { throw new Error("deleteCard() not implemented"); }
+}
+
+// ── Real subject ─────────────────────────────────────────────────────────────
+// In production, saveCard() expects a Stripe PaymentMethod id created by
+// Stripe Elements on the frontend.  When STRIPE_SECRET_KEY is absent (local
+// dev), it stores card metadata directly in MongoDB so the app stays runnable
+// without Stripe credentials.
+class StripeGateway extends PaymentGateway {
+  async saveCard(details) {
     const {
-      full_name,
-      address,
-      payment_nickname,
-      card_number,
-      expiration,
-      card_type,
-      payment_zip_code,
-    } = req.body;
-    if (
-      !full_name ||
-      !address ||
-      !card_number ||
-      !expiration ||
-      !card_type ||
-      !payment_zip_code ||
-      !payment_nickname
-    ) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
-    const user = await db
-      .collection("RentalUsers")
-      .findOne({ username: req.session.user_name });
-    if (!user?._id) return res.status(404).json({ error: "User not found" });
-
-    if (!/^\d{4}-\d{2}$/.test(expiration)) {
-      return res.status(400).json({ error: "Invalid expiration date" });
-    }
+      full_name, address, payment_nickname,
+      card_number, expiration, card_type, payment_zip_code,
+      user, stripePaymentMethodId,
+    } = details;
 
     const [year, month] = expiration.split("-");
-    const exp = `${month}/${String(year).slice(-2)}`;
-    const cleanCardNumber = card_number.replace(/\D/g, "");
-    if (cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
-      return res.status(400).json({ error: "Invalid card number" });
+    const exp           = `${month}/${String(year).slice(-2)}`;
+    const cleanCard     = card_number.replace(/\D/g, "");
+    const last4         = cleanCard.slice(-4);
+    const now           = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+    let stripeCustomerId = null;
+
+    if (stripeClient) {
+      // Retrieve or create a Stripe Customer tied to this user
+      const existing = await db
+        .collection("RentalUsers")
+        .findOne({ _id: user._id }, { projection: { stripe_customer_id: 1 } });
+
+      if (existing?.stripe_customer_id) {
+        stripeCustomerId = existing.stripe_customer_id;
+      } else {
+        const customer = await stripeClient.customers.create({
+          name: full_name,
+          metadata: { username: user.username },
+        });
+        stripeCustomerId = customer.id;
+        await db.collection("RentalUsers").updateOne(
+          { _id: user._id },
+          { $set: { stripe_customer_id: stripeCustomerId } },
+        );
+      }
+
+      // Attach the PaymentMethod sent from the frontend (Stripe Elements token)
+      if (stripePaymentMethodId) {
+        await stripeClient.paymentMethods.attach(stripePaymentMethodId, {
+          customer: stripeCustomerId,
+        });
+      }
     }
+
     const entry = {
-      customer_name: full_name,
-      payment_address: address,
-      last4: String(cleanCardNumber).slice(-4),
-      card_type: card_type,
-      expiration: exp,
-      payment_zip_code: payment_zip_code,
-      payment_nickname: payment_nickname,
-      status: "Active",
-      added_at: new Date().toISOString().replace("T", " ").substring(0, 19),
+      customer_name:    full_name,
+      payment_address:  address,
+      last4,
+      card_type,
+      expiration:       exp,
+      payment_zip_code,
+      payment_nickname,
+      status:           "Active",
+      added_at:         now,
+      ...(stripeCustomerId && { stripe_customer_id: stripeCustomerId }),
     };
 
     await db.collection("RentalUsers").updateOne(
       { _id: user._id },
       {
         $push: { payment: entry },
-        $set: {
-          updated_at: new Date()
-            .toISOString()
-            .replace("T", " ")
-            .substring(0, 19),
-        },
+        $set:  { updated_at: now },
       },
     );
 
-    return res.json({ success: true, ...entry });
-  } catch (e) {
-    console.error("Payment error:", e);
-    if (e.errInfo && e.errInfo.details) {
-      console.error(
-        "Validation details:",
-        JSON.stringify(e.errInfo.details, null, 2),
+    return entry;
+  }
+
+  async listCards(user) {
+    const fresh = await db
+      .collection("RentalUsers")
+      .findOne({ _id: user._id }, { projection: { payment: 1 } });
+    return (fresh?.payment || []).map((p) => ({
+      customer_name:    p.customer_name    || "N/A",
+      payment_address:  p.payment_address  || "N/A",
+      last4:            p.last4,
+      expiration:       p.expiration,
+      status:           p.status           || "Active",
+      card_type:        p.card_type        || "N/A",
+      payment_nickname: p.payment_nickname || "N/A",
+    }));
+  }
+
+  async deleteCard(user, { last4, expiration }) {
+    const result = await db.collection("RentalUsers").updateOne(
+      { _id: user._id },
+      { $pull: { payment: { last4, expiration } } },
+    );
+    return result.modifiedCount > 0;
+  }
+}
+
+// ── Proxy ────────────────────────────────────────────────────────────────────
+class PaymentProxy extends PaymentGateway {
+  constructor(realGateway) {
+    super();
+    this._gateway = realGateway;
+  }
+
+  // Shared: resolve and verify the session user
+  async _resolveUser(username) {
+    const user = await db.collection("RentalUsers").findOne({ username });
+    if (!user) throw Object.assign(new Error("User not found"), { status: 404 });
+    return user;
+  }
+
+  async saveCard(details) {
+    const { username } = details;
+
+    // Access control – must be an authenticated RentalUser
+    const user = await this._resolveUser(username);
+    details.user = user;
+
+    // Input validation
+    if (!/^\d{4}-\d{2}$/.test(details.expiration)) {
+      throw Object.assign(new Error("Invalid expiration date format"), { status: 400 });
+    }
+    const cleanCard = details.card_number.replace(/\D/g, "");
+    if (cleanCard.length < 13 || cleanCard.length > 19) {
+      throw Object.assign(new Error("Invalid card number length"), { status: 400 });
+    }
+
+    // Duplicate detection – same last-4 + expiration already saved
+    const last4 = cleanCard.slice(-4);
+    const [year, month] = details.expiration.split("-");
+    const exp = `${month}/${String(year).slice(-2)}`;
+    const duplicate = (user.payment || []).some(
+      (p) => p.last4 === last4 && p.expiration === exp,
+    );
+    if (duplicate) {
+      throw Object.assign(
+        new Error("A card with that number and expiration is already saved"),
+        { status: 409 },
       );
     }
-    return res.status(500).json({ error: "Server error" });
+
+    console.log(`[PaymentProxy] saveCard – user: ${username}, last4: ${last4}`);
+    const result = await this._gateway.saveCard(details);
+    console.log(`[PaymentProxy] saveCard – success for user: ${username}`);
+    return result;
+  }
+
+  async listCards(username) {
+    const user = await this._resolveUser(username);
+    return this._gateway.listCards(user);
+  }
+
+  async deleteCard(username, key) {
+    const user = await this._resolveUser(username);
+    console.log(
+      `[PaymentProxy] deleteCard – user: ${username}, last4: ${key.last4}, exp: ${key.expiration}`,
+    );
+    const removed = await this._gateway.deleteCard(user, key);
+    if (!removed) {
+      throw Object.assign(new Error("Payment method not found"), { status: 404 });
+    }
+    return true;
+  }
+}
+
+// Instantiate once at startup
+const paymentProxy = new PaymentProxy(new StripeGateway());
+
+// ── Routes (thin wrappers – all logic lives in the proxy / gateway) ──────────
+
+app.post("/payments", requireLogin, async (req, res) => {
+  const required = ["full_name", "address", "payment_nickname", "card_number", "expiration", "card_type", "payment_zip_code"];
+  for (const field of required) {
+    if (!req.body[field]) return res.status(400).json({ error: "All fields are required" });
+  }
+  try {
+    const entry = await paymentProxy.saveCard({
+      ...req.body,
+      username: req.session.user_name,
+    });
+    return res.json({ success: true, ...entry });
+  } catch (e) {
+    console.error("Payment error:", e.message);
+    return res.status(e.status || 500).json({ error: e.message || "Server error" });
   }
 });
 
@@ -2106,32 +2235,13 @@ app.get("/api/myreservations", async (req, res) => {
   }
 });
 app.get("/api/mypayments", async (req, res) => {
+  if (!req.session?.user_name) return res.status(401).json({ error: "Not logged in" });
   try {
-    if (!req.session || !req.session.user_name) {
-      return res.status(401).json({ error: "Not logged in" });
-    }
-
-    const user = await db
-      .collection("RentalUsers")
-      .findOne({ username: req.session.user_name });
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const payments = user.payment || [];
-
-    const result = payments.map((p, index) => ({
-      customer_name: p.customer_name || "N/A",
-      payment_address: p.payment_address || "N/A",
-      last4: p.last4,
-      expiration: p.expiration,
-      status: p.status || "Active",
-      card_type: p.card_type || "N/A",
-      payment_nickname: p.payment_nickname || "N/A",
-    }));
-
-    res.json(result);
+    const cards = await paymentProxy.listCards(req.session.user_name);
+    res.json(cards);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch Payment Methods" });
+    res.status(err.status || 500).json({ error: err.message || "Failed to fetch Payment Methods" });
   }
 });
 app.get("/api/myaddress", async (req, res) => {
@@ -2165,30 +2275,12 @@ app.get("/api/myaddress", async (req, res) => {
 });
 app.delete("/api/delete-payment", requireLogin, async (req, res) => {
   const { last4, expiration } = req.body;
-  if (!req.session || !req.session.user_name) {
-    return res.status(401).json({ error: "Not logged in" });
-  }
-
   try {
-    const user = await db
-      .collection("RentalUsers")
-      .findOne({ username: req.session.user_name });
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const result = await db
-      .collection("RentalUsers")
-      .updateOne(
-        { _id: user._id },
-        { $pull: { payment: { last4, expiration } } },
-      );
-    if (result.modifiedCount > 0) {
-      res.json({ success: true });
-    } else {
-      res.json({ success: false, error: "Payment not found" });
-    }
+    await paymentProxy.deleteCard(req.session.user_name, { last4, expiration });
+    res.json({ success: true });
   } catch (err) {
-    console.error("Delete payment error", err);
-    res.status(500).json({ error: "Failed to remove Payment Method" });
+    console.error("Delete payment error:", err.message);
+    res.status(err.status || 500).json({ error: err.message || "Failed to remove Payment Method" });
   }
 });
 
@@ -2233,57 +2325,113 @@ app.post("/api/delete-address", async (req, res) => {
   }
 });
 
+// ── Builder Pattern: Car Listing Creation ────────────────────────────────────
+// VehicleListingBuilder assembles a vehicle document step-by-step.
+// Each setter returns `this` for fluent chaining.
+// build() validates required fields and returns the final plain object.
+
+class VehicleListingBuilder {
+  constructor() {
+    // Defaults applied to every listing
+    this._doc = {
+      availability:      true,
+      quantity_available: 1,
+      description:       "",
+      image_url:         "",
+      host_username:     null,
+    };
+  }
+
+  setBasicInfo(year, make, model, category) {
+    this._doc.year     = year  ? parseInt(year)    : null;
+    this._doc.make     = make  ? make.trim()        : "";
+    this._doc.model    = model ? model.trim()       : "";
+    this._doc.category = category ? category.trim() : "";
+    return this;
+  }
+
+  setDescription(description) {
+    this._doc.description = description ? description.trim() : "";
+    return this;
+  }
+
+  setPricing(rental_rate_per_day) {
+    this._doc.rental_rate_per_day = parseFloat(rental_rate_per_day);
+    return this;
+  }
+
+  setSpecs(mileage, range) {
+    if (mileage !== undefined && mileage !== "") this._doc.mileage = parseInt(mileage);
+    if (range    !== undefined && range    !== "") this._doc.range  = parseInt(range);
+    return this;
+  }
+
+  setLocation(pickup_location) {
+    if (pickup_location) this._doc.pickup_location = pickup_location.trim();
+    return this;
+  }
+
+  setMedia(imagePath) {
+    if (imagePath) this._doc.image_url = imagePath;
+    return this;
+  }
+
+  setHost(username) {
+    this._doc.host_username = username || null;
+    return this;
+  }
+
+  // Used by the update route — stamps updated_at instead of created_at
+  asUpdate() {
+    this._isUpdate = true;
+    return this;
+  }
+
+  build() {
+    const required = ["year", "make", "model", "category", "rental_rate_per_day"];
+    for (const field of required) {
+      if (!this._doc[field] && this._doc[field] !== 0) {
+        throw Object.assign(
+          new Error(`${field} is required`),
+          { status: 400 },
+        );
+      }
+    }
+
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+    if (this._isUpdate) {
+      this._doc.updated_at = now;
+    } else {
+      this._doc.created_at = now;
+    }
+
+    return { ...this._doc };
+  }
+}
+
 app.post("/api/vehicle", upload.single("image"), async (req, res) => {
   try {
     const {
-      year,
-      make,
-      model,
-      category,
-      description,
-      rental_rate_per_day,
-      mileage,
-      range,
-      pickup_location,
+      year, make, model, category, description,
+      rental_rate_per_day, mileage, range, pickup_location,
     } = req.body;
 
-    if (
-      !year ||
-      !make ||
-      !model ||
-      !category ||
-      !rental_rate_per_day ||
-      !mileage ||
-      !range ||
-      !pickup_location
-    ) {
-      return res.status(400).json({
-        error:
-          "Year, make, model, category, rental rate, mileage, range, and pickup location are required",
-      });
-    }
+    const imagePath = req.file ? "assets/img/vehicles/" + req.file.filename : "";
 
-    let imagePath = "";
-    if (req.file) {
-      imagePath = "assets/img/vehicles/" + req.file.filename;
+    let vehicleData;
+    try {
+      vehicleData = new VehicleListingBuilder()
+        .setBasicInfo(year, make, model, category)
+        .setDescription(description)
+        .setPricing(rental_rate_per_day)
+        .setSpecs(mileage, range)
+        .setLocation(pickup_location)
+        .setMedia(imagePath)
+        .setHost(req.session?.user_name)
+        .build();
+    } catch (validationErr) {
+      return res.status(validationErr.status || 400).json({ error: validationErr.message });
     }
-
-    const vehicleData = {
-      year: year ? parseInt(year) : null,
-      make: make ? make.trim() : "",
-      model: model.trim(),
-      category: category.trim(),
-      description: description ? description.trim() : "",
-      mileage: parseInt(mileage),
-      range: parseInt(range),
-      pickup_location: pickup_location.trim(),
-      rental_rate_per_day: parseFloat(rental_rate_per_day),
-      quantity_available: 1,
-      availability: true,
-      host_username: req.session?.user_name || null,
-      image_url: imagePath,
-      created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
-    };
 
     const result = await db.collection("Vehicles").insertOne(vehicleData);
     res.json({
@@ -2309,6 +2457,8 @@ app.patch("/api/vehicle/:id/availability", requireLogin, async (req, res) => {
         { $set: { availability: !!availability } },
       );
     res.json({ success: true });
+    // Notify watchers asynchronously when vehicle becomes available
+    if (availability) notifyWatchers(id, "availability", true);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update availability" });
@@ -2324,23 +2474,20 @@ app.post("/api/add-vehicle", requireLogin, async (req, res) => {
 
     const { make, model, year, price, mileage, image_url, category } = req.body;
 
-    const vehicle = {
-      make,
-      model,
-      year: Number(year),
-      rental_rate_per_day: Number(price),
-      mileage: Number(mileage),
-      image_url,
-      category,
-      host_username: req.session.user.username,
-      availability: true,
-      created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
-      updated_at: new Date().toISOString().replace("T", " ").substring(0, 19)
-
-    };
+    let vehicle;
+    try {
+      vehicle = new VehicleListingBuilder()
+        .setBasicInfo(year, make, model, category)
+        .setPricing(price)
+        .setSpecs(mileage)
+        .setMedia(image_url)
+        .setHost(req.session.user.username)
+        .build();
+    } catch (validationErr) {
+      return res.status(validationErr.status || 400).json({ error: validationErr.message });
+    }
 
     await db.collection("Vehicles").insertOne(vehicle);
-
     res.json({ success: true, vehicle });
   } catch (err) {
     console.error(err);
@@ -2348,31 +2495,213 @@ app.post("/api/add-vehicle", requireLogin, async (req, res) => {
   }
 });
 
+// ── Watchlist notification helper ───────────────────────────────────────────
+// changeType: "availability" (vehicle became available) | "price" (price dropped)
+// newValue  : true for availability; new price number for price
+async function notifyWatchers(vehicleId, changeType, newValue) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) return;
+
+  try {
+    const objId    = new ObjectId(vehicleId);
+    const vehicle  = await db.collection("Vehicles").findOne({ _id: objId });
+    if (!vehicle) return;
+
+    const vehicleName = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
+
+    // Find all watchers of this vehicle
+    const watchers = await db.collection("WatchList").find({ vehicle_id: objId }).toArray();
+    if (!watchers.length) return;
+
+    for (const watcher of watchers) {
+      // For price-drop alerts, only notify if new price is at or below target
+      if (changeType === "price") {
+        if (!watcher.target_price || newValue > watcher.target_price) continue;
+      }
+
+      // Look up the watcher's email
+      const user = await db.collection("RentalUsers").findOne(
+        { username: watcher.username },
+        { projection: { email: 1 } },
+      );
+      if (!user?.email) continue;
+
+      let subject, html;
+      if (changeType === "availability") {
+        subject = `DriveShare: ${vehicleName} is now available!`;
+        html = `
+          <p>Hi ${watcher.username},</p>
+          <p>Good news! A vehicle on your watchlist is now available to rent:</p>
+          <p><strong>${vehicleName}</strong> — $${Number(vehicle.rental_rate_per_day).toFixed(2)}/day</p>
+          <p><a href="${process.env.APP_URL || "http://localhost:3000"}/vehicle-reservation.html">Book it now &rarr;</a></p>
+          <p style="color:#999;font-size:12px;">You received this because you watched this vehicle on DriveShare.</p>`;
+      } else {
+        subject = `DriveShare: Price drop on ${vehicleName}!`;
+        html = `
+          <p>Hi ${watcher.username},</p>
+          <p>The price on a vehicle you're watching just dropped:</p>
+          <p><strong>${vehicleName}</strong> — now <strong>$${Number(newValue).toFixed(2)}/day</strong>
+            (your target: $${Number(watcher.target_price).toFixed(2)}/day)</p>
+          <p><a href="${process.env.APP_URL || "http://localhost:3000"}/vehicle-reservation.html">Book it now &rarr;</a></p>
+          <p style="color:#999;font-size:12px;">You received this because you watched this vehicle on DriveShare.</p>`;
+      }
+
+      await mailer.sendMail({
+        from: `"DriveShare" <${process.env.GMAIL_USER}>`,
+        to: user.email,
+        subject,
+        html,
+      });
+
+      console.log(`[WatchList] Notified ${watcher.username} (${changeType}) for vehicle ${vehicleId}`);
+    }
+  } catch (err) {
+    console.error("[WatchList] notifyWatchers error:", err.message);
+  }
+}
+
 // ADD TO WATCHLIST
 app.post("/api/watch", requireLogin, async (req, res) => {
   try {
     const { vehicle_id, target_price } = req.body;
+    if (!vehicle_id || !ObjectId.isValid(vehicle_id)) {
+      return res.status(400).json({ error: "Invalid vehicle ID" });
+    }
+
+    const username = req.session.user.username;
+
+    // Check if already watching this exact vehicle
+    const existing = await db.collection("WatchList").findOne({
+      username,
+      vehicle_id: new ObjectId(vehicle_id),
+    });
+    if (existing) {
+      return res.json({ success: true, alreadyWatching: true });
+    }
+
+    // Enforce one watch per user — remove any existing watch before adding the new one
+    await db.collection("WatchList").deleteMany({ username });
 
     await db.collection("WatchList").insertOne({
-      username: req.session.user.username,
+      username,
       vehicle_id: new ObjectId(vehicle_id),
       target_price: target_price ? Number(target_price) : null,
-      created_at: new Date()
+      created_at: new Date(),
     });
+
+    // Send watch confirmation email
+    if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+      try {
+        const user = await db.collection("RentalUsers").findOne(
+          { username },
+          { projection: { email: 1 } },
+        );
+        const vehicle = await db.collection("Vehicles").findOne({ _id: new ObjectId(vehicle_id) });
+        if (user?.email && vehicle) {
+          const vehicleName = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") || "Your Vehicle";
+          const rate = vehicle.rental_rate_per_day ? `$${Number(vehicle.rental_rate_per_day).toFixed(2)}/day` : "N/A";
+          const priceNote = target_price
+            ? `<p style="margin:8px 0 0;font-size:13px;color:#555;">We'll also notify you if the price drops below <strong>$${Number(target_price).toFixed(2)}/day</strong>.</p>`
+            : "";
+          const appUrl = process.env.APP_URL || "http://localhost:3000";
+          await mailer.sendMail({
+            from: `"DriveShare" <${process.env.GMAIL_USER}>`,
+            to: user.email,
+            subject: `You're watching ${vehicleName} on DriveShare`,
+            html: `
+              <table width="600" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #ddd;">
+                <tr>
+                  <td bgcolor="#ea8900" style="padding:18px 24px;">
+                    <h2 style="color:#ffffff;margin:0;font-size:18px;font-weight:bold;">Watch Confirmed</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:24px;">
+                    <p style="margin:0 0 12px;font-size:15px;color:#222;">Hi <strong>${username}</strong>,</p>
+                    <p style="margin:0 0 12px;font-size:14px;color:#444;">You're now watching:</p>
+                    <p style="margin:0 0 4px;font-size:20px;font-weight:bold;color:#1a1a1a;">${vehicleName}</p>
+                    <p style="margin:0 0 16px;font-size:14px;color:#888;">Current rate: ${rate}</p>
+                    ${priceNote}
+                    <p style="margin:16px 0 0;font-size:14px;color:#444;">We'll email you as soon as this vehicle becomes available or the price changes.</p>
+                    <p style="margin:20px 0 0;">
+                      <a href="${appUrl}/vehicle-reservation.html"
+                        style="background:#ea8900;color:#fff;padding:10px 22px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:bold;">
+                        View Vehicles
+                      </a>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 24px;background:#f9f9f9;border-top:1px solid #eee;">
+                    <p style="margin:0;font-size:11px;color:#aaa;">You received this because you added a vehicle to your watchlist on DriveShare.</p>
+                  </td>
+                </tr>
+              </table>`,
+          });
+        }
+      } catch (emailErr) {
+        console.error("[Watch] Confirmation email error:", emailErr.message);
+      }
+    }
 
     res.json({ success: true });
   } catch (err) {
+    console.error("Watch error:", err);
     res.status(500).json({ error: "Failed to watch vehicle" });
   }
 });
 
-// GET WATCHLIST
+// GET WATCHLIST (with vehicle details joined in)
 app.get("/api/watch", requireLogin, async (req, res) => {
-  const list = await db.collection("WatchList").find({
-    username: req.session.user.username
-  }).toArray();
+  try {
+    const list = await db.collection("WatchList").find({
+      username: req.session.user.username,
+    }).toArray();
 
-  res.json(list);
+    // Enrich each entry with current vehicle data
+    const enriched = await Promise.all(
+      list.map(async (entry) => {
+        const vehicle = await db.collection("Vehicles").findOne(
+          { _id: entry.vehicle_id },
+          { projection: { year: 1, make: 1, model: 1, rental_rate_per_day: 1, availability: 1, image_url: 1 } },
+        );
+        return {
+          _id:          entry._id,
+          vehicle_id:   entry.vehicle_id,
+          target_price: entry.target_price,
+          created_at:   entry.created_at,
+          vehicle_name: vehicle
+            ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ")
+            : "Unknown Vehicle",
+          current_price:    vehicle?.rental_rate_per_day ?? null,
+          available:        vehicle?.availability ?? false,
+          image_url:        vehicle?.image_url ?? "",
+        };
+      }),
+    );
+
+    res.json(enriched);
+  } catch (err) {
+    console.error("Get watchlist error:", err);
+    res.status(500).json({ error: "Failed to load watchlist" });
+  }
+});
+
+// REMOVE FROM WATCHLIST
+app.delete("/api/watch", requireLogin, async (req, res) => {
+  try {
+    const { vehicle_id } = req.body;
+    if (!vehicle_id || !ObjectId.isValid(vehicle_id)) {
+      return res.status(400).json({ error: "Invalid vehicle ID" });
+    }
+    await db.collection("WatchList").deleteOne({
+      username:   req.session.user.username,
+      vehicle_id: new ObjectId(vehicle_id),
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Unwatch error:", err);
+    res.status(500).json({ error: "Failed to remove watch" });
+  }
 });
 
 
@@ -2470,22 +2799,24 @@ app.put(
         });
       }
 
-      const updateData = {
-        year: year ? parseInt(year) : null,
-        make: make ? make.trim() : "",
-        model: model.trim(),
-        category: category.trim(),
-        description: description ? description.trim() : "",
-        ...(mileage !== undefined && { mileage: parseInt(mileage) }),
-        ...(range !== undefined && { range: parseInt(range) }),
-        ...(pickup_location && { pickup_location: pickup_location.trim() }),
-        rental_rate_per_day: parseFloat(rental_rate_per_day),
-        updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
-      };
+      const imagePath = req.file ? "assets/img/vehicles/" + req.file.filename : "";
 
-      if (req.file) {
-        updateData.image_url = "assets/img/vehicles/" + req.file.filename;
-      }
+      const updateData = new VehicleListingBuilder()
+        .setBasicInfo(year, make, model, category)
+        .setDescription(description)
+        .setPricing(rental_rate_per_day)
+        .setSpecs(mileage, range)
+        .setLocation(pickup_location)
+        .setMedia(imagePath)
+        .asUpdate()
+        .build();
+
+      // Capture old price before updating so we can detect a drop
+      const before = await db.collection("Vehicles").findOne(
+        { _id: new ObjectId(id) },
+        { projection: { rental_rate_per_day: 1 } },
+      );
+      const oldPrice = before?.rental_rate_per_day ?? null;
 
       const result = await db
         .collection("Vehicles")
@@ -2493,6 +2824,11 @@ app.put(
 
       if (result.modifiedCount > 0) {
         res.json({ success: true, message: "Vehicle updated successfully" });
+        // Notify watchers asynchronously if price dropped
+        const newPrice = updateData.rental_rate_per_day;
+        if (oldPrice !== null && newPrice < oldPrice) {
+          notifyWatchers(id, "price", newPrice);
+        }
       } else {
         res.json({
           success: false,
