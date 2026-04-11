@@ -1045,9 +1045,6 @@
                     <label for="review-vehicle">Vehicle *</label>
                     <select class="form-control" id="review-vehicle" required>
                       <option value="">— Select a completed rental —</option>
-                      <option value="v1">2022 Chrysler 300</option>
-                      <option value="v2">2021 Toyota Camry</option>
-                      <option value="v3">2020 Ford Mustang</option>
                     </select>
                   </div>
                   <div class="form-group col-md-6">
@@ -1101,27 +1098,9 @@
             </div>
             <div class="acct-box">
               <div class="acct-box-title">Reviews from Vehicle Owners</div>
-
-              <div class="review-card">
-                <div class="review-card-header">
-                  <span class="review-card-vehicle">James T. — 2022 Chrysler 300</span>
-                  <span class="review-card-stars">★★★★★</span>
-                </div>
-                <div class="review-card-title">Excellent renter, highly recommended!</div>
-                <div class="review-card-body">Returned the car in perfect condition, on time and with a full tank. Communication was great throughout the rental. Would be happy to rent to this person again anytime.</div>
-                <div class="review-card-date">Reviewed on March 30, 2026</div>
+              <div id="owner-review-list-body">
+                <!-- loaded dynamically -->
               </div>
-
-              <div class="review-card">
-                <div class="review-card-header">
-                  <span class="review-card-vehicle">Sarah M. — 2021 Toyota Camry</span>
-                  <span class="review-card-stars">★★★★☆</span>
-                </div>
-                <div class="review-card-title">Great renter, minor late return</div>
-                <div class="review-card-body">Very respectful of the vehicle and kept it clean. Returned about 30 minutes late but gave advance notice which I appreciated. Overall a positive experience.</div>
-                <div class="review-card-date">Reviewed on February 16, 2026</div>
-              </div>
-
             </div>
           </div>
           <!-- END PANEL: Reviews by Owner -->
@@ -1583,43 +1562,7 @@
         });
 
       /* ── Reviews panel ──────────────────────────────────────────────── */
-      (function initReviews() {
-        var premade = [
-          {
-            vehicle: "2022 Chrysler 300",
-            stars: 5,
-            title: "Smooth ride, great condition!",
-            body: "The car was spotless and drove beautifully. Pick-up was easy and the host was very responsive. Would definitely rent again.",
-            date: "March 28, 2026",
-          },
-          {
-            vehicle: "2021 Toyota Camry",
-            stars: 4,
-            title: "Solid rental experience",
-            body: "Great value for the price. The car was clean and comfortable. Minor issue with the GPS but nothing serious. Overall a pleasant experience.",
-            date: "February 14, 2026",
-          },
-        ];
-
-        var container = document.getElementById("review-list-body");
-        container.innerHTML = premade
-          .map(function (r) {
-            var starsHtml = "★".repeat(r.stars) + "☆".repeat(5 - r.stars);
-            return (
-              '<div class="review-card">' +
-              '<div class="review-card-header">' +
-              '<span class="review-card-vehicle">' + r.vehicle + "</span>" +
-              '<span class="review-card-stars">' + starsHtml + "</span>" +
-              "</div>" +
-              '<div class="review-card-title">' + r.title + "</div>" +
-              '<div class="review-card-body">' + r.body + "</div>" +
-              '<div class="review-card-date">Reviewed on ' + r.date + "</div>" +
-              "</div>"
-            );
-          })
-          .join("");
-
-        /* Star picker interaction */
+      (function initReviewStarPicker() {
         var stars = document.querySelectorAll("#review-star-picker .rev-star");
         stars.forEach(function (star) {
           star.addEventListener("mouseover", function () {
@@ -1641,6 +1584,98 @@
         });
       })();
 
+      function loadCompletedRentalsDropdown() {
+        fetch("/api/customer-completed-rentals")
+          .then(function (r) { return r.json(); })
+          .then(function (rentals) {
+            var sel = document.getElementById("review-vehicle");
+            sel.innerHTML = '<option value="">— Select a completed rental —</option>';
+            if (!Array.isArray(rentals) || rentals.length === 0) {
+              sel.innerHTML += '<option disabled>No completed rentals available to review</option>';
+              return;
+            }
+            rentals.forEach(function (r) {
+              var opt = document.createElement("option");
+              opt.value = r.bookingId;
+              opt.dataset.host = r.hostUsername || "";
+              opt.textContent = r.vehicleName + (r.endDate ? "  (" + r.endDate + ")" : "");
+              sel.appendChild(opt);
+            });
+          })
+          .catch(function () {});
+      }
+
+      function loadMyReviews() {
+        fetch("/api/my-reviews")
+          .then(function (r) { return r.json(); })
+          .then(function (reviews) {
+            var container = document.getElementById("review-list-body");
+            container.innerHTML = "";
+            if (!Array.isArray(reviews) || reviews.length === 0) {
+              container.innerHTML =
+                '<div style="text-align:center;padding:40px 24px">' +
+                '<i class="bx bx-star" style="font-size:48px;color:#d1d5db;display:block;margin-bottom:12px;"></i>' +
+                '<h4 style="color:#6c757d;margin-bottom:8px">No reviews yet</h4>' +
+                '<p style="color:#9ca3af;max-width:380px;margin:0 auto">After completing a rental you\'ll be able to leave a review for the vehicle and host. Your reviews will appear here.</p>' +
+                '</div>';
+              return;
+            }
+            reviews.forEach(function (rev) {
+              var stars = "★".repeat(rev.rating) + "☆".repeat(5 - rev.rating);
+              container.innerHTML +=
+                '<div class="review-card">' +
+                '<div class="review-card-header">' +
+                '<span class="review-card-vehicle">' + rev.vehicleName + '</span>' +
+                '<span class="review-card-stars">' + stars + '</span>' +
+                '</div>' +
+                (rev.title ? '<div class="review-card-title">' + rev.title + '</div>' : '') +
+                '<div class="review-card-body">"' + rev.comment + '"</div>' +
+                '<div class="review-card-date">Reviewed on ' + rev.date + '</div>' +
+                '</div>';
+            });
+          })
+          .catch(function () {});
+      }
+
+      function loadOwnerReviews() {
+        fetch("/api/my-received-reviews")
+          .then(function (r) { return r.json(); })
+          .then(function (reviews) {
+            var container = document.getElementById("owner-review-list-body");
+            if (!container) return;
+            if (!Array.isArray(reviews) || reviews.length === 0) {
+              container.innerHTML =
+                '<div style="text-align:center;padding:40px 24px">' +
+                '<i class="bx bx-comment-check" style="font-size:48px;color:#d1d5db;display:block;margin-bottom:12px;"></i>' +
+                '<h4 style="color:#6c757d;margin-bottom:8px">No reviews yet</h4>' +
+                '<p style="color:#9ca3af;max-width:380px;margin:0 auto">Reviews left by vehicle owners after your rentals will appear here.</p>' +
+                '</div>';
+              return;
+            }
+            container.innerHTML = reviews.map(function (r) {
+              var stars = "★".repeat(r.rating) + "☆".repeat(5 - r.rating);
+              return '<div class="review-card">' +
+                '<div class="review-card-header">' +
+                '<span class="review-card-vehicle">' + r.reviewerUsername + ' — ' + r.vehicleName + '</span>' +
+                '<span class="review-card-stars">' + stars + '</span>' +
+                '</div>' +
+                '<div class="review-card-body">"' + r.comment + '"</div>' +
+                '<div class="review-card-date">Reviewed on ' + r.date + '</div>' +
+                '</div>';
+            }).join("");
+          })
+          .catch(function () {
+            var container = document.getElementById("owner-review-list-body");
+            if (container) container.innerHTML = '<p class="text-muted" style="padding:1rem;">Could not load reviews.</p>';
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loadCompletedRentalsDropdown();
+        loadMyReviews();
+        loadOwnerReviews();
+      });
+
       function toggleReviewForm() {
         var panel = document.getElementById("review-form-panel");
         panel.classList.toggle("open");
@@ -1650,43 +1685,55 @@
 
       function submitReview(e) {
         e.preventDefault();
-        var rating = document.getElementById("review-rating").value;
-        if (!rating) {
-          var err = document.getElementById("review-alert-error");
-          err.textContent = "Please select a star rating.";
-          err.style.display = "block";
+        var sel = document.getElementById("review-vehicle");
+        var booking_id = sel.value;
+        var selectedOpt = sel.options[sel.selectedIndex];
+        var reviewed_username = selectedOpt ? selectedOpt.dataset.host : "";
+        var rating = parseInt(document.getElementById("review-rating").value);
+        var title = document.getElementById("review-title").value.trim();
+        var comment = document.getElementById("review-body").value.trim();
+
+        var successEl = document.getElementById("review-alert-success");
+        var errorEl = document.getElementById("review-alert-error");
+        successEl.style.display = "none";
+        errorEl.style.display = "none";
+
+        if (!booking_id) {
+          errorEl.textContent = "Please select a vehicle.";
+          errorEl.style.display = "block";
           return;
         }
-        var vehicle = document.getElementById("review-vehicle").options[
-          document.getElementById("review-vehicle").selectedIndex
-        ].text;
-        var title = document.getElementById("review-title").value.trim();
-        var body = document.getElementById("review-body").value.trim();
-        var starsHtml = "★".repeat(Number(rating)) + "☆".repeat(5 - Number(rating));
-        var now = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+        if (!rating || rating < 1 || rating > 5) {
+          errorEl.textContent = "Please select a star rating.";
+          errorEl.style.display = "block";
+          return;
+        }
 
-        var card =
-          '<div class="review-card">' +
-          '<div class="review-card-header">' +
-          '<span class="review-card-vehicle">' + vehicle + "</span>" +
-          '<span class="review-card-stars">' + starsHtml + "</span>" +
-          "</div>" +
-          '<div class="review-card-title">' + title + "</div>" +
-          '<div class="review-card-body">' + body + "</div>" +
-          '<div class="review-card-date">Reviewed on ' + now + "</div>" +
-          "</div>";
-
-        document.getElementById("review-list-body").insertAdjacentHTML("afterbegin", card);
-
-        var ok = document.getElementById("review-alert-success");
-        ok.textContent = "Review submitted successfully!";
-        ok.style.display = "block";
-        document.getElementById("review-form").reset();
-        document.querySelectorAll("#review-star-picker .rev-star").forEach(function (s) {
-          s.classList.remove("active");
-        });
-        document.getElementById("review-rating").value = "";
-        setTimeout(function () { toggleReviewForm(); }, 1200);
+        fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ booking_id: booking_id, reviewed_username: reviewed_username, review_type: "car", rating: rating, title: title, comment: comment }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.success) {
+              successEl.textContent = "Review submitted successfully!";
+              successEl.style.display = "block";
+              document.getElementById("review-form").reset();
+              document.querySelectorAll("#review-star-picker .rev-star").forEach(function (s) { s.classList.remove("active"); });
+              document.getElementById("review-rating").value = "";
+              loadCompletedRentalsDropdown();
+              loadMyReviews();
+              setTimeout(function () { toggleReviewForm(); }, 1200);
+            } else {
+              errorEl.textContent = data.error || "Failed to submit review.";
+              errorEl.style.display = "block";
+            }
+          })
+          .catch(function () {
+            errorEl.textContent = "Server error. Please try again.";
+            errorEl.style.display = "block";
+          });
       }
 
       /* ── Address panel ──────────────────────────────────────────────── */

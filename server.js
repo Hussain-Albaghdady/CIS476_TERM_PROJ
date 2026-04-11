@@ -3282,14 +3282,11 @@ app.put(
 
         // Count pending (completed rentals not yet reviewed by host)
         const vehicles = await db.collection("Vehicles").find({ host_username: username }).toArray();
-        const vehicleIds = vehicles.map((v) => v._id);
-        const completed = await db.collection("Reservations").find({
-          $or: [
-            { history_vehicle_id: { $in: vehicleIds } },
-            { vehicle_id: { $in: vehicleIds } },
-          ],
-          status: "Complete",
-        }).toArray();
+        const vehicleIdStrings = new Set(vehicles.map((v) => v._id.toString()));
+        const allCompleted = await db.collection("Reservations").find({ status: "Complete" }).toArray();
+        const completed = allCompleted.filter((r) =>
+          toIdArray(r.history_vehicle_id || r.vehicle_id).some((id) => vehicleIdStrings.has(id.toString()))
+        );
         const reviewedIds = new Set(given.map((r) => r.booking_id?.toString()));
         const pendingCount = completed.filter((r) => !reviewedIds.has(r._id.toString())).length;
 
@@ -3351,16 +3348,11 @@ app.put(
           .toArray();
         const vehicleIds = vehicles.map((v) => v._id);
 
-        const completed = await db
-          .collection("Reservations")
-          .find({
-            $or: [
-              { history_vehicle_id: { $in: vehicleIds } },
-              { vehicle_id: { $in: vehicleIds } },
-            ],
-            status: "Complete",
-          })
-          .toArray();
+        const vehicleIdStrings = new Set(vehicleIds.map((id) => id.toString()));
+        const allCompleted = await db.collection("Reservations").find({ status: "Complete" }).toArray();
+        const completed = allCompleted.filter((r) =>
+          toIdArray(r.history_vehicle_id || r.vehicle_id).some((id) => vehicleIdStrings.has(id.toString()))
+        );
 
         // Find which ones the host hasn't reviewed yet
         const existingReviews = await db
@@ -3422,14 +3414,20 @@ app.put(
             .json({ error: "Rating must be between 1 and 5." });
         }
 
-        // Get booking to find car_id
+        // Get booking to find car_id and, for renter reviews, the reviewed customer's username
         let car_id = null;
+        let resolved_reviewed_username = reviewed_username || null;
         if (booking_id && ObjectId.isValid(booking_id)) {
           const booking = await db
             .collection("Reservations")
             .findOne({ _id: new ObjectId(booking_id) });
           if (booking) {
             car_id = booking.history_vehicle_id || booking.vehicle_id;
+            // Derive reviewed_username from the renter when not provided
+            if (!resolved_reviewed_username && review_type === "renter" && booking.user_id) {
+              const renter = await db.collection("RentalUsers").findOne({ _id: booking.user_id });
+              resolved_reviewed_username = renter?.username || null;
+            }
           }
         }
 
@@ -3439,7 +3437,7 @@ app.put(
             : null,
           car_id,
           reviewer_username,
-          reviewed_username,
+          reviewed_username: resolved_reviewed_username,
           review_type: review_type || "car",
           rating: parseInt(rating),
           title: title || "",
@@ -3480,15 +3478,24 @@ app.put(
     app.get("/api/customer-completed-rentals", requireLogin, async (req, res) => {
       try {
         const username = req.session.user_name;
+        console.log("[completed-rentals] username:", username);
         const user = await db.collection("RentalUsers").findOne({ username });
-        if (!user) return res.status(404).json({ error: "User not found" });
+        console.log("[completed-rentals] user found:", user ? user._id : "NOT FOUND");
 
+        const today = new Date().toISOString().split("T")[0];
         const completed = await db
           .collection("Reservations")
-          .find({ user_id: user._id, status: "Complete" })
+          .find({
+            user_id: user._id,
+            $or: [
+              { status: "Complete" },
+              { status: { $in: ["Booked", "Reserved"] }, end_date: { $lte: today } },
+            ],
+          })
           .sort({ end_date: -1 })
           .toArray();
 
+        console.log("[completed-rentals] completed count:", completed.length);
         if (completed.length === 0) return res.json([]);
 
         const vehicleIds = completed
@@ -3530,6 +3537,7 @@ app.put(
             };
           });
 
+        console.log("[completed-rentals] result count:", result.length);
         res.json(result);
       } catch (err) {
         console.error("customer-completed-rentals error:", err);
@@ -3575,6 +3583,51 @@ app.put(
         res.json(result);
       } catch (err) {
         console.error("my-reviews error:", err);
+        res.status(500).json({ error: "Failed to fetch reviews." });
+      }
+    });
+
+    // ── Customer: get reviews received from hosts ─────────────────
+    app.get("/api/my-received-reviews", requireLogin, async (req, res) => {
+      try {
+        const username = req.session.user_name;
+        const reviews = await db
+          .collection("Reviews")
+          .find({ reviewed_username: username, review_type: "renter" })
+          .sort({ createdAt: -1 })
+          .toArray();
+
+        // Look up vehicle names via car_id and reviewer's host info
+        const carIds = reviews
+          .map((r) => {
+            try { return r.car_id && ObjectId.isValid(r.car_id) ? new ObjectId(r.car_id) : null; }
+            catch { return null; }
+          })
+          .filter(Boolean);
+
+        const vehicleMap = {};
+        if (carIds.length > 0) {
+          const vDocs = await db.collection("Vehicles").find({ _id: { $in: carIds } }).toArray();
+          vDocs.forEach((v) => { vehicleMap[v._id.toString()] = v; });
+        }
+
+        const result = reviews.map((r) => {
+          const v = vehicleMap[r.car_id?.toString()] || {};
+          const vehicleName = [v.year, v.make, v.model].filter(Boolean).join(" ") || v.name || "Unknown Vehicle";
+          return {
+            vehicleName,
+            reviewerUsername: r.reviewer_username || "—",
+            rating: r.rating,
+            comment: r.comment || "",
+            date: r.createdAt
+              ? new Date(r.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+              : "—",
+          };
+        });
+
+        res.json(result);
+      } catch (err) {
+        console.error("my-received-reviews error:", err);
         res.status(500).json({ error: "Failed to fetch reviews." });
       }
     });

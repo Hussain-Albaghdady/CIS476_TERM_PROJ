@@ -4157,9 +4157,23 @@ body.auth-page #main {
     letter-spacing: 0.03em;
   }
 
-  #review-customers-table .table-responsive,
-  #pending-reviews-table .table-responsive {
+  #review-customers .table-responsive {
     overflow-x: visible;
+  }
+
+  #review-customers-table tbody td > span,
+  #review-customers-table tbody td > button,
+  #review-customers-table tbody td > a,
+  #pending-reviews-table tbody td > span,
+  #pending-reviews-table tbody td > button,
+  #pending-reviews-table tbody td > a {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  #review-customers-table,
+  #pending-reviews-table {
+    display: block;
   }
 }
 

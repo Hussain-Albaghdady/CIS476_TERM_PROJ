@@ -568,41 +568,7 @@
               <h3>Reviews by Owner</h3>
             </div>
             <div class="row" id="owner-review-card-container">
-              <!-- placeholder cards -->
-              <div class="col-md-6 d-flex align-items-stretch">
-                <div class="info-box w-100">
-                  <div class="review-card-header">
-                    <span class="review-vehicle">2022 Toyota Camry</span>
-                    <span class="review-owner">by John H.</span>
-                  </div>
-                  <div class="review-rating-row">
-                    <span class="rating-score">4.0</span>
-                    <span class="rating-star">&#9733;</span>
-                  </div>
-                  <p class="review-body">
-                    "Great renter, returned the car on time and in perfect
-                    condition."
-                  </p>
-                  <span class="review-date">March 13, 2025</span>
-                </div>
-              </div>
-              <div class="col-md-6 d-flex align-items-stretch">
-                <div class="info-box w-100">
-                  <div class="review-card-header">
-                    <span class="review-vehicle">2020 Honda CR-V</span>
-                    <span class="review-owner">by Sarah M.</span>
-                  </div>
-                  <div class="review-rating-row">
-                    <span class="rating-score">5.0</span>
-                    <span class="rating-star">&#9733;</span>
-                  </div>
-                  <p class="review-body">
-                    "Wonderful guest, very communicative and respectful of the
-                    vehicle."
-                  </p>
-                  <span class="review-date">January 5, 2025</span>
-                </div>
-              </div>
+              <!-- loaded dynamically -->
             </div>
           </section>
         </div>
@@ -1545,8 +1511,11 @@
 
       // ── Load completed rentals into the vehicle dropdown ─────────
       function loadCompletedRentalsDropdown() {
-        fetch("/api/customer-completed-rentals")
-          .then((r) => r.json())
+        fetch("/api/customer-completed-rentals", { credentials: "include" })
+          .then((r) => {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          })
           .then((rentals) => {
             const sel = document.getElementById("review-vehicle");
             sel.innerHTML =
@@ -1565,7 +1534,7 @@
               sel.appendChild(opt);
             });
           })
-          .catch(() => {});
+          .catch((err) => { console.error("loadCompletedRentalsDropdown error:", err); });
       }
 
       // ── Load and render customer's existing reviews ───────────────
@@ -1664,10 +1633,48 @@
           });
       }
 
+      // ── Load reviews received from hosts ─────────────────────────
+      function loadOwnerReviews() {
+        fetch("/api/my-received-reviews")
+          .then((res) => {
+            if (!res.ok) return [];
+            return res.json();
+          })
+          .then((reviews) => {
+            const container = document.getElementById("owner-review-card-container");
+            if (!container) return;
+            if (!Array.isArray(reviews) || reviews.length === 0) {
+              container.innerHTML = '<p class="text-muted" style="padding:1rem;">No reviews from owners yet.</p>';
+              return;
+            }
+            container.innerHTML = reviews.map((r) => `
+              <div class="col-md-6 d-flex align-items-stretch mb-3">
+                <div class="info-box w-100">
+                  <div class="review-card-header">
+                    <span class="review-vehicle">${r.vehicleName}</span>
+                    <span class="review-owner">by ${r.reviewerUsername}</span>
+                  </div>
+                  <div class="review-rating-row">
+                    <span class="rating-score">${r.rating}.0</span>
+                    <span class="rating-star">&#9733;</span>
+                  </div>
+                  <p class="review-body">"${r.comment}"</p>
+                  <span class="review-date">${r.date}</span>
+                </div>
+              </div>
+            `).join("");
+          })
+          .catch(() => {
+            const container = document.getElementById("owner-review-card-container");
+            if (container) container.innerHTML = '<p class="text-muted" style="padding:1rem;">No reviews from owners yet.</p>';
+          });
+      }
+
       // ── Wire up on page load ──────────────────────────────────────
       document.addEventListener("DOMContentLoaded", function () {
         loadCompletedRentalsDropdown();
         loadMyReviews();
+        loadOwnerReviews();
       });
 
       // Add Payment form submission

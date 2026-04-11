@@ -1474,15 +1474,17 @@
                 const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                  <td data-label="Customer">${r.customer || '—'}</td>
-                  <td data-label="Vehicle">${r.vehicle || '—'}</td>
-                  <td data-label="Rental Date">${r.rentalDate || '—'}</td>
-                  <td data-label="Rating"><strong>${r.rating}</strong> <span style="color:#f5a623;">${stars}</span></td>
-                  <td data-label="Review">"${r.review || '—'}"</td>
-                  <td data-label="Submitted">${r.submitted || '—'}</td>
+                  <td data-label="Customer"><span>${r.customer || '—'}</span></td>
+                  <td data-label="Vehicle"><span>${r.vehicle || '—'}</span></td>
+                  <td data-label="Rental Date"><span>${r.rentalDate || '—'}</span></td>
+                  <td data-label="Rating"><span><strong>${r.rating}</strong> <span style="color:#f5a623;">${stars}</span></span></td>
+                  <td data-label="Review"><span>"${r.review || '—'}"</span></td>
+                  <td data-label="Submitted"><span>${r.submitted || '—'}</span></td>
                   <td data-label="Actions">
-                    <a href="#" class="text-primary mr-2" onclick="openEditReviewModal('${r.id}','${r.customer}',${r.rating},\`${r.review}\`);return false;">Edit</a>
-                    <a href="#" class="text-danger" onclick="openDeleteReviewModal('${r.id}');return false;">Delete</a>
+                    <span>
+                      <a href="#" class="text-primary mr-2" onclick="openEditReviewModal('${r.id}','${r.customer}',${r.rating},\`${r.review}\`);return false;">Edit</a>
+                      <a href="#" class="text-danger" onclick="openDeleteReviewModal('${r.id}');return false;">Delete</a>
+                    </span>
                   </td>
                 `;
                 tbody.appendChild(tr);
@@ -1506,9 +1508,9 @@
               data.forEach(r => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                  <td data-label="Customer">${r.customer || '—'}</td>
-                  <td data-label="Vehicle">${r.vehicle || '—'}</td>
-                  <td data-label="Rental Period">${r.rentalPeriod || '—'}</td>
+                  <td data-label="Customer"><span>${r.customer || '—'}</span></td>
+                  <td data-label="Vehicle"><span>${r.vehicle || '—'}</span></td>
+                  <td data-label="Rental Period"><span>${r.rentalPeriod || '—'}</span></td>
                   <td data-label="Customer's Review"><span class="text-muted">${r.customerReview || '—'}</span></td>
                   <td data-label="Action">
                     <button class="btn btn-sm btn-success" onclick="openReviewModal('${r.bookingId}','${r.customer}')">Write Review</button>
