@@ -555,52 +555,102 @@ app.post("/sign_up", async (req, res) => {
     );
   }
 });
-app.post("/reset_password", async (req, res) => {
-  const {
-    username,
-    security1,
-    answer1,
-    security2,
-    answer2,
-    security3,
-    answer3,
-    new_password,
-    confirm_password,
-  } = req.body;
+// ── Chain of Responsibility: Password Recovery ──────────────────────────────
+// Each handler validates one concern. On failure it redirects and stops.
+// On success it calls this.next(ctx) to pass control to the next handler.
 
-  try {
+class PasswordResetHandler {
+  setNext(handler) {
+    this._next = handler;
+    return handler; // enables fluent chaining
+  }
+  async handle(ctx) {
+    if (this._next) return this._next.handle(ctx);
+  }
+}
+
+// Handler 1 – required fields present
+class RequiredFieldsHandler extends PasswordResetHandler {
+  async handle(ctx) {
+    const { username, new_password, confirm_password, res } = ctx;
     if (!username || !new_password || !confirm_password) {
       return res.redirect(
         `passwordResetForm.html?error=${encodeURIComponent("All fields are required.")}`,
       );
     }
+    return super.handle(ctx);
+  }
+}
 
+// Handler 2 – passwords match
+class PasswordMatchHandler extends PasswordResetHandler {
+  async handle(ctx) {
+    const { new_password, confirm_password, res } = ctx;
     if (new_password !== confirm_password) {
       return res.redirect(
         `passwordResetForm.html?error=${encodeURIComponent("Passwords do not match.")}`,
       );
     }
+    return super.handle(ctx);
+  }
+}
 
-    // Find user across both collections
+// Handler 3 – password meets strength rules
+class PasswordStrengthHandler extends PasswordResetHandler {
+  async handle(ctx) {
+    const { new_password, res } = ctx;
+    if (new_password.length < 8) {
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent("Password must be at least 8 characters.")}`,
+      );
+    }
+    if (!/[A-Z]/.test(new_password)) {
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent("Password must contain at least one uppercase letter.")}`,
+      );
+    }
+    if (!/[a-z]/.test(new_password)) {
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent("Password must contain at least one lowercase letter.")}`,
+      );
+    }
+    if (!/[0-9]/.test(new_password)) {
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent("Password must contain at least one number.")}`,
+      );
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(new_password)) {
+      return res.redirect(
+        `passwordResetForm.html?error=${encodeURIComponent('Password must contain at least one special character.')}`,
+      );
+    }
+    return super.handle(ctx);
+  }
+}
+
+// Handler 4 – user exists in the database
+class UserLookupHandler extends PasswordResetHandler {
+  async handle(ctx) {
+    const { username, res } = ctx;
     const collections = ["RentalUsers", "HostUsers"];
-    let user = null;
-    let collection = null;
     for (const coll of collections) {
       const found = await db.collection(coll).findOne({ username });
       if (found) {
-        user = found;
-        collection = coll;
-        break;
+        ctx.user = found;
+        ctx.collection = coll;
+        return super.handle(ctx);
       }
     }
+    return res.redirect(
+      `passwordResetForm.html?error=${encodeURIComponent("No account found with that username.")}`,
+    );
+  }
+}
 
-    if (!user) {
-      return res.redirect(
-        `passwordResetForm.html?error=${encodeURIComponent("No account found with that username.")}`,
-      );
-    }
-
-    // Verify security questions if stored on the user
+// Handler 5 – security questions match
+class SecurityQuestionsHandler extends PasswordResetHandler {
+  async handle(ctx) {
+    const { security1, answer1, security2, answer2, security3, answer3, user, res } = ctx;
     if (user.security_questions && user.security_questions.length > 0) {
       const submitted = [
         { question: security1, answer: (answer1 || "").trim().toLowerCase() },
@@ -620,17 +670,39 @@ app.post("/reset_password", async (req, res) => {
         );
       }
     }
+    return super.handle(ctx);
+  }
+}
 
+// Handler 6 – persist the new password
+class PasswordUpdateHandler extends PasswordResetHandler {
+  async handle(ctx) {
+    const { username, new_password, collection, res } = ctx;
     const hash = crypto.createHash("sha256").update(new_password).digest("hex");
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
     await db
       .collection(collection)
       .updateOne({ username }, { $set: { password: hash, updated_at: now } });
-
     console.log(`Password reset successful for user: ${username}`);
     return res.redirect(
       `loginform.html?success=${encodeURIComponent("Password reset successfully. Please sign in.")}`,
     );
+  }
+}
+
+// Wire the chain once at startup
+const passwordResetChain = new RequiredFieldsHandler();
+passwordResetChain
+  .setNext(new PasswordMatchHandler())
+  .setNext(new PasswordStrengthHandler())
+  .setNext(new UserLookupHandler())
+  .setNext(new SecurityQuestionsHandler())
+  .setNext(new PasswordUpdateHandler());
+
+app.post("/reset_password", async (req, res) => {
+  const ctx = { ...req.body, res };
+  try {
+    await passwordResetChain.handle(ctx);
   } catch (err) {
     console.error("Password reset error:", err);
     return res.redirect(
