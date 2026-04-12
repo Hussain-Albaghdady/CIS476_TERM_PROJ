@@ -11,6 +11,28 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
   }
+
+  // ── Floating message shortcut button ──────────────────────
+  var path = window.location.pathname;
+  if (!path.includes("adminPage") && !path.includes("admin-setup")) {
+    var msgBtn = document.createElement("a");
+    msgBtn.id = "msg-float-btn";
+    msgBtn.className = "msg-float-btn";
+    msgBtn.title = "Messages";
+    msgBtn.innerHTML = '<i class="bx bx-message-dots"></i>';
+    document.body.appendChild(msgBtn);
+
+    fetch("/userdetail", { credentials: "include" })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        if (!data || data.error || data.user_type === "admin") return;
+        msgBtn.href = data.user_type === "host"
+          ? "/ownerPage.html#messaging"
+          : "/account.html#messaging";
+        msgBtn.style.display = "block";
+      })
+      .catch(function () {});
+  }
 });
 !(function ($) {
   "use strict";
@@ -113,7 +135,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     $(document).on("click", ".mobile-nav .drop-down > a", function (e) {
-      e.preventDefault();
+      const href = $(this).attr("href") || "";
+      if (!href.includes("#")) {
+        e.preventDefault();
+      }
       $(this).next().slideToggle(300);
       $(this).parent().toggleClass("active");
     });
@@ -205,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
     time: 1000,
   });
 
-  $(".event-details-carousel").owlCarousel({
+  $(".vehicle-details-carousel").owlCarousel({
     autoplay: true,
     dots: true,
     loop: true,
@@ -222,8 +247,8 @@ document.addEventListener("DOMContentLoaded", function () {
   $(window).on("load", function () {
     aos_init();
   });
-  var $grid = $(".event-container").isotope({
-    itemSelector: ".event-item",
+  var $grid = $(".vehicle-container").isotope({
+    itemSelector: ".vehicle-item",
   });
 
   var filters = {
@@ -231,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
     type: "",
   };
 
-  $("#event-flters").on("click", "li", function () {
+  $("#vehicle-flters").on("click", "li", function () {
     var $this = $(this);
     var filterValue = $this.attr("data-filter");
 
@@ -268,8 +293,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return allFilters.length ? allFilters.join("") : "*";
   }
+  function formatVehicleRating(avgRating, reviewCount) {
+    if (!reviewCount) {
+      return `N/A <span style="color:#f5a623;">★</span> (0)`;
+    }
+
+    return `${Number(avgRating || 0).toFixed(1)}/5 <span style="color:#f5a623;">★</span> (${Number(reviewCount)})`;
+  }
+
   $(document).ready(function () {
-    const $container = $(".event-container");
+    const $container = $(".vehicle-container");
     if (!$container.length) return;
 
     let homeAllVehicles = [];
@@ -330,12 +363,15 @@ document.addEventListener("DOMContentLoaded", function () {
               ? item.image_url
               : "assets/img/no-image.png";
         $container.append(`
-        <div class="col-lg-4 col-md-6 event-item ${filters.join(" ")}">
+        <div class="col-lg-4 col-md-6 vehicle-item ${filters.join(" ")}">
           <div class="card">
             <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category || "Vehicle"}" />
             <div class="card-text">
               <h2>${[item.year, item.make, item.model].filter(Boolean).join(" ") || item.category || "Vehicle"}</h2>
               <p class="hosted-by">Hosted By ${item.host_fname || "Unknown"}</p>
+              <p class="card-rating">
+                ${formatVehicleRating(item.avg_rating, item.review_count)}    
+              </p>
               <p class="desc">${item.description || ""}</p>
               ${item.range ? `<p class="range"><b>Range:</b> ${item.range} mi</p>` : ""}
               <p class="rate">Rate: $${item.rental_rate_per_day} / day</p>
@@ -347,7 +383,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if ($container.data("isotope")) {
         $container.isotope("reloadItems").isotope();
       } else if (typeof Isotope !== "undefined") {
-        $container.isotope({ itemSelector: ".event-item" });
+        $container.isotope({ itemSelector: ".vehicle-item" });
       }
     }
 
@@ -476,11 +512,14 @@ document.addEventListener("DOMContentLoaded", function () {
               <li id="dashboard-page-link">
                 <a href="account.html" id="dashboard-page-link-anchor">Dashboard</a>
               </li>
+              <li id="my-account-page-link">
+                <a href="my-account.html" id="my-account-page-link-anchor">New Dashboard</a>
+              </li>
               <li id="customer-page-link">
                 <a href="vehicle-reservation.html" id="customer-page-link-anchor">Rent Vehicles</a>
               </li>
-              <li id="return-page-link">
-                <a href="account.html#return" id="return-page-link-anchor">Return Vehicles</a>
+              <li id="manage-bookings-page-link">
+                <a href="account.html" id="manage-bookings-page-link-anchor" onclick="sessionStorage.setItem('scrollToReturn','1');sessionStorage.setItem('highlightManageBookings','1')">Manage Bookings</a>
               </li>
             </ul>
           `;
@@ -506,9 +545,34 @@ document.addEventListener("DOMContentLoaded", function () {
             }
           } else if (userType === "host") {
             const dropdownLi = document.createElement("li");
-            dropdownLi.id = "owner-page";
+            dropdownLi.classList.add("drop-down");
+            dropdownLi.id = "host-dropdown";
             dropdownLi.innerHTML = `
-            <a href="ownerPage.html">Host Portal</a>
+            <a href="ownerPage.html" class="account-toggle">Host Portal<i class="icofont-simple-down dropdown-arrow"></i></a>
+            <ul>
+              <li id="vehicle-page-link" class="drop-down">
+                <a href="ownerPage.html" id="vehicle-page-link-anchor">Vehicle Management<i class="icofont-simple-down dropdown-arrow"></i></a>
+                <ul>
+                  <li id="add-vehicle-link">
+                    <a href="ownerPage.html#vehicle-management" id="add-vehicle-link-anchor">Add New Vehicle</a>
+                  </li>
+                  <li id="manage-existing-link">
+                    <a href="ownerPage.html#vehicle-management" id="manage-existing-link-anchor">Manage Existing Vehicle</a>
+                  </li>
+                </ul>
+              </li>
+              <li id="financial-page-link" class="drop-down">
+                <a href="ownerPage.html" id="financial-page-link-anchor">Financial Management<i class="icofont-simple-down dropdown-arrow"></i></a>
+                <ul>
+                  <li id="view-financial-link">
+                    <a href="ownerPage.html#financial-management" id="view-financial-link-anchor">View Financial Records</a>
+                  </li>
+                </ul>
+              </li>
+              <li id="return-page-link">
+                <a href="ownerPage.html#availability" id="return-page-link-anchor">Vehicle Inventory</a>
+              </li>
+            </ul>
           `;
 
             const logoutLi = nav.querySelector("#login-link-li");
@@ -520,9 +584,22 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
         const current = window.location.pathname + window.location.hash;
-        if (current.endsWith("account.html")) {
+        if (current.includes("my-account.html")) {
           document
-            .querySelectorAll("#dashboard-page-link-anchor")
+            .querySelectorAll("#my-account-page-link-anchor")
+            .forEach((a) => a.parentElement.classList.add("active"));
+        }
+        if (
+          current.endsWith("account.html") &&
+          !current.includes("my-account.html")
+        ) {
+          var highlightFlag = sessionStorage.getItem("highlightManageBookings");
+          sessionStorage.removeItem("highlightManageBookings");
+          var anchorId = highlightFlag
+            ? "#manage-bookings-page-link-anchor"
+            : "#dashboard-page-link-anchor";
+          document
+            .querySelectorAll(anchorId)
             .forEach((a) => a.parentElement.classList.add("active"));
         }
         if (current.endsWith("vehicle-reservation.html")) {
@@ -530,19 +607,15 @@ document.addEventListener("DOMContentLoaded", function () {
             .querySelectorAll("#customer-page-link-anchor")
             .forEach((a) => a.parentElement.classList.add("active"));
         }
-        if (current.endsWith("account.html#return")) {
-          document
-            .querySelectorAll("#return-page-link-anchor")
-            .forEach((a) => a.parentElement.classList.add("active"));
-        }
+
         if (current.endsWith("adminPage.html")) {
           document
             .querySelectorAll('a[href$="adminPage.html"]')
             .forEach((a) => a.parentElement.classList.add("active"));
         }
-        if (current.endsWith("maintainancePage.html")) {
+        if (current.endsWith("ownerPage.html")) {
           document
-            .querySelectorAll('a[href$="maintainancePage.html"]')
+            .querySelectorAll('a[href$="ownerPage.html"]')
             .forEach((a) => a.parentElement.classList.add("active"));
         }
       });
@@ -626,21 +699,29 @@ document.addEventListener("DOMContentLoaded", function () {
               ? eq.image_url
               : "assets/img/no-image.png";
         return `
-      <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm">
-          <img src="${imgUrl}" class="card-img-top" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}" style="height:200px; object-fit:cover; width:100%;">
-          <div class="card-body">
-            <h5 class="card-title" style="font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1;">${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h5>
-            <p class="card-text">${eq.description || ""}</p>
-            <div style="font-weight:bold;margin-bottom:5px;">
-              Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : "N/A"} per day
-            </div>
-            ${eq.range ? `<div style="font-size:0.98em;margin-bottom:3px;"><b>Range:</b> ${eq.range} mi</div>` : ""}
-            ${eq.pickup_location ? `<div style="font-size:0.98em;margin-bottom:5px;"><b>Pick-Up:</b> ${eq.pickup_location}</div>` : ""}
-            <div>
+      <div class="col-lg-4 col-md-6 vehicle-item mb-4">
+        <div class="card">
+          <img src="${imgUrl}" class="img-fluid" alt="${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}">
+          <div class="card-text">
+            <h2>${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h2>
+            <p class="hosted-by">Hosted By ${eq.host_fname || "Unknown"}</p>
+            <p class="card-rating">
+              ${formatVehicleRating(eq.avg_rating, eq.review_count)}
+            </p>
+            <p class="desc">${eq.description || ""}</p>
+            ${eq.range ? `<p class="range"><b>Range:</b> ${eq.range} mi</p>` : ""}
+            ${eq.pickup_location ? `<p class="range"><b>Pick-Up:</b> ${eq.pickup_location}</p>` : ""}
+            <div class="reservation-select">
               <input type="checkbox" class="vehicle-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedVehicleSet.has(eq._id) ? "checked" : ""}>
               <label for="equip_${eq._id}">Select this Vehicle</label>
+              <span class="watch-divider">|</span>
+              <input type="checkbox" class="watch-checkbox" id="watch_${eq._id}">
+              <label for="watch_${eq._id}" class="watch-btn">
+                <i class="bx bx-heart watch-icon-empty"></i>
+                <i class="bx bxs-heart watch-icon-filled"></i> Watch
+              </label>
             </div>
+            <p class="rate">Rate: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : "N/A"} / day</p>
           </div>
         </div>
       </div>
@@ -678,8 +759,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (other !== this) {
               other.checked = false;
               other.disabled = true;
-              other.closest(".col-md-4").style.opacity = "0.4";
-              other.closest(".col-md-4").style.pointerEvents = "none";
+              other.closest(".vehicle-item").style.opacity = "0.4";
+              other.closest(".vehicle-item").style.pointerEvents = "none";
             }
           });
         } else {
@@ -698,8 +779,8 @@ document.addEventListener("DOMContentLoaded", function () {
           // Restore all other vehicle cards
           document.querySelectorAll(".vehicle-checkbox").forEach((other) => {
             other.disabled = false;
-            other.closest(".col-md-4").style.opacity = "";
-            other.closest(".col-md-4").style.pointerEvents = "";
+            other.closest(".vehicle-item").style.opacity = "";
+            other.closest(".vehicle-item").style.pointerEvents = "";
           });
         }
       });
@@ -729,18 +810,22 @@ document.addEventListener("DOMContentLoaded", function () {
         renderVehicle(document.getElementById("vehicle-category").value);
       })
       .catch(() => {
-        document.getElementById("vehicle-list").innerHTML =
-          '<div class="col-12"><p style="color:red;">Failed to load vehicles. Please try again.</p></div>';
+        const vehicleList = document.getElementById("vehicle-list");
+        if (vehicleList) {
+          vehicleList.innerHTML =
+            '<div class="col-12"><p style="color:red;">Failed to load vehicles. Please try again.</p></div>';
+        }
       });
   }
 
   fetchAndRenderVehicles();
 
-  document
-    .getElementById("vehicle-category")
-    .addEventListener("change", function () {
+  const vehicleCategory = document.getElementById("vehicle-category");
+  if (vehicleCategory) {
+    vehicleCategory.addEventListener("change", function () {
       renderVehicle(this.value);
     });
+  }
 
   const formLocation = document.getElementById("location");
   if (formLocation) {
@@ -818,15 +903,12 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       document.getElementById("reservation-error").textContent = "";
       document.getElementById("reservation-success").textContent = "";
-      document.getElementById("selected-vehicle").value = JSON.stringify(
-        Array.from(selectedVehicleSet),
-      );
       if (selectedVehicleSet.size === 0) {
         document.getElementById("reservation-error").textContent =
           "Please select at least one vehicle to reserve.";
         return;
       }
-      const selectedIds = Array.from(selectedVehicleSet);
+      const vehicleId = Array.from(selectedVehicleSet)[0];
       const startDate = document.getElementById("start_date").value;
       const endDate = document.getElementById("end_date").value;
       if (!startDate) {
@@ -845,25 +927,24 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
       const days = calculateDays(startDate, endDate);
-      let totalPrice = 0;
-      selectedIds.forEach((id) => {
-        const eq = allVehicle.find((eq) => eq._id == id);
-        if (eq && eq.rental_rate_per_day) {
-          totalPrice += Number(eq.rental_rate_per_day) * days;
-        }
-      });
       const taxRate = 0.06;
-      const taxAmount = totalPrice * taxRate;
-      const totalWithTax = totalPrice + taxAmount;
-      document.getElementById("total-cost").value = totalWithTax.toFixed(2);
-      showPaymentModal(totalPrice, () => {
+      const eq = allVehicle.find((v) => v._id == vehicleId);
+      const vehiclePrice =
+        eq && eq.rental_rate_per_day
+          ? Number(eq.rental_rate_per_day) * days
+          : 0;
+      const totalWithTax = (vehiclePrice * (1 + taxRate)).toFixed(2);
+
+      showPaymentModal(vehiclePrice, () => {
         const form = document.getElementById("reservation-form");
         const formData = new FormData(form);
-        // Disabled fields aren't included in FormData — manually add location
         const locationEl = document.getElementById("location");
         if (locationEl && locationEl.disabled && locationEl.value) {
           formData.set("location", locationEl.value);
         }
+        formData.set("vehicle_id", vehicleId);
+        formData.set("total_cost", totalWithTax);
+
         fetch(form.action, {
           method: "POST",
           body: new URLSearchParams([...formData]),
@@ -873,41 +954,27 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.error) {
               document.getElementById("reservation-error").textContent =
                 data.error;
-              document.getElementById("reservation-success").textContent = "";
-            } else {
-              let msg = "";
-              if (
-                data.unavailable_vehicle_ids &&
-                data.unavailable_vehicle_ids.length > 0
-              ) {
-                msg = `<div style="color:green;font-weight:bold;">Reservation successful for available vehicles only.</div>
-                    <div style="color:red;font-weight:bold;">Some vehicles was already booked and not reserved.</div>`;
-              } else {
-                msg = `<div style="color:green;font-weight:bold;">Reservation successful!</div>`;
-              }
-              document.getElementById("reservation-modal-title").textContent =
-                "Reservation successful!";
-              document.getElementById("reservation-modal-body").innerHTML = `
-            ${msg}
-            <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
-          `;
-              document.getElementById("reservation-modal").style.display =
-                "flex";
-              document.getElementById("close-modal-btn").onclick = function () {
-                document.getElementById("reservation-modal").style.display =
-                  "none";
-                window.location.reload();
-              };
-              document.getElementById("reservation-success").textContent = "";
-              document.getElementById("reservation-error").textContent = "";
-              selectedVehicleSet.clear();
-              renderVehicle(document.getElementById("vehicle-category").value);
+              return;
             }
+            document.getElementById("reservation-modal-title").textContent =
+              "Reservation successful!";
+            document.getElementById("reservation-modal-body").innerHTML = `
+              <div style="color:green;font-weight:bold;">Reservation successful!</div>
+              <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
+            `;
+            document.getElementById("reservation-modal").style.display = "flex";
+            document.getElementById("close-modal-btn").onclick = function () {
+              document.getElementById("reservation-modal").style.display =
+                "none";
+              window.location.reload();
+            };
+            document.getElementById("reservation-error").textContent = "";
+            selectedVehicleSet.clear();
+            renderVehicle(document.getElementById("vehicle-category").value);
           })
           .catch(() => {
             document.getElementById("reservation-error").textContent =
               "Reservation failed. Please try again.";
-            document.getElementById("reservation-success").textContent = "";
           });
       });
     });
@@ -934,21 +1001,56 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
+  function fillAddressSelect(
+    selectElement,
+    addresses,
+    placeholderText = "-- Choose Billing Address --",
+  ) {
+    if (!selectElement) return;
+
+    selectElement.innerHTML = `<option value="" disabled selected>${placeholderText}</option>`;
+
+    if (!Array.isArray(addresses) || addresses.length === 0) {
+      return;
+    }
+
+    addresses.forEach((address, index) => {
+      const option = document.createElement("option");
+
+      const nickname = address.address_nickname || `Address ${index + 1}`;
+      const street = address.street || address.address_line1 || "";
+      const city = address.city || "";
+      const state = address.state || "";
+      const zip = address.zip_code || "";
+
+      option.value = nickname;
+      option.textContent = `${street}, ${city}, ${state} ${zip} (${nickname})`;
+
+      selectElement.appendChild(option);
+    });
+  }
   function populateAddressDropdown() {
     fetch("/api/myaddress")
       .then((res) => res.json())
       .then((addresses) => {
         const addressSelect = document.getElementById("address");
-        if (addressSelect && addresses && addresses.length > 0) {
-          addressSelect.innerHTML =
-            '<option value="" disabled selected>-- Choose Billing address--</option>';
+        const payAddressSelect = document.getElementById("payAddress");
+        console.log("payAddressSelect:", payAddressSelect);
 
-          addresses.forEach((address, index) => {
-            const option = document.createElement("option");
-            option.value = address.address_nickname || `address_${index}`;
-            option.textContent = `${address.address_line1}, ${address.city}, ${address.state} ${address.zip_code} (${address.address_nickname || "Address " + (index + 1)})`;
-            addressSelect.appendChild(option);
-          });
+        if (payAddressSelect) {
+          fillAddressSelect(
+            payAddressSelect,
+            addresses,
+            "-- Choose Billing Address --",
+          );
+        }
+
+        if (addressSelect) {
+          fillAddressSelect(
+            addressSelect,
+            addresses,
+            "-- Choose Billing Address --",
+          );
         }
       })
       .catch((err) => {
@@ -972,145 +1074,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (window.location.pathname.endsWith("vehicle-reservation.html")) {
       populatePaymentDropdown();
       populateAddressDropdown();
-
-      const addPaymentBtn = document.getElementById("add-payment-btn");
-      const addAddressBtn = document.getElementById("add-address-btn");
-      const paymentForm = document.getElementById("Payment-form");
-      const addressForm = document.getElementById("Address-form");
-
-      if (addPaymentBtn && paymentForm) {
-        addPaymentBtn.addEventListener("click", function () {
-          paymentForm.classList.toggle("hidden-form");
-          addPaymentBtn.textContent = paymentForm.classList.contains(
-            "hidden-form",
-          )
-            ? "+ Add New Payment Method"
-            : "- Hide Payment Form";
-        });
-      }
-
-      if (addAddressBtn && addressForm) {
-        addAddressBtn.addEventListener("click", function () {
-          addressForm.classList.toggle("hidden-form");
-          addAddressBtn.textContent = addressForm.classList.contains(
-            "hidden-form",
-          )
-            ? "+ Add New Address"
-            : "- Hide Address Form";
-        });
-      }
-      const cardField = document.getElementById("card_number");
-      if (cardField) {
-        cardField.addEventListener("input", function () {
-          let digits = this.value.replace(/\D/g, "").substring(0, 16);
-          let formatted = digits.match(/.{1,4}/g)?.join("-") || "";
-          this.value = formatted;
-        });
-      }
-      ["payment_zip_code", "cvv"].forEach(function (fieldId) {
-        const field = document.getElementById(fieldId);
-        if (field) {
-          field.addEventListener("input", function () {
-            this.value = this.value.replace(/[^\d]/g, "");
-          });
-        }
-      });
-
-      if (paymentForm) {
-        paymentForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const cardNumberFormatted = paymentForm.card_number.value.trim();
-          const rawCardNumber = cardNumberFormatted.replace(/\D/g, "");
-          const zipCode = paymentForm.payment_zip_code.value.trim();
-          const cvv = paymentForm.cvv.value.trim();
-
-          let errorMsg = "";
-          if (!/^\d{16}$/.test(rawCardNumber)) {
-            errorMsg = "Card number must be exactly 16 digits.";
-          } else if (!/^\d{5}$/.test(zipCode)) {
-            errorMsg = "Zip code must be exactly 5 digits.";
-          } else if (!/^\d{3,4}$/.test(cvv)) {
-            errorMsg = "CVV must be 3 or 4 digits.";
-          }
-
-          if (errorMsg) {
-            document.getElementById("payments-error").textContent = errorMsg;
-            document.getElementById("payments-success").textContent = "";
-            return;
-          }
-
-          const formData = new FormData(paymentForm);
-          formData.set("card_number", rawCardNumber);
-
-          fetch("/payments", {
-            method: "POST",
-            body: new URLSearchParams([...formData]),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.message || data.success || !data.error) {
-                document.getElementById("payments-success").textContent =
-                  "Payment method added successfully!";
-                document.getElementById("payments-error").textContent = "";
-                paymentForm.reset();
-
-                setTimeout(() => {
-                  populatePaymentDropdown();
-                  paymentForm.classList.add("hidden-form");
-                  if (addPaymentBtn) {
-                    addPaymentBtn.textContent = "+ Add New Payment Method";
-                  }
-                }, 1000);
-              } else {
-                document.getElementById("payments-error").textContent =
-                  data.error || "Failed to add payment method";
-                document.getElementById("payments-success").textContent = "";
-              }
-            })
-            .catch((err) => {
-              console.error("Payment submit error:", err);
-              document.getElementById("payments-error").textContent =
-                "Failed to add payment method";
-              document.getElementById("payments-success").textContent = "";
-            });
-        });
-      }
-
-      if (addressForm) {
-        addressForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-          const formData = new FormData(addressForm);
-
-          fetch("/addresses", {
-            method: "POST",
-            body: new URLSearchParams([...formData]),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.message || data.success || !data.error) {
-                document.getElementById("address-success").textContent =
-                  "Address added successfully!";
-                document.getElementById("address-error").textContent = "";
-                addressForm.reset();
-                setTimeout(() => {
-                  populateAddressDropdown();
-                  addressForm.classList.add("hidden-form");
-                  addAddressBtn.textContent = "+ Add New Address";
-                }, 1000);
-              } else {
-                document.getElementById("address-error").textContent =
-                  data.error || "Failed to add address";
-                document.getElementById("address-success").textContent = "";
-              }
-            })
-            .catch(() => {
-              document.getElementById("address-error").textContent =
-                "Failed to add address";
-              document.getElementById("address-success").textContent = "";
-            });
-        });
-      }
     }
 
     if (localStorage.getItem("showReservationModal") === "1") {
@@ -1129,160 +1092,218 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-/* ==========================================================
+  /* ==========================================================
    Login Form
    ========================================================== */
-(function () {
-  if (!document.getElementById("login-error-modal")) return;
+  (function () {
+    if (!document.getElementById("login-error-modal")) return;
 
-  var params = new URLSearchParams(window.location.search);
-  var serverError = params.get("error");
-  if (serverError) {
-    document.getElementById("login-error-modal-message").textContent = decodeURIComponent(serverError);
-    document.getElementById("login-error-modal").style.display = "flex";
-    window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
-  }
-}());
+    var params = new URLSearchParams(window.location.search);
+    var serverError = params.get("error");
+    if (serverError) {
+      document.getElementById("login-error-modal-message").textContent =
+        decodeURIComponent(serverError);
+      document.getElementById("login-error-modal").style.display = "flex";
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.origin + window.location.pathname,
+      );
+    }
+  })();
 
-/* ==========================================================
+  /* ==========================================================
    Registration Form
    ========================================================== */
-(function () {
-  if (!document.getElementById("register-form")) return;
+  (function () {
+    if (!document.getElementById("register-form")) return;
 
-  /* Server-side error modal */
-  var params = new URLSearchParams(window.location.search);
-  var serverError = params.get("error");
-  if (serverError) {
-    document.getElementById("error-modal-message").textContent = decodeURIComponent(serverError);
-    document.getElementById("error-modal").style.display = "flex";
-    window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
-  }
-
-  /* Account type selection */
-  var selectedAccountType = "";
-
-  window.selectType = function (type) {
-    selectedAccountType = type;
-    document.getElementById("user_type").value = type;
-    var rBtn = document.getElementById("btn-renter");
-    var hBtn = document.getElementById("btn-host");
-    rBtn.classList.remove("selected-renter", "selected-host");
-    hBtn.classList.remove("selected-renter", "selected-host");
-    if (type === "customer") rBtn.classList.add("selected-renter");
-    if (type === "host")     hBtn.classList.add("selected-host");
-  };
-
-  /* Password strength */
-  document.getElementById("password").addEventListener("input", function () {
-    var val   = this.value;
-    var score = 0;
-    if (val.length >= 8)                        score++;
-    if (/[A-Z]/.test(val))                      score++;
-    if (/[a-z]/.test(val))                      score++;
-    if (/[0-9]/.test(val))                      score++;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(val))    score++;
-
-    var levels = [
-      { pct: "0%",   color: "#e0e8f5", label: "" },
-      { pct: "25%",  color: "#e74c3c", label: "Weak" },
-      { pct: "50%",  color: "#e67e22", label: "Fair" },
-      { pct: "75%",  color: "#f1c40f", label: "Good" },
-      { pct: "100%", color: "#27ae60", label: "Strong" },
-    ];
-    var lvl  = levels[Math.min(score, 4)];
-    var fill = document.getElementById("pw-fill");
-    var text = document.getElementById("pw-text");
-    fill.style.width      = lvl.pct;
-    fill.style.background = lvl.color;
-    text.textContent      = lvl.label;
-    text.style.color      = lvl.color;
-  });
-
-  /* Error helpers */
-  function showError(msg) {
-    var el = document.getElementById("inline-error");
-    el.textContent = msg;
-    el.classList.add("visible");
-    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
-  function clearError() {
-    var el = document.getElementById("inline-error");
-    el.textContent = "";
-    el.classList.remove("visible");
-  }
-
-  /* Step switcher */
-  function goToStep(n) {
-    document.querySelectorAll(".step-panel").forEach(function (p) { p.classList.remove("active"); });
-    document.getElementById("step-" + n).classList.add("active");
-
-    var b1 = document.getElementById("bubble-1");
-    var b2 = document.getElementById("bubble-2");
-    var l1 = document.getElementById("label-1");
-    var l2 = document.getElementById("label-2");
-    var ln = document.getElementById("connector-line");
-
-    if (n === 1) {
-      b1.className = "step-bubble active";
-      b2.className = "step-bubble";
-      l1.className = "step-label active";
-      l2.className = "step-label";
-      ln.className = "step-line";
-    } else {
-      b1.className = "step-bubble done";
-      b2.className = "step-bubble active";
-      l1.className = "step-label done";
-      l2.className = "step-label active";
-      ln.className = "step-line done";
+    /* Server-side error modal */
+    var params = new URLSearchParams(window.location.search);
+    var serverError = params.get("error");
+    if (serverError) {
+      document.getElementById("error-modal-message").textContent =
+        decodeURIComponent(serverError);
+      document.getElementById("error-modal").style.display = "flex";
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.origin + window.location.pathname,
+      );
     }
-  }
 
-  /* Next: validate step 1 */
-  document.getElementById("next-btn").addEventListener("click", function () {
-    clearError();
+    /* Account type selection */
+    var selectedAccountType = "";
 
-    var fname     = document.getElementById("fname").value.trim();
-    var lname     = document.getElementById("lname").value.trim();
-    var email     = document.getElementById("email").value.trim();
-    var username  = document.getElementById("username").value.trim();
-    var password  = document.getElementById("password").value;
-    var cpassword = document.getElementById("cpassword").value;
+    window.selectType = function (type) {
+      selectedAccountType = type;
+      document.getElementById("user_type").value = type;
+      var rBtn = document.getElementById("btn-renter");
+      var hBtn = document.getElementById("btn-host");
+      rBtn.classList.remove("selected-renter", "selected-host");
+      hBtn.classList.remove("selected-renter", "selected-host");
+      if (type === "customer") rBtn.classList.add("selected-renter");
+      if (type === "host") hBtn.classList.add("selected-host");
+    };
 
-    if (!selectedAccountType)                                   { showError("Please choose an account type — Renter or Host."); return; }
-    if (!fname || !lname)                                       { showError("Please enter your first and last name."); return; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))   { showError("Please enter a valid email address."); return; }
-    if (!username || username.length < 3)                       { showError("Username must be at least 3 characters."); return; }
-    if (password.length < 8)                                    { showError("Password must be at least 8 characters."); return; }
-    if (!/[A-Z]/.test(password))                                { showError("Password must contain at least one uppercase letter."); return; }
-    if (!/[a-z]/.test(password))                                { showError("Password must contain at least one lowercase letter."); return; }
-    if (!/[0-9]/.test(password))                                { showError("Password must contain at least one number."); return; }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))              { showError("Password must contain at least one special character (!@#$%^&*…)."); return; }
-    if (password !== cpassword)                                  { showError("Passwords do not match."); return; }
+    /* Password strength */
+    document.getElementById("password").addEventListener("input", function () {
+      var val = this.value;
+      var score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[a-z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(val)) score++;
 
-    goToStep(2);
-  });
+      var levels = [
+        { pct: "0%", color: "#e0e8f5", label: "" },
+        { pct: "25%", color: "#e74c3c", label: "Weak" },
+        { pct: "50%", color: "#e67e22", label: "Fair" },
+        { pct: "75%", color: "#f1c40f", label: "Good" },
+        { pct: "100%", color: "#27ae60", label: "Strong" },
+      ];
+      var lvl = levels[Math.min(score, 4)];
+      var fill = document.getElementById("pw-fill");
+      var text = document.getElementById("pw-text");
+      fill.style.width = lvl.pct;
+      fill.style.background = lvl.color;
+      text.textContent = lvl.label;
+      text.style.color = lvl.color;
+    });
 
-  /* Back */
-  document.getElementById("back-btn").addEventListener("click", function () {
-    clearError();
-    goToStep(1);
-  });
+    /* Error helpers */
+    function showError(msg) {
+      var el = document.getElementById("inline-error");
+      el.textContent = msg;
+      el.classList.add("visible");
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    function clearError() {
+      var el = document.getElementById("inline-error");
+      el.textContent = "";
+      el.classList.remove("visible");
+    }
 
-  /* Submit: validate step 2 */
-  document.getElementById("register-form").addEventListener("submit", function (e) {
-    clearError();
+    /* Step switcher */
+    function goToStep(n) {
+      document.querySelectorAll(".step-panel").forEach(function (p) {
+        p.classList.remove("active");
+      });
+      document.getElementById("step-" + n).classList.add("active");
 
-    var s1 = document.getElementById("security1").value;
-    var s2 = document.getElementById("security2").value;
-    var s3 = document.getElementById("security3").value;
-    var a1 = document.getElementById("answer1").value.trim();
-    var a2 = document.getElementById("answer2").value.trim();
-    var a3 = document.getElementById("answer3").value.trim();
+      var b1 = document.getElementById("bubble-1");
+      var b2 = document.getElementById("bubble-2");
+      var l1 = document.getElementById("label-1");
+      var l2 = document.getElementById("label-2");
+      var ln = document.getElementById("connector-line");
 
-    if (!s1 || !s2 || !s3) { e.preventDefault(); showError("Please select a question for each security field."); return; }
-    if (!a1 || !a2 || !a3) { e.preventDefault(); showError("Please provide an answer for each security question."); return; }
-    if (new Set([s1, s2, s3]).size < 3) { e.preventDefault(); showError("Please choose three different security questions."); return; }
-  });
-}());
+      if (n === 1) {
+        b1.className = "step-bubble active";
+        b2.className = "step-bubble";
+        l1.className = "step-label active";
+        l2.className = "step-label";
+        ln.className = "step-line";
+      } else {
+        b1.className = "step-bubble done";
+        b2.className = "step-bubble active";
+        l1.className = "step-label done";
+        l2.className = "step-label active";
+        ln.className = "step-line done";
+      }
+    }
+
+    /* Next: validate step 1 */
+    document.getElementById("next-btn").addEventListener("click", function () {
+      clearError();
+
+      var fname = document.getElementById("fname").value.trim();
+      var lname = document.getElementById("lname").value.trim();
+      var email = document.getElementById("email").value.trim();
+      var username = document.getElementById("username").value.trim();
+      var password = document.getElementById("password").value;
+      var cpassword = document.getElementById("cpassword").value;
+
+      if (!selectedAccountType) {
+        showError("Please choose an account type — Renter or Host.");
+        return;
+      }
+      if (!fname || !lname) {
+        showError("Please enter your first and last name.");
+        return;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError("Please enter a valid email address.");
+        return;
+      }
+      if (!username || username.length < 3) {
+        showError("Username must be at least 3 characters.");
+        return;
+      }
+      if (password.length < 8) {
+        showError("Password must be at least 8 characters.");
+        return;
+      }
+      if (!/[A-Z]/.test(password)) {
+        showError("Password must contain at least one uppercase letter.");
+        return;
+      }
+      if (!/[a-z]/.test(password)) {
+        showError("Password must contain at least one lowercase letter.");
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        showError("Password must contain at least one number.");
+        return;
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        showError(
+          "Password must contain at least one special character (!@#$%^&*…).",
+        );
+        return;
+      }
+      if (password !== cpassword) {
+        showError("Passwords do not match.");
+        return;
+      }
+
+      goToStep(2);
+    });
+
+    /* Back */
+    document.getElementById("back-btn").addEventListener("click", function () {
+      clearError();
+      goToStep(1);
+    });
+
+    /* Submit: validate step 2 */
+    document
+      .getElementById("register-form")
+      .addEventListener("submit", function (e) {
+        clearError();
+
+        var s1 = document.getElementById("security1").value;
+        var s2 = document.getElementById("security2").value;
+        var s3 = document.getElementById("security3").value;
+        var a1 = document.getElementById("answer1").value.trim();
+        var a2 = document.getElementById("answer2").value.trim();
+        var a3 = document.getElementById("answer3").value.trim();
+
+        if (!s1 || !s2 || !s3) {
+          e.preventDefault();
+          showError("Please select a question for each security field.");
+          return;
+        }
+        if (!a1 || !a2 || !a3) {
+          e.preventDefault();
+          showError("Please provide an answer for each security question.");
+          return;
+        }
+        if (new Set([s1, s2, s3]).size < 3) {
+          e.preventDefault();
+          showError("Please choose three different security questions.");
+          return;
+        }
+      });
+  })();
 })(jQuery);

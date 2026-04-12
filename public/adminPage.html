@@ -190,7 +190,6 @@
               </div>
             </div>
           </div>
-
           <!-- Per-Vehicle Breakdown Table -->
           <h3 style="margin-bottom: 16px;">All Vehicle Performance</h3>
           <div class="table-responsive">
@@ -213,6 +212,71 @@
         </div>
       </div>
     </section><!-- End Financial Management Section -->
+    
+    <!-- ======= Review Management Section ======= -->
+    <section id="review-management" class="vehicle-management">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="management-header-box">
+          <div class="section-title">
+            <h2>Review Management</h2>
+            <p>View and moderate all reviews across the platform</p>
+          </div>
+          <div class="row mb-4 justify-content-center">
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="view-reviews-btn" class="btn btn-success btn-lg">
+                <i class="icofont-star"></i> View All Reviews
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="review-management-section" class="management-form" style="display: none;">
+
+          <!-- Customer Reviews by Vehicle -->
+          <h3>Customer Reviews by Vehicle</h3>
+          <div class="table-responsive">
+            <table class="table table-striped" id="vehicle-reviews-table">
+              <thead>
+                <tr>
+                  <th>Vehicle</th>
+                  <th>Host</th>
+                  <th>Customer</th>
+                  <th>Rating</th>
+                  <th>Review</th>
+                  <th>Rental Date</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vehicle-reviews-body"></tbody>
+            </table>
+          </div>
+
+          <!-- Host Reviews by Vehicle -->
+          <div style="margin-top: 32px;">
+            <h3>Host Reviews by Vehicle</h3>
+            <div class="table-responsive">
+              <table class="table table-striped" id="host-reviews-table">
+                <thead>
+                  <tr>
+                    <th>Vehicle</th>
+                    <th>Host</th>
+                    <th>Customer Reviewed</th>
+                    <th>Rating</th>
+                    <th>Review</th>
+                    <th>Rental Date</th>
+                    <th>Submitted</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="host-reviews-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section><!-- End Review Management Section -->
 
     <!-- ======= Admin User Management Section ======= -->
     <section id="admin-user-management" class="vehicle-management">
@@ -293,7 +357,7 @@
 
         <div class="row">
           <div class="col-lg-12">
-            <ul id="event-flters">
+            <ul id="vehicle-flters">
               <li data-filter="*" class="filter-active">All</li>
               <li data-filter=".filter-Available">Available</li>
               <li data-filter=".filter-Booked">Booked</li>
@@ -313,7 +377,7 @@
             </ul>
           </div>
         </div>
-        <div class="row event-container">
+        <div class="row vehicle-container">
           <!-- Dynamic vehicle cards will be injected here by JS -->
         </div>
     </section><!-- End Avaliablity Section -->
@@ -568,12 +632,12 @@
       }
 
       function refreshMainVehicleDisplay() {
-        if (typeof $ !== 'undefined' && $('.event-container').length) {
+        if (typeof $ !== 'undefined' && $('.vehicle-container').length) {
           fetch('/api/vehicles')
             .then(res => res.json())
             .then(data => {
               console.log("Refreshing vehicle display:", data);
-              const $container = $('.event-container');
+              const $container = $('.vehicle-container');
               $container.empty();
               if (!Array.isArray(data) || data.length === 0) {
                 $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No vehicle found. Check your API or database.</p></div>');
@@ -616,12 +680,17 @@
                   ? item.image
                   : "assets/img/no-image.png";
                 $container.append(`
-                  <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
+                  <div class="col-lg-4 col-md-6 vehicle-item ${filters.join(' ')}">
                     <div class="card">
                       <img src="${imgUrl}" class="img-fluid" alt="${item.model || item.category}" />
                       <div class="card-text">
                         <h2>${[item.year, item.make, item.model].filter(Boolean).join(' ') || item.category}</h2>
                         <p class="hosted-by">Hosted By ${item.host_fname || 'Unknown'}</p>
+                        <p class="card-rating">
+                          <span class="rating-score">${item.avg_rating ? Number(item.avg_rating).toFixed(1) : 'N/A'}</span>
+                          <span class="rating-star">&#9733;</span>
+                          <span class="rating-count">(${item.review_count || 0})</span>
+                        </p>
                         <p>${item.description || ""}</p>
                         ${item.range ? `<p><b>Range:</b> ${item.range} mi</p>` : ''}
                         <p>Rate: $${item.rental_rate_per_day} / day</p>
@@ -634,7 +703,7 @@
                 if ($container.data('isotope')) {
                   $container.isotope('reloadItems').isotope('layout');
                 } else if (typeof Isotope !== "undefined") {
-                  $container.isotope({ itemSelector: '.event-item' });
+                  $container.isotope({ itemSelector: '.vehicle-item' });
                 }
               };
               // Wait for images before laying out
@@ -771,7 +840,6 @@
         financialSection.style.display = isVisible ? 'none' : 'block';
         if (!isVisible) loadFinancials();
       });
-
       function loadFinancials() {
         fetch('/api/admin-financials')
           .then(res => res.json())

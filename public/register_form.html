@@ -2,404 +2,413 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+   <meta charset="utf-8">
+   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>DriveShare - Register</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+   <title>DriveShare - Register</title>
+   <meta content="" name="description">
+   <meta content="" name="keywords">
 
-  <!-- Favicons -->
-  <link href="assets/img/favicon_io/favicon-2.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+   <!-- Favicons -->
+   <link href="assets/img/favicon_io/favicon-2.png" rel="icon">
+   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,600,600i,700,700i,900" rel="stylesheet">
+   <!-- Google Fonts -->
+   <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,600,600i,700,700i,900"
+      rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
-  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
-  <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
-  <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+   <!-- Vendor CSS Files -->
+   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+   <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
+   <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+   <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+   <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
+   <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
+   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
 
-  <!-- Main CSS File -->
-  <link href="assets/css/style.css" rel="stylesheet">
+   <!-- Main CSS File -->
+   <link href="assets/css/style.css" rel="stylesheet">
 </head>
 
-<body class="register-page">
+<body class="auth-page">
 
-  <!-- Server-side error modal -->
-  <div id="error-modal">
-    <div class="modal-box">
-      <span class="modal-msg" id="error-modal-message"></span>
-      <br>
-      <button onclick="document.getElementById('error-modal').style.display='none'">OK</button>
-    </div>
-  </div>
-
-  <!-- ======= Header ======= -->
-  <header id="header">
-    <div class="container">
-      <div class="logo float-left">
-        <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="DriveShare" class="img-fluid"></a>
+   <!-- Server-side error modal -->
+   <div id="error-modal">
+      <div class="modal-box">
+         <span class="modal-msg" id="error-modal-message"></span>
+         <br>
+         <button onclick="document.getElementById('error-modal').style.display='none'">OK</button>
       </div>
-      <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
-          <li><a href="Home.html">Home</a></li>
-          <li><a href="Home.html#about">About Us</a></li>
-          <li><a href="Home.html#avaliablity">Vehicle Inventory</a></li>
-          <li><a href="Home.html#location">Locations</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+   </div>
 
-  <main id="main">
-    <div class="register-card">
-
-      <!-- Step indicator -->
-      <div class="step-indicator">
-        <div class="step-bubble active" id="bubble-1">1</div>
-        <div class="step-line" id="connector-line"></div>
-        <div class="step-bubble" id="bubble-2">2</div>
-      </div>
-      <div class="step-label-row">
-        <div class="step-label active" id="label-1">Account Info</div>
-        <div class="step-label" id="label-2">Security</div>
-      </div>
-
-      <!-- Inline validation error -->
-      <div class="form-error" id="inline-error"></div>
-
-      <form id="register-form" action="/sign_up" method="post">
-
-        <!-- ══ STEP 1: Account Information ══ -->
-        <div class="step-panel active" id="step-1">
-          <h3>Create Your Account</h3>
-
-          <!-- Account type toggle -->
-          <div class="type-toggle">
-            <button type="button" class="type-btn" id="btn-renter" onclick="selectType('customer')">
-              <span class="type-icon">&#128663;</span>
-              Renter
-            </button>
-            <button type="button" class="type-btn" id="btn-host" onclick="selectType('host')">
-              <span class="type-icon">&#128273;</span>
-              Host
-            </button>
-          </div>
-          <input type="hidden" id="user_type" name="user_type" value="">
-
-          <div class="field-row">
-            <div class="field-group">
-              <label for="fname">First Name</label>
-              <input type="text" id="fname" name="fname" placeholder="Jane">
-            </div>
-            <div class="field-group">
-              <label for="lname">Last Name</label>
-              <input type="text" id="lname" name="lname" placeholder="Doe">
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="jane@example.com">
-          </div>
-
-          <div class="field-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Choose a username">
-          </div>
-
-          <div class="field-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="At least 8 characters">
-            <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
-            <div class="pw-strength-text" id="pw-text"></div>
-          </div>
-
-          <div class="field-group">
-            <label for="cpassword">Confirm Password</label>
-            <input type="password" id="cpassword" name="cpassword" placeholder="Re-enter your password">
-          </div>
-
-          <button type="button" class="btn-primary-ds" id="next-btn">Continue &rarr;</button>
-
-          <hr class="divider">
-          <a href="loginform.html" class="btn-back-ds login-action-btn">Already have an account? Sign In</a>
-        </div>
-
-        <!-- ══ STEP 2: Security Questions ══ -->
-        <div class="step-panel" id="step-2">
-          <h3>Security Questions</h3>
-          <p class="subtitle">These help verify your identity if you need to recover your account</p>
-
-          <!-- Question 1 -->
-          <div class="sq-pair">
-            <div class="sq-num">Question 1</div>
-            <div class="field-group" style="margin-bottom:10px">
-              <label for="security1">Select a question</label>
-              <select id="security1" name="security1">
-                <option value="" disabled selected>Choose a question&hellip;</option>
-                <option value="first_pet">What was the name of your first pet?</option>
-                <option value="birth_city">What city were you born in?</option>
-                <option value="mothers_maiden">What is your mother's maiden name?</option>
-                <option value="elementary_school">What was the name of your elementary school?</option>
-                <option value="first_car">What was the make of your first car?</option>
-                <option value="childhood_nickname">What was your childhood nickname?</option>
-                <option value="street_grew_up">What is the name of the street you grew up on?</option>
-                <option value="favorite_team">What is your favorite sports team?</option>
-              </select>
-            </div>
-            <div class="field-group" style="margin-bottom:0">
-              <label for="answer1">Your Answer</label>
-              <input type="text" id="answer1" name="answer1" placeholder="Enter your answer" autocomplete="off">
-            </div>
-          </div>
-
-          <!-- Question 2 -->
-          <div class="sq-pair">
-            <div class="sq-num">Question 2</div>
-            <div class="field-group" style="margin-bottom:10px">
-              <label for="security2">Select a question</label>
-              <select id="security2" name="security2">
-                <option value="" disabled selected>Choose a question&hellip;</option>
-                <option value="first_pet">What was the name of your first pet?</option>
-                <option value="birth_city">What city were you born in?</option>
-                <option value="mothers_maiden">What is your mother's maiden name?</option>
-                <option value="elementary_school">What was the name of your elementary school?</option>
-                <option value="first_car">What was the make of your first car?</option>
-                <option value="childhood_nickname">What was your childhood nickname?</option>
-                <option value="street_grew_up">What is the name of the street you grew up on?</option>
-                <option value="favorite_team">What is your favorite sports team?</option>
-              </select>
-            </div>
-            <div class="field-group" style="margin-bottom:0">
-              <label for="answer2">Your Answer</label>
-              <input type="text" id="answer2" name="answer2" placeholder="Enter your answer" autocomplete="off">
-            </div>
-          </div>
-
-          <!-- Question 3 -->
-          <div class="sq-pair">
-            <div class="sq-num">Question 3</div>
-            <div class="field-group" style="margin-bottom:10px">
-              <label for="security3">Select a question</label>
-              <select id="security3" name="security3">
-                <option value="" disabled selected>Choose a question&hellip;</option>
-                <option value="first_pet">What was the name of your first pet?</option>
-                <option value="birth_city">What city were you born in?</option>
-                <option value="mothers_maiden">What is your mother's maiden name?</option>
-                <option value="elementary_school">What was the name of your elementary school?</option>
-                <option value="first_car">What was the make of your first car?</option>
-                <option value="childhood_nickname">What was your childhood nickname?</option>
-                <option value="street_grew_up">What is the name of the street you grew up on?</option>
-                <option value="favorite_team">What is your favorite sports team?</option>
-              </select>
-            </div>
-            <div class="field-group" style="margin-bottom:0">
-              <label for="answer3">Your Answer</label>
-              <input type="text" id="answer3" name="answer3" placeholder="Enter your answer" autocomplete="off">
-            </div>
-          </div>
-
-          <input type="submit" class="btn-submit-ds" value="Create Account">
-          <button type="button" class="btn-back-ds" id="back-btn">&larr; Back</button>
-        </div>
-
-      </form>
-    </div>
-  </main>
-
-  <!-- ======= Footer ======= -->
-  <footer id="footer">
-    <div class="footer-top">
+   <!-- ======= Header ======= -->
+   <header id="header">
       <div class="container">
-        <div class="row">
-          <div class="col-sm-6 d-flex align-items-stretch" data-aos="fade-up">
-            <div class="info-box">
-              <a href="" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i></a>
-              <h3>Our Headquarter Address</h3>
-              <p>4901 Evergreen Rd Dearborn, MI 48128</p>
-            </div>
-          </div>
-          <div class="col-sm-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
-            <div class="info-box">
-              <a href="mailto:info@DriveShare.com"><i class="bx bx-envelope"></i></a>
-              <h3>Email Us</h3>
-              <p>info@DriveShare.com</p>
-            </div>
-          </div>
-          <div class="col-sm-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
-            <div class="info-box">
-              <a href="tel:248-420-6969"><i class="bx bx-phone-call"></i></a>
-              <h3>Call Us</h3>
-              <p>+1 248-420-6969</p>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-12 footer-links">
+         <div class="logo float-left">
+            <a href="Home.html"><img src="assets/img/DriveShare_Full_Logo.png" alt="DriveShare" class="img-fluid"></a>
+         </div>
+         <nav class="nav-menu float-right d-none d-lg-block">
             <ul>
-              <li><a href="tos.html">Terms of Services</a></li>
-              <li><a href="privacy.html">Privacy Policy</a></li>
-              <li><a href="cookies_settings.html">Cookies Settings</a></li>
+               <li><a href="Home.html">Home</a></li>
+               <li><a href="Home.html#about">About Us</a></li>
+               <li><a href="Home.html#avaliablity">Vehicle Inventory</a></li>
+               <li><a href="Home.html#location">Locations</a></li>
             </ul>
-          </div>
-        </div>
+         </nav>
       </div>
-    </div>
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
+   </header>
+
+   <main id="main">
+      <div class="register-card">
+
+         <!-- Step indicator -->
+         <div class="step-progress">
+            <div class="step-item">
+               <div class="step-bubble active" id="bubble-1">1</div>
+               <div class="step-label active" id="label-1">Account Info</div>
+            </div>
+
+            <div class="step-line" id="connector-line"></div>
+
+            <div class="step-item">
+               <div class="step-bubble" id="bubble-2">2</div>
+               <div class="step-label" id="label-2">Security</div>
+            </div>
+         </div>
+
+         <!-- Inline validation error -->
+         <div class="form-error" id="inline-error"></div>
+
+         <form id="register-form" action="/sign_up" method="post">
+
+            <!-- ══ STEP 1: Account Information ══ -->
+            <div class="step-panel active" id="step-1">
+               <h3>Create Your Account</h3>
+
+               <!-- Account type toggle -->
+               <div class="type-toggle">
+                  <button type="button" class="type-btn" id="btn-renter" onclick="selectType('customer')">
+                     <span class="type-icon">&#128663;</span>
+                     Renter
+                  </button>
+                  <button type="button" class="type-btn" id="btn-host" onclick="selectType('host')">
+                     <span class="type-icon">&#128273;</span>
+                     Host
+                  </button>
+               </div>
+               <input type="hidden" id="user_type" name="user_type" value="">
+
+               <div class="field-row">
+                  <div class="field-group">
+                     <label for="fname">First Name</label>
+                     <input type="text" id="fname" name="fname" placeholder="Jane">
+                  </div>
+                  <div class="field-group">
+                     <label for="lname">Last Name</label>
+                     <input type="text" id="lname" name="lname" placeholder="Doe">
+                  </div>
+               </div>
+
+               <div class="field-group">
+                  <label for="email">Email Address</label>
+                  <input type="email" id="email" name="email" placeholder="jane@example.com">
+               </div>
+
+               <div class="field-group">
+                  <label for="username">Username</label>
+                  <input type="text" id="username" name="username" placeholder="Choose a username">
+               </div>
+
+               <div class="field-group">
+                  <label for="password">Password</label>
+                  <input type="password" id="password" name="password" placeholder="At least 8 characters">
+                  <div class="pw-strength-bar">
+                     <div class="pw-strength-fill" id="pw-fill"></div>
+                  </div>
+                  <div class="pw-strength-text" id="pw-text"></div>
+               </div>
+
+               <div class="field-group">
+                  <label for="cpassword">Confirm Password</label>
+                  <input type="password" id="cpassword" name="cpassword" placeholder="Re-enter your password">
+               </div>
+
+               <button type="button" class="btn-primary-ds" id="next-btn">Continue &rarr;</button>
+
+               <hr class="divider">
+               <a href="loginform.html" class="btn-back-ds login-action-btn">Already have an account? Sign In</a>
+            </div>
+
+            <!-- ══ STEP 2: Security Questions ══ -->
+            <div class="step-panel" id="step-2">
+               <h3>Security Questions</h3>
+               <p class="subtitle">These help verify your identity if you need to recover your account</p>
+
+               <!-- Question 1 -->
+               <div class="sq-pair">
+                  <div class="sq-num">Question 1</div>
+                  <div class="field-group" style="margin-bottom:10px">
+                     <label for="security1">Select a question</label>
+                     <select id="security1" name="security1">
+                        <option value="" disabled selected>Choose a question&hellip;</option>
+                        <option value="first_pet">What was the name of your first pet?</option>
+                        <option value="birth_city">What city were you born in?</option>
+                        <option value="mothers_maiden">What is your mother's maiden name?</option>
+                        <option value="elementary_school">What was the name of your elementary school?</option>
+                        <option value="first_car">What was the make of your first car?</option>
+                        <option value="childhood_nickname">What was your childhood nickname?</option>
+                        <option value="street_grew_up">What is the name of the street you grew up on?</option>
+                        <option value="favorite_team">What is your favorite sports team?</option>
+                     </select>
+                  </div>
+                  <div class="field-group" style="margin-bottom:0">
+                     <label for="answer1">Your Answer</label>
+                     <input type="text" id="answer1" name="answer1" placeholder="Enter your answer" autocomplete="off">
+                  </div>
+               </div>
+
+               <!-- Question 2 -->
+               <div class="sq-pair">
+                  <div class="sq-num">Question 2</div>
+                  <div class="field-group" style="margin-bottom:10px">
+                     <label for="security2">Select a question</label>
+                     <select id="security2" name="security2">
+                        <option value="" disabled selected>Choose a question&hellip;</option>
+                        <option value="first_pet">What was the name of your first pet?</option>
+                        <option value="birth_city">What city were you born in?</option>
+                        <option value="mothers_maiden">What is your mother's maiden name?</option>
+                        <option value="elementary_school">What was the name of your elementary school?</option>
+                        <option value="first_car">What was the make of your first car?</option>
+                        <option value="childhood_nickname">What was your childhood nickname?</option>
+                        <option value="street_grew_up">What is the name of the street you grew up on?</option>
+                        <option value="favorite_team">What is your favorite sports team?</option>
+                     </select>
+                  </div>
+                  <div class="field-group" style="margin-bottom:0">
+                     <label for="answer2">Your Answer</label>
+                     <input type="text" id="answer2" name="answer2" placeholder="Enter your answer" autocomplete="off">
+                  </div>
+               </div>
+
+               <!-- Question 3 -->
+               <div class="sq-pair">
+                  <div class="sq-num">Question 3</div>
+                  <div class="field-group" style="margin-bottom:10px">
+                     <label for="security3">Select a question</label>
+                     <select id="security3" name="security3">
+                        <option value="" disabled selected>Choose a question&hellip;</option>
+                        <option value="first_pet">What was the name of your first pet?</option>
+                        <option value="birth_city">What city were you born in?</option>
+                        <option value="mothers_maiden">What is your mother's maiden name?</option>
+                        <option value="elementary_school">What was the name of your elementary school?</option>
+                        <option value="first_car">What was the make of your first car?</option>
+                        <option value="childhood_nickname">What was your childhood nickname?</option>
+                        <option value="street_grew_up">What is the name of the street you grew up on?</option>
+                        <option value="favorite_team">What is your favorite sports team?</option>
+                     </select>
+                  </div>
+                  <div class="field-group" style="margin-bottom:0">
+                     <label for="answer3">Your Answer</label>
+                     <input type="text" id="answer3" name="answer3" placeholder="Enter your answer" autocomplete="off">
+                  </div>
+               </div>
+
+               <input type="submit" class="btn-submit-ds" value="Create Account">
+               <button type="button" class="btn-back-ds" id="back-btn">&larr; Back</button>
+            </div>
+
+         </form>
       </div>
-      <div class="credits">
-        Designed by <a href="Home.html#team">Meaad Hassan</a>
+   </main>
+
+   <!-- ======= Footer ======= -->
+   <footer id="footer">
+      <div class="footer-top">
+         <div class="container">
+            <div class="row">
+               <div class="col-sm-6 d-flex align-items-stretch" data-aos="fade-up">
+                  <div class="info-box">
+                     <a href="" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i></a>
+                     <h3>Our Headquarter Address</h3>
+                     <p>4901 Evergreen Rd Dearborn, MI 48128</p>
+                  </div>
+               </div>
+               <div class="col-sm-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
+                  <div class="info-box">
+                     <a href="mailto:info@DriveShare.com"><i class="bx bx-envelope"></i></a>
+                     <h3>Email Us</h3>
+                     <p>info@DriveShare.com</p>
+                  </div>
+               </div>
+               <div class="col-sm-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
+                  <div class="info-box">
+                     <a href="tel:248-420-6969"><i class="bx bx-phone-call"></i></a>
+                     <h3>Call Us</h3>
+                     <p>+1 248-420-6969</p>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-lg-12 footer-links">
+                  <ul>
+                     <li><a href="tos.html">Terms of Services</a></li>
+                     <li><a href="privacy.html">Privacy Policy</a></li>
+                     <li><a href="cookies_settings.html">Cookies Settings</a></li>
+                  </ul>
+               </div>
+            </div>
+         </div>
       </div>
-    </div>
-  </footer>
+      <div class="container">
+         <div class="copyright">
+            &copy; Copyright <strong><span>DriveShare Corporation</span></strong>. All Rights Reserved
+         </div>
+         <div class="credits">
+            Designed by <a href="Home.html#team">Meaad Hassan</a>
+         </div>
+      </div>
+   </footer>
 
-  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+   <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/jquery/jquery.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
-  <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
-  <script src="assets/vendor/venobox/venobox.min.js"></script>
-  <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
-  <script src="assets/vendor/counterup/counterup.min.js"></script>
-  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/js/main.js"></script>
+   <!-- Vendor JS Files -->
+   <script src="assets/vendor/jquery/jquery.min.js"></script>
+   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+   <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+   <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+   <script src="assets/vendor/venobox/venobox.min.js"></script>
+   <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+   <script src="assets/vendor/counterup/counterup.min.js"></script>
+   <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+   <script src="assets/vendor/aos/aos.js"></script>
+   <script src="assets/js/main.js"></script>
 
-  <script>
-    /* ── Account type selection ── */
-    var selectedAccountType = "";
+   <script>
+      /* ── Account type selection ── */
+      var selectedAccountType = "";
 
-    function selectType(type) {
-      selectedAccountType = type;
-      document.getElementById("user_type").value = type;
-      var rBtn = document.getElementById("btn-renter");
-      var hBtn = document.getElementById("btn-host");
-      rBtn.classList.remove("selected-renter", "selected-host");
-      hBtn.classList.remove("selected-renter", "selected-host");
-      if (type === "customer") rBtn.classList.add("selected-renter");
-      if (type === "host")     hBtn.classList.add("selected-host");
-    }
-
-    /* ── Password strength ── */
-    document.getElementById("password").addEventListener("input", function () {
-      var val   = this.value;
-      var score = 0;
-      if (val.length >= 8)                        score++;
-      if (/[A-Z]/.test(val))                      score++;
-      if (/[a-z]/.test(val))                      score++;
-      if (/[0-9]/.test(val))                      score++;
-      if (/[!@#$%^&*(),.?":{}|<>]/.test(val))    score++;
-
-      var levels = [
-        { pct: "0%",   color: "#e0e8f5", label: "" },
-        { pct: "25%",  color: "#e74c3c", label: "Weak" },
-        { pct: "50%",  color: "#e67e22", label: "Fair" },
-        { pct: "75%",  color: "#f1c40f", label: "Good" },
-        { pct: "100%", color: "#27ae60", label: "Strong" },
-      ];
-      var lvl  = levels[Math.min(score, 4)];
-      var fill = document.getElementById("pw-fill");
-      var text = document.getElementById("pw-text");
-      fill.style.width      = lvl.pct;
-      fill.style.background = lvl.color;
-      text.textContent      = lvl.label;
-      text.style.color      = lvl.color;
-    });
-
-    /* ── Error helpers ── */
-    function showError(msg) {
-      var el = document.getElementById("inline-error");
-      el.textContent = msg;
-      el.classList.add("visible");
-      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-    function clearError() {
-      var el = document.getElementById("inline-error");
-      el.textContent = "";
-      el.classList.remove("visible");
-    }
-
-    /* ── Step switcher ── */
-    function goToStep(n) {
-      document.querySelectorAll(".step-panel").forEach(function (p) { p.classList.remove("active"); });
-      document.getElementById("step-" + n).classList.add("active");
-      var b1 = document.getElementById("bubble-1");
-      var b2 = document.getElementById("bubble-2");
-      var l1 = document.getElementById("label-1");
-      var l2 = document.getElementById("label-2");
-      var ln = document.getElementById("connector-line");
-      if (n === 1) {
-        b1.className = "step-bubble active";
-        b2.className = "step-bubble";
-        l1.className = "step-label active";
-        l2.className = "step-label";
-        ln.className = "step-line";
-      } else {
-        b1.className = "step-bubble done";
-        b2.className = "step-bubble active";
-        l1.className = "step-label done";
-        l2.className = "step-label active";
-        ln.className = "step-line done";
+      function selectType(type) {
+         selectedAccountType = type;
+         document.getElementById("user_type").value = type;
+         var rBtn = document.getElementById("btn-renter");
+         var hBtn = document.getElementById("btn-host");
+         rBtn.classList.remove("selected-renter", "selected-host");
+         hBtn.classList.remove("selected-renter", "selected-host");
+         if (type === "customer") rBtn.classList.add("selected-renter");
+         if (type === "host") hBtn.classList.add("selected-host");
       }
-    }
 
-    /* ── Next: validate step 1 ── */
-    document.getElementById("next-btn").addEventListener("click", function () {
-      clearError();
-      var fname     = document.getElementById("fname").value.trim();
-      var lname     = document.getElementById("lname").value.trim();
-      var email     = document.getElementById("email").value.trim();
-      var username  = document.getElementById("username").value.trim();
-      var password  = document.getElementById("password").value;
-      var cpassword = document.getElementById("cpassword").value;
+      /* ── Password strength ── */
+      document.getElementById("password").addEventListener("input", function () {
+         var val = this.value;
+         var score = 0;
+         if (val.length >= 8) score++;
+         if (/[A-Z]/.test(val)) score++;
+         if (/[a-z]/.test(val)) score++;
+         if (/[0-9]/.test(val)) score++;
+         if (/[!@#$%^&*(),.?":{}|<>]/.test(val)) score++;
 
-      if (!selectedAccountType)                                   { showError("Please choose an account type — Renter or Host."); return; }
-      if (!fname || !lname)                                       { showError("Please enter your first and last name."); return; }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))   { showError("Please enter a valid email address."); return; }
-      if (!username || username.length < 3)                       { showError("Username must be at least 3 characters."); return; }
-      if (password.length < 8)                                    { showError("Password must be at least 8 characters."); return; }
-      if (!/[A-Z]/.test(password))                                { showError("Password must contain at least one uppercase letter."); return; }
-      if (!/[a-z]/.test(password))                                { showError("Password must contain at least one lowercase letter."); return; }
-      if (!/[0-9]/.test(password))                                { showError("Password must contain at least one number."); return; }
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))              { showError("Password must contain at least one special character (!@#$%^&*…)."); return; }
-      if (password !== cpassword)                                  { showError("Passwords do not match."); return; }
+         var levels = [
+            { pct: "0%", color: "#e0e8f5", label: "" },
+            { pct: "25%", color: "#e74c3c", label: "Weak" },
+            { pct: "50%", color: "#e67e22", label: "Fair" },
+            { pct: "75%", color: "#f1c40f", label: "Good" },
+            { pct: "100%", color: "#27ae60", label: "Strong" },
+         ];
+         var lvl = levels[Math.min(score, 4)];
+         var fill = document.getElementById("pw-fill");
+         var text = document.getElementById("pw-text");
+         fill.style.width = lvl.pct;
+         fill.style.background = lvl.color;
+         text.textContent = lvl.label;
+         text.style.color = lvl.color;
+      });
 
-      goToStep(2);
-    });
+      /* ── Error helpers ── */
+      function showError(msg) {
+         var el = document.getElementById("inline-error");
+         el.textContent = msg;
+         el.classList.add("visible");
+         el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+      function clearError() {
+         var el = document.getElementById("inline-error");
+         el.textContent = "";
+         el.classList.remove("visible");
+      }
 
-    /* ── Back ── */
-    document.getElementById("back-btn").addEventListener("click", function () {
-      clearError();
-      goToStep(1);
-    });
+      /* ── Step switcher ── */
+      function goToStep(n) {
+         document.querySelectorAll(".step-panel").forEach(function (p) { p.classList.remove("active"); });
+         document.getElementById("step-" + n).classList.add("active");
+         var b1 = document.getElementById("bubble-1");
+         var b2 = document.getElementById("bubble-2");
+         var l1 = document.getElementById("label-1");
+         var l2 = document.getElementById("label-2");
+         var ln = document.getElementById("connector-line");
+         if (n === 1) {
+            b1.className = "step-bubble active";
+            b2.className = "step-bubble";
+            l1.className = "step-label active";
+            l2.className = "step-label";
+            ln.className = "step-line";
+         } else {
+            b1.className = "step-bubble done";
+            b2.className = "step-bubble active";
+            l1.className = "step-label done";
+            l2.className = "step-label active";
+            ln.className = "step-line done";
+         }
+      }
 
-    /* ── Submit: validate step 2 ── */
-    document.getElementById("register-form").addEventListener("submit", function (e) {
-      clearError();
-      var s1 = document.getElementById("security1").value;
-      var s2 = document.getElementById("security2").value;
-      var s3 = document.getElementById("security3").value;
-      var a1 = document.getElementById("answer1").value.trim();
-      var a2 = document.getElementById("answer2").value.trim();
-      var a3 = document.getElementById("answer3").value.trim();
+      /* ── Next: validate step 1 ── */
+      document.getElementById("next-btn").addEventListener("click", function () {
+         clearError();
+         var fname = document.getElementById("fname").value.trim();
+         var lname = document.getElementById("lname").value.trim();
+         var email = document.getElementById("email").value.trim();
+         var username = document.getElementById("username").value.trim();
+         var password = document.getElementById("password").value;
+         var cpassword = document.getElementById("cpassword").value;
 
-      if (!s1 || !s2 || !s3) { e.preventDefault(); showError("Please select a question for each security field."); return; }
-      if (!a1 || !a2 || !a3) { e.preventDefault(); showError("Please provide an answer for each security question."); return; }
-      if (new Set([s1, s2, s3]).size < 3) { e.preventDefault(); showError("Please choose three different security questions."); return; }
-    });
-  </script>
+         if (!selectedAccountType) { showError("Please choose an account type — Renter or Host."); return; }
+         if (!fname || !lname) { showError("Please enter your first and last name."); return; }
+         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError("Please enter a valid email address."); return; }
+         if (!username || username.length < 3) { showError("Username must be at least 3 characters."); return; }
+         if (password.length < 8) { showError("Password must be at least 8 characters."); return; }
+         if (!/[A-Z]/.test(password)) { showError("Password must contain at least one uppercase letter."); return; }
+         if (!/[a-z]/.test(password)) { showError("Password must contain at least one lowercase letter."); return; }
+         if (!/[0-9]/.test(password)) { showError("Password must contain at least one number."); return; }
+         if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) { showError("Password must contain at least one special character (!@#$%^&*…)."); return; }
+         if (password !== cpassword) { showError("Passwords do not match."); return; }
+
+         goToStep(2);
+      });
+
+      /* ── Back ── */
+      document.getElementById("back-btn").addEventListener("click", function () {
+         clearError();
+         goToStep(1);
+      });
+
+      /* ── Submit: validate step 2 ── */
+      document.getElementById("register-form").addEventListener("submit", function (e) {
+         clearError();
+         var s1 = document.getElementById("security1").value;
+         var s2 = document.getElementById("security2").value;
+         var s3 = document.getElementById("security3").value;
+         var a1 = document.getElementById("answer1").value.trim();
+         var a2 = document.getElementById("answer2").value.trim();
+         var a3 = document.getElementById("answer3").value.trim();
+
+         if (!s1 || !s2 || !s3) { e.preventDefault(); showError("Please select a question for each security field."); return; }
+         if (!a1 || !a2 || !a3) { e.preventDefault(); showError("Please provide an answer for each security question."); return; }
+         if (new Set([s1, s2, s3]).size < 3) { e.preventDefault(); showError("Please choose three different security questions."); return; }
+      });
+   </script>
 
 </body>
+
 </html>

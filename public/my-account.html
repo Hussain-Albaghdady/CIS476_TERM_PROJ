@@ -1,0 +1,1956 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>DriveShare — My Account</title>
+    <link href="assets/img/favicon_io/favicon-2.png" rel="icon" />
+    <link
+      href="assets/img/favicon_io/apple-touch-icon.png"
+      rel="apple-touch-icon"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900"
+      rel="stylesheet"
+    />
+    <link
+      href="assets/vendor/bootstrap/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet" />
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+    <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet" />
+    <link href="assets/vendor/venobox/venobox.css" rel="stylesheet" />
+    <link
+      href="assets/vendor/owl.carousel/assets/owl.carousel.min.css"
+      rel="stylesheet"
+    />
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+
+    <style>
+      /* ── Layout ─────────────────────────────────────────── */
+      .acct-wrap {
+        display: flex;
+        min-height: calc(100vh - 160px);
+        max-width: 1280px;
+        margin: 32px auto 48px;
+        padding: 0 16px;
+        gap: 28px;
+        align-items: flex-start;
+      }
+
+      /* ── Sidebar ─────────────────────────────────────────── */
+      .acct-sidebar {
+        flex-shrink: 0;
+        width: 240px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        overflow: hidden;
+        position: sticky;
+        top: 90px;
+      }
+
+      .acct-sidebar-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 18px;
+        border-bottom: 1px solid #e8eaed;
+        background: #f8f9fa;
+      }
+
+      .acct-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0541c4, #1a73e8);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        letter-spacing: 0.5px;
+      }
+
+      .acct-sidebar-name {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1a1a2e;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .acct-sidebar-sub {
+        font-size: 12px;
+        color: #6c757d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .acct-nav {
+        list-style: none;
+        margin: 0;
+        padding: 8px 0;
+      }
+
+      .acct-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 11px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #444;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s,
+          border-color 0.15s;
+        border-left: 3px solid transparent;
+        user-select: none;
+      }
+
+      .acct-nav-item i {
+        font-size: 18px;
+        flex-shrink: 0;
+        color: #888;
+        transition: color 0.15s;
+      }
+
+      .acct-nav-item:hover {
+        background: #f0f4ff;
+        color: #0541c4;
+      }
+
+      .acct-nav-item:hover i {
+        color: #0541c4;
+      }
+
+      .acct-nav-item.active {
+        background: #eef2ff;
+        color: #0541c4;
+        border-left-color: #0541c4;
+        font-weight: 700;
+      }
+
+      .acct-nav-item.active i {
+        color: #0541c4;
+      }
+
+      .acct-nav-divider {
+        height: 1px;
+        background: #e8eaed;
+        margin: 6px 0;
+      }
+
+      .acct-nav-logout {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 11px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #dc3545;
+        cursor: pointer;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+        transition: background 0.15s;
+      }
+
+      .acct-nav-logout:hover {
+        background: #fff5f5;
+        color: #c0392b;
+        text-decoration: none;
+      }
+
+      .acct-nav-logout i {
+        font-size: 18px;
+        color: #dc3545;
+      }
+
+      /* ── Content Area ────────────────────────────────────── */
+      .acct-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .acct-panel {
+        display: none;
+      }
+
+      .acct-panel.active {
+        display: block;
+      }
+
+      .acct-panel-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e8eaed;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .acct-panel-title i {
+        color: #0541c4;
+        font-size: 24px;
+      }
+
+      /* ── Profile Panel ───────────────────────────────────── */
+      .profile-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        padding: 28px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 20px;
+      }
+
+      .profile-avatar-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0541c4, #1a73e8);
+        color: #fff;
+        font-size: 28px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .profile-info h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0 0 4px;
+      }
+
+      .profile-info .profile-username {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+
+      .profile-fields {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        overflow: hidden;
+      }
+
+      .profile-field-row {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f0f0f0;
+        gap: 16px;
+      }
+
+      .profile-field-row:last-child {
+        border-bottom: none;
+      }
+
+      .profile-field-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #eef2ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .profile-field-icon i {
+        font-size: 18px;
+        color: #0541c4;
+      }
+
+      .profile-field-label {
+        font-size: 12px;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+      }
+
+      .profile-field-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+
+      /* ── Panel cards / boxes ─────────────────────────────── */
+      .acct-box {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+
+      .acct-box-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* ── Manage Booking sub-section separator ────────────── */
+      .acct-sub-divider {
+        border: none;
+        border-top: 2px dashed #e8eaed;
+        margin: 28px 0;
+      }
+
+      .acct-sub-heading {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .acct-sub-heading i {
+        color: #0541c4;
+      }
+
+      /* ── Add-form panel (same open/close as original) ────── */
+      .add-form-panel {
+        display: none;
+      }
+
+      .add-form-panel.open {
+        display: block;
+      }
+
+      /* ── Responsive table wrapper ────────────────────────── */
+      .table-wrapper {
+        overflow-x: auto;
+      }
+
+      /* ── Mobile sidebar toggle ───────────────────────────── */
+      .acct-mobile-toggle {
+        display: none;
+        width: 100%;
+        padding: 12px 16px;
+        background: #0541c4;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .acct-mobile-toggle i {
+        font-size: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .acct-wrap {
+          flex-direction: column;
+          margin: 16px auto 32px;
+          gap: 0;
+        }
+
+        .acct-sidebar {
+          width: 100%;
+          position: static;
+          border-radius: 8px;
+          margin-bottom: 16px;
+        }
+
+        .acct-sidebar.collapsed .acct-nav,
+        .acct-sidebar.collapsed .acct-sidebar-user {
+          display: none;
+        }
+
+        .acct-mobile-toggle {
+          display: flex;
+        }
+
+        .profile-card {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+
+      /* ── Review star picker ───────────────────────────────── */
+      .review-star-picker {
+        display: flex;
+        gap: 4px;
+        font-size: 28px;
+        cursor: pointer;
+        color: #d1d5db;
+        margin-top: 4px;
+      }
+      .review-star-picker .rev-star.active,
+      .review-star-picker .rev-star:hover,
+      .review-star-picker .rev-star.hover {
+        color: #f59e0b;
+      }
+
+      /* ── Review card ──────────────────────────────────────── */
+      .review-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 14px;
+        background: #fafafa;
+      }
+      .review-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .review-card-vehicle {
+        font-weight: 600;
+        color: #1a2e44;
+      }
+      .review-card-stars {
+        color: #f59e0b;
+        font-size: 16px;
+        letter-spacing: 1px;
+      }
+      .review-card-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #374151;
+      }
+      .review-card-body {
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .review-card-date {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header">
+      <div class="container">
+        <div class="logo float-left">
+          <a href="Home.html"
+            ><img
+              src="assets/img/DriveShare_Full_Logo.png"
+              alt=""
+              class="img-fluid"
+          /></a>
+        </div>
+        <div class="mobile">
+          <div class="login float-right">
+            <h1>
+              <a
+                href="/logout"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                ><i class="icofont-logout"></i> | Logout</a
+              >
+            </h1>
+          </div>
+        </div>
+        <nav class="nav-menu float-right d-none d-lg-block">
+          <ul id="main-navbar-list">
+            <li><a href="Home.html">Home</a></li>
+            <li><a href="Home.html#about">About Us</a></li>
+            <li><a href="Home.html#location">Locations</a></li>
+            <li><a href="Home.html#contact">Contact Us</a></li>
+            <li id="login-link-li">
+              <a
+                href="/logout"
+                rel="noopener noreferrer"
+                target="_self"
+                class="btn-get-started"
+                id="login-link"
+              >
+                <i class="icofont-logout"></i> | Logout
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <!-- End Header -->
+
+    <!-- ======= Main ======= -->
+    <main id="main" class="hidden-page">
+      <div class="acct-wrap">
+        <!-- ── Mobile toggle ── -->
+        <button class="acct-mobile-toggle" id="sidebar-toggle">
+          <i class="bx bx-menu"></i>
+          <span id="sidebar-toggle-label">My Account</span>
+        </button>
+
+        <!-- ── Sidebar ── -->
+        <aside class="acct-sidebar" id="acct-sidebar">
+          <div class="acct-sidebar-user">
+            <div class="acct-avatar" id="sidebar-avatar">?</div>
+            <div style="min-width: 0">
+              <div class="acct-sidebar-name" id="sidebar-name">Loading…</div>
+              <div class="acct-sidebar-sub" id="sidebar-username"></div>
+            </div>
+          </div>
+
+          <ul class="acct-nav">
+            <li class="acct-nav-item active" data-panel="profile">
+              <i class="bx bx-user-circle"></i> Profile
+            </li>
+            <li class="acct-nav-item" data-panel="orders">
+              <i class="bx bx-receipt"></i> Orders
+            </li>
+            <li class="acct-nav-item" data-panel="address">
+              <i class="bx bx-map"></i> Address
+            </li>
+            <li class="acct-nav-item" data-panel="payments">
+              <i class="bx bx-credit-card"></i> Payments
+            </li>
+            <li class="acct-nav-item" data-panel="reviews">
+              <i class="bx bx-star"></i> My Reviews
+            </li>
+            <li class="acct-nav-item" data-panel="owner-reviews">
+              <i class="bx bx-comment-check"></i> Reviews by Owner
+            </li>
+            <li class="acct-nav-item" data-panel="messaging">
+              <i class="bx bx-message-dots"></i> Messaging
+            </li>
+            <li class="acct-nav-divider"></li>
+            <li>
+              <a href="/logout" class="acct-nav-logout"
+                ><i class="bx bx-log-out"></i> Sign Out</a
+              >
+            </li>
+          </ul>
+        </aside>
+
+        <!-- ── Content ── -->
+        <div class="acct-content">
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Profile                                     -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-profile" class="acct-panel active">
+            <div class="acct-panel-title">
+              <i class="bx bx-user-circle"></i> Profile
+            </div>
+
+            <div class="profile-card">
+              <div class="profile-avatar-lg" id="profile-avatar-lg">?</div>
+              <div class="profile-info">
+                <h3 id="profile-full-name">Loading…</h3>
+                <p class="profile-username" id="profile-username-sub"></p>
+              </div>
+            </div>
+
+            <div class="profile-fields">
+              <div class="profile-field-row">
+                <div class="profile-field-icon"><i class="bx bx-user"></i></div>
+                <div>
+                  <div class="profile-field-label">Full Name</div>
+                  <div class="profile-field-value" id="prof-name">—</div>
+                </div>
+              </div>
+              <div class="profile-field-row">
+                <div class="profile-field-icon"><i class="bx bx-at"></i></div>
+                <div>
+                  <div class="profile-field-label">Username</div>
+                  <div class="profile-field-value" id="prof-username">—</div>
+                </div>
+              </div>
+              <div class="profile-field-row">
+                <div class="profile-field-icon">
+                  <i class="bx bx-envelope"></i>
+                </div>
+                <div>
+                  <div class="profile-field-label">Email</div>
+                  <div class="profile-field-value" id="prof-email">—</div>
+                </div>
+              </div>
+              <div class="profile-field-row">
+                <div class="profile-field-icon">
+                  <i class="bx bx-phone"></i>
+                </div>
+                <div>
+                  <div class="profile-field-label">Phone</div>
+                  <div class="profile-field-value" id="prof-phone">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Orders                                      -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-orders" class="acct-panel">
+            <div class="acct-panel-title">
+              <i class="bx bx-receipt"></i> Orders
+            </div>
+
+            <!-- Order History -->
+            <div class="acct-box">
+              <div class="acct-box-title">Order History</div>
+              <div class="table-wrapper">
+                <table class="responsive-table">
+                  <thead>
+                    <tr>
+                      <th>OrderID</th>
+                      <th>Start Date</th>
+                      <th>Return Date</th>
+                      <th>Status</th>
+                      <th>Vehicle</th>
+                      <th>Mileage</th>
+                      <th>Pick-Up Location</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orders-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <hr class="acct-sub-divider" />
+
+            <!-- Manage Booking -->
+            <div class="acct-sub-heading">
+              <i class="bx bx-calendar-edit"></i> Manage Your Booking
+            </div>
+            <p style="color: #6c757d; margin-bottom: 20px">
+              Return an active rental or cancel an upcoming reservation.
+            </p>
+
+            <div
+              id="return-success"
+              class="alert alert-success"
+              style="display: none"
+            ></div>
+            <div
+              id="return-error"
+              class="alert alert-danger"
+              style="display: none"
+            ></div>
+
+            <div class="acct-box">
+              <form id="return-form">
+                <div class="form-group">
+                  <label id="form-header" for="vehicleSelect"
+                    >Your Active Booking</label
+                  >
+                  <select
+                    class="form-control"
+                    id="vehicleSelect"
+                    name="vehicleId"
+                    required
+                  >
+                    <option value="">Loading…</option>
+                  </select>
+                  <small id="vehicleHelp" class="form-text text-muted"
+                    >Select the booking you wish to manage.</small
+                  >
+                </div>
+                <div
+                  class="form-group"
+                  id="mileage-group"
+                  style="display: none"
+                >
+                  <label for="returnMileage">Current Mileage at Return *</label>
+                  <label id="currentMileage" for="returnMileage"
+                    >Mileage at Pickup: -</label
+                  >
+                  <input
+                    type="number"
+                    id="returnMileage"
+                    class="form-control"
+                    min="0"
+                    placeholder="Enter current odometer reading"
+                  />
+                  <small class="form-text text-muted"
+                    >Must be equal to or greater than the mileage when you
+                    rented.</small
+                  >
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                  <button
+                    id="submit"
+                    type="submit"
+                    class="btn btn-primary"
+                    style="display: none"
+                  >
+                    Return Vehicle
+                  </button>
+                  <button
+                    id="cancel-booking-btn"
+                    type="button"
+                    class="btn btn-danger"
+                    style="display: none"
+                  >
+                    Cancel Booking
+                  </button>
+                </div>
+              </form>
+              <div
+                id="no-vehicle-message"
+                class="alert alert-info"
+                style="display: none; text-align: center; margin-top: 12px"
+              >
+                You have no active bookings or upcoming reservations.
+              </div>
+            </div>
+            <hr class="acct-sub-divider" />
+
+            <!-- Watchlist -->
+            <div class="acct-sub-heading">
+              <i class="bx bx-heart"></i> My Watchlist
+            </div>
+            <p style="color:#6c757d; margin-bottom:20px;">
+              Vehicles you're watching. You'll be notified when they become available or the price drops to your target.
+            </p>
+            <div class="acct-box" id="watchlist-box">
+              <div id="watchlist-body">
+                <p style="color:#6c757d; text-align:center; padding:16px;">Loading watchlist…</p>
+              </div>
+            </div>
+          </div>
+          <!-- END PANEL: Orders -->
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Address                                     -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-address" class="acct-panel">
+            <div class="acct-panel-title">
+              <i class="bx bx-map"></i> Address Book
+            </div>
+
+            <div
+              id="addr-alert-success"
+              class="alert alert-success"
+              style="display: none"
+            ></div>
+            <div
+              id="addr-alert-error"
+              class="alert alert-danger"
+              style="display: none"
+            ></div>
+
+            <!-- Saved addresses list -->
+            <div class="acct-box" id="addr-list-box">
+              <div class="acct-box-title">
+                Saved Addresses
+                <button
+                  class="btn btn-sm btn-primary"
+                  id="addr-add-toggle-btn"
+                  onclick="toggleAddressForm()"
+                >
+                  + Add Address
+                </button>
+              </div>
+              <div id="addr-list-body">
+                <p class="text-muted" style="margin: 0">Loading…</p>
+              </div>
+            </div>
+
+            <!-- Add address form (collapsed by default) -->
+            <div class="acct-box add-form-panel" id="addr-form-panel">
+              <div class="acct-box-title">New Address</div>
+              <form id="addr-form">
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="addr-nickname">Address Nickname *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="addr-nickname"
+                      placeholder="e.g. Home, Work"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="addr-name">Full Name *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="addr-name"
+                      placeholder="Name on address"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="addr-street">Street Address *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="addr-street"
+                    placeholder="123 Main St"
+                    required
+                  />
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-5">
+                    <label for="addr-city">City *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="addr-city"
+                      placeholder="Detroit"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="addr-state">State *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="addr-state"
+                      placeholder="MI"
+                      maxlength="2"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="addr-zip">ZIP Code *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="addr-zip"
+                      placeholder="48128"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="addr-phone">Phone Number *</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="addr-phone"
+                    placeholder="(555) 555-5555"
+                    required
+                  />
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                  <button type="submit" class="btn btn-primary">
+                    Save Address
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="toggleAddressForm()"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!-- END PANEL: Address -->
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Payments                                    -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-payments" class="acct-panel">
+            <div class="acct-panel-title">
+              <i class="bx bx-credit-card"></i> Payment Methods
+            </div>
+
+            <div
+              id="pay-alert-success"
+              class="alert alert-success"
+              style="display: none"
+            ></div>
+            <div
+              id="pay-alert-error"
+              class="alert alert-danger"
+              style="display: none"
+            ></div>
+
+            <!-- Saved cards list -->
+            <div class="acct-box" id="pay-list-box">
+              <div class="acct-box-title">
+                Saved Cards
+                <button
+                  class="btn btn-sm btn-primary"
+                  id="pay-add-toggle-btn"
+                  onclick="togglePaymentForm()"
+                >
+                  + Add Card
+                </button>
+              </div>
+              <div id="pay-list-body">
+                <p class="text-muted" style="margin: 0">Loading…</p>
+              </div>
+            </div>
+
+            <!-- Add payment form (collapsed by default) -->
+            <div class="acct-box add-form-panel" id="pay-form-panel">
+              <div class="acct-box-title">New Payment Method</div>
+              <form id="pay-form">
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="pay-nickname">Card Nickname *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="pay-nickname"
+                      placeholder="e.g. My Visa"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="pay-type">Card Type *</label>
+                    <select class="form-control" id="pay-type" required>
+                      <option value="" disabled selected>Select type…</option>
+                      <option value="Visa">Visa</option>
+                      <option value="MasterCard">MasterCard</option>
+                      <option value="American Express">American Express</option>
+                      <option value="Discover">Discover</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="pay-name">Cardholder Name *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="pay-name"
+                    placeholder="Jane Doe"
+                    required
+                  />
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-8">
+                    <label for="pay-number">Card Number *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="pay-number"
+                      placeholder="•••• •••• •••• ••••"
+                      maxlength="19"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="pay-exp">Expiration *</label>
+                    <input
+                      type="month"
+                      class="form-control"
+                      id="pay-exp"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-8">
+                    <label for="pay-address">Billing Address *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="pay-address"
+                      placeholder="123 Main St, Detroit, MI"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="pay-zip">Billing ZIP *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="pay-zip"
+                      placeholder="48128"
+                      required
+                    />
+                  </div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                  <button type="submit" class="btn btn-primary">
+                    Save Card
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="togglePaymentForm()"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!-- END PANEL: Payments -->
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: My Reviews                                  -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-reviews" class="acct-panel">
+            <div class="acct-panel-title">
+              <i class="bx bx-star"></i> My Reviews
+            </div>
+
+            <!-- Reviews list -->
+            <div class="acct-box">
+              <div class="acct-box-title">
+                My Reviews
+                <button
+                  class="btn btn-sm btn-primary"
+                  id="review-add-toggle-btn"
+                  onclick="toggleReviewForm()"
+                >
+                  + Add Review
+                </button>
+              </div>
+              <div id="review-list-body">
+                <div style="text-align:center;padding:40px 24px">
+                  <i class="bx bx-star" style="font-size:48px;color:#d1d5db;display:block;margin-bottom:12px;"></i>
+                  <h4 style="color:#6c757d;margin-bottom:8px">No reviews yet</h4>
+                  <p style="color:#9ca3af;max-width:380px;margin:0 auto">After completing a rental you'll be able to leave a review for the vehicle and host. Your reviews will appear here.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add review form (hidden by default) -->
+            <div class="acct-box add-form-panel" id="review-form-panel">
+              <div class="acct-box-title">New Review</div>
+              <div id="review-alert-success" class="alert alert-success" style="display:none"></div>
+              <div id="review-alert-error" class="alert alert-danger" style="display:none"></div>
+              <form id="review-form" onsubmit="submitReview(event)">
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="review-vehicle">Vehicle *</label>
+                    <select class="form-control" id="review-vehicle" required>
+                      <option value="">— Select a completed rental —</option>
+                    </select>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label>Rating *</label>
+                    <div class="review-star-picker" id="review-star-picker">
+                      <span class="rev-star" data-val="1">&#9733;</span>
+                      <span class="rev-star" data-val="2">&#9733;</span>
+                      <span class="rev-star" data-val="3">&#9733;</span>
+                      <span class="rev-star" data-val="4">&#9733;</span>
+                      <span class="rev-star" data-val="5">&#9733;</span>
+                    </div>
+                    <input type="hidden" id="review-rating" value="" required />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="review-title">Review Title *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="review-title"
+                    placeholder="e.g. Great experience!"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="review-body">Your Review *</label>
+                  <textarea
+                    class="form-control"
+                    id="review-body"
+                    rows="4"
+                    placeholder="Share your experience with this vehicle..."
+                    required
+                  ></textarea>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <button type="submit" class="btn btn-primary">Submit Review</button>
+                  <button type="button" class="btn btn-secondary" onclick="toggleReviewForm()">Cancel</button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+          <!-- END PANEL: My Reviews -->
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Reviews by Owner                            -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-owner-reviews" class="acct-panel">
+            <div class="acct-panel-title">
+              <i class="bx bx-comment-check"></i> Reviews by Owner
+            </div>
+            <div class="acct-box">
+              <div class="acct-box-title">Reviews from Vehicle Owners</div>
+              <div id="owner-review-list-body">
+                <!-- loaded dynamically -->
+              </div>
+            </div>
+          </div>
+          <!-- END PANEL: Reviews by Owner -->
+
+          <!-- ══════════════════════════════════════════════════ -->
+          <!-- PANEL: Messaging                                   -->
+          <!-- ══════════════════════════════════════════════════ -->
+          <div id="panel-messaging" class="acct-panel">
+            <div class="acct-panel-title">
+              <i class="bx bx-message-dots"></i> Messaging
+            </div>
+            <div
+              class="acct-box"
+              style="text-align: center; padding: 48px 24px"
+            >
+              <i
+                class="bx bx-message-dots"
+                style="
+                  font-size: 48px;
+                  color: #d1d5db;
+                  margin-bottom: 12px;
+                  display: block;
+                "
+              ></i>
+              <h4 style="color: #6c757d; margin-bottom: 8px">Coming Soon</h4>
+              <p style="color: #9ca3af; max-width: 380px; margin: 0 auto">
+                Direct messaging with vehicle owners will be available in a
+                future update. Stay tuned!
+              </p>
+            </div>
+          </div>
+          <!-- END PANEL: Messaging -->
+        </div>
+        <!-- END acct-content -->
+      </div>
+      <!-- END acct-wrap -->
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-6 d-flex align-items-stretch" data-aos="fade-up">
+              <div class="info-box">
+                <a href="" rel="noopener noreferrer" target="_blank"
+                  ><i class="bx bx-map"></i
+                ></a>
+                <h3>Our Headquarter Address</h3>
+                <p>4901 Evergreen Rd Dearborn, MI 48128</p>
+              </div>
+            </div>
+            <div
+              class="col-sm-3 d-flex align-items-stretch"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
+              <div class="info-box">
+                <a href="mailto:info@DriveShare.com"
+                  ><i class="bx bx-envelope"></i
+                ></a>
+                <h3>Email Us</h3>
+                <p>info@DriveShare.com</p>
+              </div>
+            </div>
+            <div
+              class="col-sm-3 d-flex align-items-stretch"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <div class="info-box">
+                <a href="tel:248-420-6969"><i class="bx bx-phone-call"></i></a>
+                <h3>Call Us</h3>
+                <p>+1 248-420-6969</p>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 footer-links">
+              <ul>
+                <li><a href="tos.html">Terms of Services</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="cookies_settings.html">Cookies Settings</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="copyright">
+          &copy; Copyright <strong><span>DriveShare Corporation</span></strong
+          >. All Rights Reserved
+        </div>
+        <div class="credits">
+          Designed by <a href="Home.html#team">Meaad Hassan</a>
+        </div>
+      </div>
+    </footer>
+    <!-- End Footer -->
+
+    <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+    <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+    <script src="assets/vendor/venobox/venobox.min.js"></script>
+    <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+    <script src="assets/vendor/counterup/counterup.min.js"></script>
+    <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+    <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+      /* ================================================================
+         my-account.html — page script
+         ================================================================ */
+
+      /* ── Helpers ────────────────────────────────────────────────────── */
+      function showAlert(id, msg, type) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.className = "alert alert-" + type;
+        el.textContent = msg;
+        el.style.display = "";
+        setTimeout(function () {
+          el.style.display = "none";
+        }, 5000);
+      }
+
+      /* ── Sidebar panel navigation ───────────────────────────────────── */
+      document.querySelectorAll(".acct-nav-item").forEach(function (item) {
+        item.addEventListener("click", function () {
+          var panel = this.dataset.panel;
+          if (!panel) return;
+
+          document.querySelectorAll(".acct-nav-item").forEach(function (i) {
+            i.classList.remove("active");
+          });
+          this.classList.add("active");
+
+          document.querySelectorAll(".acct-panel").forEach(function (p) {
+            p.classList.remove("active");
+          });
+          var target = document.getElementById("panel-" + panel);
+          if (target) target.classList.add("active");
+
+          /* lazy-load panel data */
+          if (panel === "address") loadAddresses();
+          if (panel === "payments") loadPayments();
+          if (panel === "orders") { loadOrders(); loadWatchlist(); }
+        });
+      });
+
+      /* ── Mobile sidebar toggle ──────────────────────────────────────── */
+      document
+        .getElementById("sidebar-toggle")
+        .addEventListener("click", function () {
+          var sidebar = document.getElementById("acct-sidebar");
+          var label = document.getElementById("sidebar-toggle-label");
+          var collapsed = sidebar.classList.toggle("collapsed");
+          label.textContent = collapsed ? "Show Menu" : "My Account";
+        });
+
+      /* ── Load user profile ──────────────────────────────────────────── */
+      fetch("/userdetail", { credentials: "include" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("not logged in");
+          return r.json();
+        })
+        .then(function (data) {
+          var name = data.name || "Customer";
+          var username = data.username || "";
+          var parts = name.trim().split(/\s+/);
+          var initials = parts
+            .map(function (w) {
+              return w[0] || "";
+            })
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+
+          /* sidebar */
+          document.getElementById("sidebar-avatar").textContent = initials;
+          document.getElementById("sidebar-name").textContent = name;
+          document.getElementById("sidebar-username").textContent =
+            "@" + username;
+
+          /* profile panel */
+          document.getElementById("profile-avatar-lg").textContent = initials;
+          document.getElementById("profile-full-name").textContent = name;
+          document.getElementById("profile-username-sub").textContent =
+            "@" + username;
+          document.getElementById("prof-name").textContent = name;
+          document.getElementById("prof-username").textContent = username;
+
+          /* welcome header */
+          var welcomeSpan = document.querySelector("#welcome h2 span");
+          if (welcomeSpan) welcomeSpan.textContent = parts[0] || name;
+          var userWelcomeName = document.getElementById("user-welcome-name");
+          if (userWelcomeName) userWelcomeName.textContent = name;
+
+          /* reveal page */
+          document.getElementById("main").classList.remove("hidden-page");
+
+          /* open panel from URL hash */
+          var hash = window.location.hash.replace("#", "");
+          if (hash) {
+            var navItem = document.querySelector(
+              '.acct-nav-item[data-panel="' + hash + '"]',
+            );
+            if (navItem) navItem.click();
+          }
+        })
+        .catch(function () {
+          window.location.href = "loginform.html";
+        });
+
+      /* ── Load order history ─────────────────────────────────────────── */
+      function loadOrders() {
+        fetch("/api/myreservations", { credentials: "include" })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (orders) {
+            var tbody = document.getElementById("orders-body");
+            if (!orders || orders.length === 0) {
+              tbody.innerHTML =
+                '<tr><td colspan="8" style="text-align:center;color:#6c757d;padding:20px">No orders found.</td></tr>';
+              return;
+            }
+            tbody.innerHTML = orders
+              .map(function (o) {
+                var vehicles = Array.isArray(o.items)
+                  ? o.items.join(", ")
+                  : o.items || "—";
+                var mileage = o.status === "Cancelled"
+                  ? "0 mi"
+                  : (o.miles_driven != null ? Number(o.miles_driven).toLocaleString() + " mi" : "—");
+                return (
+                  "<tr>" +
+                  '<td data-label="OrderID">' +
+                  (o.order_id || "—") +
+                  "</td>" +
+                  '<td data-label="Start Date">' +
+                  (o.start_date || "—") +
+                  "</td>" +
+                  '<td data-label="Return Date">' +
+                  (o.end_date || "—") +
+                  "</td>" +
+                  '<td data-label="Status"><span class="badge badge-' +
+                  (o.status === "Booked"
+                    ? "success"
+                    : o.status === "Cancelled"
+                      ? "danger"
+                      : "secondary") +
+                  '">' +
+                  (o.status || "—") +
+                  "</span></td>" +
+                  '<td data-label="Vehicle">' +
+                  vehicles +
+                  "</td>" +
+                  '<td data-label="Mileage">' +
+                  mileage +
+                  "</td>" +
+                  '<td data-label="Pick-Up Location">' +
+                  (o.location || "—") +
+                  "</td>" +
+                  '<td data-label="Total">$' +
+                  (o.total_cost != null
+                    ? Number(o.total_cost).toFixed(2)
+                    : "0.00") +
+                  "</td>" +
+                  "</tr>"
+                );
+              })
+              .join("");
+          })
+          .catch(function () {
+            document.getElementById("orders-body").innerHTML =
+              '<tr><td colspan="8" style="text-align:center;color:red">Failed to load orders.</td></tr>';
+          });
+      }
+
+      /* ── Load active rentals for "Manage Booking" ───────────────────── */
+      function loadActiveRentals() {
+        fetch("/api/myrentals", { credentials: "include" })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (rentals) {
+            var select = document.getElementById("vehicleSelect");
+            var noMsg = document.getElementById("no-vehicle-message");
+
+            if (!rentals || rentals.length === 0) {
+              select.innerHTML = '<option value="">No active bookings</option>';
+              document.getElementById("submit").style.display = "none";
+              document.getElementById("cancel-booking-btn").style.display =
+                "none";
+              document.getElementById("mileage-group").style.display = "none";
+              if (noMsg) noMsg.style.display = "";
+              return;
+            }
+
+            if (noMsg) noMsg.style.display = "none";
+            select.innerHTML =
+              '<option value="">Select a booking…</option>' +
+              rentals
+                .map(function (r) {
+                  return (
+                    '<option value="' +
+                    r.id +
+                    '" data-mileage="' +
+                    (r.mileage != null ? r.mileage : "") +
+                    '" data-status="' +
+                    r.status +
+                    '">' +
+                    r.name +
+                    " — " +
+                    r.status +
+                    "</option>"
+                  );
+                })
+                .join("");
+          })
+          .catch(function () {
+            document.getElementById("vehicleSelect").innerHTML =
+              '<option value="">Failed to load</option>';
+          });
+      }
+
+      /* Show/hide mileage field and buttons based on selection */
+      document
+        .getElementById("vehicleSelect")
+        .addEventListener("change", function () {
+          var opt = this.options[this.selectedIndex];
+          if (!opt || !opt.value) {
+            document.getElementById("mileage-group").style.display = "none";
+            document.getElementById("submit").style.display = "none";
+            document.getElementById("cancel-booking-btn").style.display =
+              "none";
+            return;
+          }
+          var status = opt.dataset.status;
+          var mileage = opt.dataset.mileage;
+          if (status === "Booked") {
+            document.getElementById("mileage-group").style.display = "";
+            document.getElementById("currentMileage").textContent = mileage
+              ? "Mileage at Pickup: " + mileage
+              : "Mileage at Pickup: —";
+            document.getElementById("submit").style.display = "";
+          } else {
+            document.getElementById("mileage-group").style.display = "none";
+            document.getElementById("submit").style.display = "none";
+          }
+          document.getElementById("cancel-booking-btn").style.display = "";
+        });
+
+      /* Return vehicle form */
+      document
+        .getElementById("return-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          var vehicleId = document.getElementById("vehicleSelect").value;
+          var returnMileage = document.getElementById("returnMileage").value;
+          if (!vehicleId) return;
+
+          fetch("/api/return", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              vehicleId: vehicleId,
+              returnMileage: returnMileage,
+            }),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (data.success) {
+                showAlert(
+                  "return-success",
+                  "Vehicle returned successfully!",
+                  "success",
+                );
+                loadActiveRentals();
+                loadOrders();
+                document.getElementById("mileage-group").style.display = "none";
+                document.getElementById("submit").style.display = "none";
+                document.getElementById("cancel-booking-btn").style.display =
+                  "none";
+                document.getElementById("returnMileage").value = "";
+              } else {
+                showAlert(
+                  "return-error",
+                  data.error || "Return failed. Please try again.",
+                  "danger",
+                );
+              }
+            })
+            .catch(function () {
+              showAlert(
+                "return-error",
+                "Server error. Please try again.",
+                "danger",
+              );
+            });
+        });
+
+      /* Cancel booking button */
+      document
+        .getElementById("cancel-booking-btn")
+        .addEventListener("click", function () {
+          var vehicleId = document.getElementById("vehicleSelect").value;
+          if (!vehicleId) return;
+          if (!confirm("Are you sure you want to cancel this booking?")) return;
+
+          fetch("/api/cancel-reservation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ vehicleId: vehicleId }),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (data.success) {
+                showAlert(
+                  "return-success",
+                  "Booking cancelled successfully.",
+                  "success",
+                );
+                loadActiveRentals();
+                loadOrders();
+                document.getElementById("mileage-group").style.display = "none";
+                document.getElementById("submit").style.display = "none";
+                document.getElementById("cancel-booking-btn").style.display =
+                  "none";
+              } else {
+                showAlert(
+                  "return-error",
+                  data.error || "Cancellation failed. Please try again.",
+                  "danger",
+                );
+              }
+            })
+            .catch(function () {
+              showAlert(
+                "return-error",
+                "Server error. Please try again.",
+                "danger",
+              );
+            });
+        });
+
+      /* ── Address panel ──────────────────────────────────────────────── */
+      function toggleAddressForm() {
+        var panel = document.getElementById("addr-form-panel");
+        panel.classList.toggle("open");
+      }
+
+      function loadAddresses() {
+        fetch("/api/myaddress", { credentials: "include" })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (addresses) {
+            var container = document.getElementById("addr-list-body");
+            if (!addresses || addresses.length === 0) {
+              container.innerHTML =
+                '<p class="text-muted" style="margin:0">No saved addresses. Add one below.</p>';
+              return;
+            }
+            container.innerHTML = addresses
+              .map(function (a, i) {
+                return (
+                  '<div class="profile-field-row" style="flex-wrap:wrap;justify-content:space-between">' +
+                  '<div style="display:flex;align-items:flex-start;gap:12px;flex:1">' +
+                  '<div class="profile-field-icon"><i class="bx bx-map-pin"></i></div>' +
+                  "<div>" +
+                  '<div class="profile-field-label">' +
+                  (a.address_nickname || "Address") +
+                  "</div>" +
+                  '<div class="profile-field-value">' +
+                  (a.customer_name || "") +
+                  "</div>" +
+                  '<div style="font-size:14px;color:#444">' +
+                  (a.address_line1 || "") +
+                  "</div>" +
+                  '<div style="font-size:14px;color:#444">' +
+                  [a.city, a.state, a.zip_code].filter(Boolean).join(", ") +
+                  "</div>" +
+                  '<div style="font-size:13px;color:#6c757d">' +
+                  (a.phone_number || "") +
+                  "</div>" +
+                  "</div>" +
+                  "</div>" +
+                  '<button class="btn btn-sm btn-outline-danger" style="align-self:center;margin-top:8px" ' +
+                  "onclick=\"deleteAddress('" +
+                  escAttr(a.address_nickname) +
+                  "','" +
+                  escAttr(a.address_line1) +
+                  "')\">" +
+                  '<i class="bx bx-trash"></i> Remove</button>' +
+                  "</div>"
+                );
+              })
+              .join("");
+          })
+          .catch(function () {
+            document.getElementById("addr-list-body").innerHTML =
+              '<p class="text-danger" style="margin:0">Failed to load addresses.</p>';
+          });
+      }
+
+      function deleteAddress(nickname, line1) {
+        if (!confirm("Remove this address?")) return;
+        fetch("/api/delete-address", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            address_nickname: nickname,
+            address_line1: line1,
+          }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (data.success) {
+              showAlert("addr-alert-success", "Address removed.", "success");
+              loadAddresses();
+            } else {
+              showAlert(
+                "addr-alert-error",
+                data.error || "Could not remove address.",
+                "danger",
+              );
+            }
+          })
+          .catch(function () {
+            showAlert("addr-alert-error", "Server error.", "danger");
+          });
+      }
+
+      document
+        .getElementById("addr-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          var payload = {
+            address_nickname: document
+              .getElementById("addr-nickname")
+              .value.trim(),
+            customer_name: document.getElementById("addr-name").value.trim(),
+            street: document.getElementById("addr-street").value.trim(),
+            city: document.getElementById("addr-city").value.trim(),
+            state: document
+              .getElementById("addr-state")
+              .value.trim()
+              .toUpperCase(),
+            zip_code: document.getElementById("addr-zip").value.trim(),
+            phone_number: document.getElementById("addr-phone").value.trim(),
+          };
+          fetch("/addresses", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(payload),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (data && data.message) {
+                showAlert(
+                  "addr-alert-success",
+                  "Address saved successfully!",
+                  "success",
+                );
+                document.getElementById("addr-form").reset();
+                document
+                  .getElementById("addr-form-panel")
+                  .classList.remove("open");
+                loadAddresses();
+              } else {
+                showAlert(
+                  "addr-alert-error",
+                  data.error || "Could not save address.",
+                  "danger",
+                );
+              }
+            })
+            .catch(function () {
+              showAlert(
+                "addr-alert-error",
+                "Server error. Please try again.",
+                "danger",
+              );
+            });
+        });
+
+      /* ── Payments panel ─────────────────────────────────────────────── */
+      function togglePaymentForm() {
+        var panel = document.getElementById("pay-form-panel");
+        panel.classList.toggle("open");
+      }
+
+      function loadPayments() {
+        fetch("/api/mypayments", { credentials: "include" })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (payments) {
+            var container = document.getElementById("pay-list-body");
+            if (!payments || payments.length === 0) {
+              container.innerHTML =
+                '<p class="text-muted" style="margin:0">No saved payment methods. Add one below.</p>';
+              return;
+            }
+            container.innerHTML = payments
+              .map(function (p) {
+                var icon =
+                  p.card_type === "Visa"
+                    ? "bxl-visa"
+                    : p.card_type === "MasterCard"
+                      ? "bx-credit-card-alt"
+                      : "bx-credit-card";
+                return (
+                  '<div class="profile-field-row" style="flex-wrap:wrap;justify-content:space-between">' +
+                  '<div style="display:flex;align-items:center;gap:12px;flex:1">' +
+                  '<div class="profile-field-icon"><i class="bx ' +
+                  icon +
+                  '"></i></div>' +
+                  "<div>" +
+                  '<div class="profile-field-label">' +
+                  (p.payment_nickname || "Card") +
+                  "</div>" +
+                  '<div class="profile-field-value">' +
+                  (p.card_type || "") +
+                  " ending in " +
+                  (p.last4 || "••••") +
+                  "</div>" +
+                  '<div style="font-size:13px;color:#6c757d">Expires ' +
+                  (p.expiration || "") +
+                  " &nbsp;·&nbsp; " +
+                  (p.customer_name || "") +
+                  "</div>" +
+                  '<div style="font-size:13px;color:#6c757d">' +
+                  (p.payment_address || "") +
+                  "</div>" +
+                  '<span class="badge badge-' +
+                  (p.status === "Active" ? "success" : "secondary") +
+                  '" style="font-size:11px">' +
+                  (p.status || "Active") +
+                  "</span>" +
+                  "</div>" +
+                  "</div>" +
+                  '<button class="btn btn-sm btn-outline-danger" style="align-self:center;margin-top:8px" ' +
+                  "onclick=\"deletePayment('" +
+                  escAttr(p.last4) +
+                  "','" +
+                  escAttr(p.expiration) +
+                  "')\">" +
+                  '<i class="bx bx-trash"></i> Remove</button>' +
+                  "</div>"
+                );
+              })
+              .join("");
+          })
+          .catch(function () {
+            document.getElementById("pay-list-body").innerHTML =
+              '<p class="text-danger" style="margin:0">Failed to load payment methods.</p>';
+          });
+      }
+
+      function deletePayment(last4, expiration) {
+        if (!confirm("Remove this card ending in " + last4 + "?")) return;
+        fetch("/api/delete-payment", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ last4: last4, expiration: expiration }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (data.success) {
+              showAlert("pay-alert-success", "Card removed.", "success");
+              loadPayments();
+            } else {
+              showAlert(
+                "pay-alert-error",
+                data.error || "Could not remove card.",
+                "danger",
+              );
+            }
+          })
+          .catch(function () {
+            showAlert("pay-alert-error", "Server error.", "danger");
+          });
+      }
+
+      document
+        .getElementById("pay-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          var payload = {
+            payment_nickname: document
+              .getElementById("pay-nickname")
+              .value.trim(),
+            card_type: document.getElementById("pay-type").value,
+            full_name: document.getElementById("pay-name").value.trim(),
+            card_number: document
+              .getElementById("pay-number")
+              .value.replace(/\s/g, ""),
+            expiration: document.getElementById("pay-exp").value,
+            address: document.getElementById("pay-address").value.trim(),
+            payment_zip_code: document.getElementById("pay-zip").value.trim(),
+          };
+          fetch("/payments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(payload),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (data.success) {
+                showAlert(
+                  "pay-alert-success",
+                  "Card saved successfully!",
+                  "success",
+                );
+                document.getElementById("pay-form").reset();
+                document
+                  .getElementById("pay-form-panel")
+                  .classList.remove("open");
+                loadPayments();
+              } else {
+                showAlert(
+                  "pay-alert-error",
+                  data.error || "Could not save card.",
+                  "danger",
+                );
+              }
+            })
+            .catch(function () {
+              showAlert(
+                "pay-alert-error",
+                "Server error. Please try again.",
+                "danger",
+              );
+            });
+        });
+
+      /* ── Format card number input (spaces every 4 digits) ───────────── */
+      document
+        .getElementById("pay-number")
+        .addEventListener("input", function () {
+          var v = this.value.replace(/\D/g, "").substring(0, 16);
+          this.value = v.match(/.{1,4}/g) ? v.match(/.{1,4}/g).join(" ") : v;
+        });
+
+      /* ── Escape helper for inline onclick attributes ─────────────────── */
+      function escAttr(s) {
+        return String(s || "")
+          .replace(/'/g, "\\'")
+          .replace(/"/g, "&quot;");
+      }
+
+      /* ── Load watchlist ─────────────────────────────────────────────── */
+      function loadWatchlist() {
+        var container = document.getElementById("watchlist-body");
+        if (!container) return;
+        container.innerHTML = '<p style="color:#6c757d;text-align:center;padding:16px;">Loading…</p>';
+        fetch("/api/watch", { credentials: "include" })
+          .then(function (r) { return r.json(); })
+          .then(function (list) {
+            if (!list || list.length === 0) {
+              container.innerHTML =
+                '<p style="color:#6c757d;text-align:center;padding:16px;">You are not watching any vehicles yet.</p>';
+              return;
+            }
+            container.innerHTML = list.map(function (entry) {
+              var v = entry.vehicle || {};
+              var badge = v.availability
+                ? '<span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:12px;font-size:12px;white-space:nowrap;">Available</span>'
+                : '<span style="background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:12px;font-size:12px;white-space:nowrap;">Unavailable</span>';
+              var datesLine = (entry.start_date && entry.end_date)
+                ? '<div style="font-size:12px;color:#555;margin-top:3px;"><i class="bx bx-calendar"></i> ' + entry.start_date + ' &rarr; ' + entry.end_date + '</div>'
+                : "";
+              var targetLine = entry.target_price
+                ? '<div style="font-size:12px;color:#ea8900;margin-top:2px;"><i class="bx bx-tag"></i> Target: $' + Number(entry.target_price).toFixed(2) + '/day</div>'
+                : "";
+              return (
+                '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f0f0f0;">' +
+                (v.image_url
+                  ? '<img src="' + v.image_url + '" style="width:64px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;" />'
+                  : '<div style="width:64px;height:44px;background:#eee;border-radius:6px;flex-shrink:0;"></div>') +
+                '<div style="flex:1;min-width:0;">' +
+                  '<div style="font-weight:600;font-size:14px;">' + (v.label || "Unknown Vehicle") + "</div>" +
+                  '<div style="font-size:12px;color:#6c757d;margin-top:2px;">$' + (v.rental_rate_per_day ? Number(v.rental_rate_per_day).toFixed(2) : "—") + "/day</div>" +
+                  datesLine +
+                  targetLine +
+                "</div>" +
+                badge +
+                '<button data-vid="' + entry.vehicle_id + '" class="unwatch-btn" ' +
+                  'style="margin-left:8px;border:none;background:none;color:#e74c3c;cursor:pointer;font-size:13px;white-space:nowrap;">' +
+                  '<i class="bx bx-x"></i> Unwatch</button>' +
+                "</div>"
+              );
+            }).join("") +
+            '<p style="font-size:12px;color:#aaa;margin-top:10px;">You\'ll receive an email notification at your registered address.</p>';
+
+            // Wire unwatch buttons
+            container.querySelectorAll(".unwatch-btn").forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                var vid = this.getAttribute("data-vid");
+                fetch("/api/watch", {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ vehicle_id: vid }),
+                })
+                  .then(function (r) { return r.json(); })
+                  .then(function (data) {
+                    if (data.success) loadWatchlist();
+                  });
+              });
+            });
+          })
+          .catch(function () {
+            container.innerHTML =
+              '<p style="color:red;text-align:center;padding:16px;">Failed to load watchlist.</p>';
+          });
+      }
+
+      /* ── Bootstrap on page load ─────────────────────────────────────── */
+      loadOrders();
+      loadWatchlist();
+      loadActiveRentals();
+    </script>
+  </body>
+</html>
