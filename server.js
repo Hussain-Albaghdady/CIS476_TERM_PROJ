@@ -3161,6 +3161,56 @@ app.put(
 );
 
 // ── Host Reviews ────────────────────────────────────────────
+// GET /api/reviews/by-reservation/:id  — customer review for a given reservation (host view)
+app.get("/api/reviews/by-reservation/:id", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid reservation ID" });
+    }
+    const review = await db
+      .collection("Reviews")
+      .findOne({ reservation_id: new ObjectId(id) });
+
+    if (!review) {
+      return res.status(404).json({ error: "No customer review found for this reservation" });
+    }
+    res.json(serializeReview(review));
+  } catch (err) {
+    console.error("reviews/by-reservation error:", err);
+    res.status(500).json({ error: "Failed to fetch review" });
+  }
+});
+
+// DELETE /api/reviews/:id  — host deletes a customer's review of their vehicle
+app.delete("/api/reviews/:id", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid review ID" });
+    }
+
+    // Verify the review is for one of this host's vehicles
+    const review = await db.collection("Reviews").findOne({ _id: new ObjectId(id) });
+    if (!review) return res.status(404).json({ error: "Review not found" });
+
+    const vehicle = await db
+      .collection("Vehicles")
+      .findOne({ _id: review.vehicle_id, host_username: hostUsername });
+
+    if (!vehicle) {
+      return res.status(403).json({ error: "Not your vehicle" });
+    }
+
+    await db.collection("Reviews").deleteOne({ _id: new ObjectId(id) });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DELETE /api/reviews/:id error:", err);
+    res.status(500).json({ error: "Failed to delete review" });
+  }
+});
+
 // GET /api/host-reviews/for-customer  — reviews written about the logged-in customer
 app.get("/api/host-reviews/for-customer", requireLogin, async (req, res) => {
   try {

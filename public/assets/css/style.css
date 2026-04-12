@@ -2929,10 +2929,7 @@ section[id],
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
-  margin: auto;
   position: relative;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .modal-header {
