@@ -570,6 +570,7 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
+<<<<<<< Updated upstream
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       fetch("/userdetail")
@@ -587,6 +588,55 @@
         })
         .catch(() => {
           window.location.href = "/loginform.html"; 
+=======
+    <!-- Chat Mediator (Mediator pattern for messaging UI) -->
+    <script src="assets/js/chat-mediator.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("/userdetail")
+          .then(res => {
+            if (!res.ok) throw new Error("Not logged in");
+            return res.json();
+          })
+          .then(data => {
+            if (data.user_type !== "host") {
+              fetch("/logout", { credentials: "include" })
+                .then(() => window.location.href = "/loginform.html");
+            } else {
+              document.getElementById("main").classList.remove("hidden-page");
+              // Auto-open messaging or notifications section from URL hash
+              if (window.location.hash === "#messaging") {
+                var msgContent = document.getElementById("messaging-content");
+                if (msgContent) {
+                  msgContent.style.display = "block";
+                  setTimeout(function () {
+                    document.getElementById("messaging").scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 600);
+                }
+              } else if (window.location.hash === "#notifications") {
+                var notifContent = document.getElementById("notifications-content");
+                if (notifContent) {
+                  notifContent.style.display = "block";
+                  setTimeout(function () {
+                    document.getElementById("notifications").scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 600);
+                }
+              }
+            }
+          })
+          .catch(() => {
+            window.location.href = "/loginform.html";
+          });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const logoImg = document.getElementById("logo-img");
+        const fallbackText = document.getElementById("logo-fallback");
+
+        logoImg.addEventListener("error", function () {
+          logoImg.style.display = "none";
+          fallbackText.style.display = "block";
+>>>>>>> Stashed changes
         });
     });
     document.addEventListener("DOMContentLoaded", function () {
@@ -1043,6 +1093,7 @@
               `;
               tbody.appendChild(tr);
             });
+<<<<<<< Updated upstream
           })
           .catch(err => {
             console.error('Failed to load financials:', err);
@@ -1050,6 +1101,342 @@
       }
     });
   </script>
+=======
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            customerReviewModal.style.display = 'none';
+            reviewsLoaded = false;
+            loadHostReviews();
+            reviewsLoaded = true;
+          } catch (err) {
+            alert('Could not delete review: ' + err.message);
+          }
+        });
+
+        // ── Write / Edit modal logic ─────────────────────────────
+        let currentReviewMode = 'create'; // 'create' | 'edit'
+        let currentEditReviewId = null;
+        let currentReservationId = null;
+        let selectedRating = 0;
+
+        const reviewModal       = document.getElementById('write-review-modal');
+        const reviewModalTitle  = document.getElementById('review-modal-title');
+        const closeReviewModal  = document.getElementById('close-review-modal');
+        const cancelReviewModal = document.getElementById('cancel-review-modal');
+        const reviewForm        = document.getElementById('write-review-form');
+        const modalCustomer     = document.getElementById('modal-customer-name');
+        const modalComment      = document.getElementById('modal-comment');
+        const modalRatingInput  = document.getElementById('modal-rating');
+        const modalStars        = document.querySelectorAll('.modal-rev-star');
+        const alertSuccess      = document.getElementById('review-modal-alert-success');
+        const alertError        = document.getElementById('review-modal-alert-error');
+
+        function openReviewModal(mode, opts) {
+          currentReviewMode    = mode;
+          currentEditReviewId  = opts.reviewId || null;
+          currentReservationId = opts.reservationId || null;
+          selectedRating       = opts.rating || 0;
+
+          reviewModalTitle.textContent = mode === 'edit' ? 'Edit Review' : 'Write Review';
+          modalCustomer.value  = opts.customerName || '';
+          modalComment.value   = opts.comment || '';
+          modalRatingInput.value = selectedRating;
+          alertSuccess.style.display = 'none';
+          alertError.style.display   = 'none';
+          setStars(selectedRating);
+          reviewModal.style.display = 'flex';
+        }
+
+        function closeModal() {
+          reviewModal.style.display = 'none';
+        }
+
+        closeReviewModal.addEventListener('click', closeModal);
+        cancelReviewModal.addEventListener('click', closeModal);
+        reviewModal.addEventListener('click', e => { if (e.target === reviewModal) closeModal(); });
+
+        modalStars.forEach(star => {
+          star.addEventListener('click', () => {
+            selectedRating = parseInt(star.dataset.val, 10);
+            modalRatingInput.value = selectedRating;
+            setStars(selectedRating);
+          });
+          star.addEventListener('mouseenter', () => setStars(parseInt(star.dataset.val, 10)));
+          star.addEventListener('mouseleave', () => setStars(selectedRating));
+        });
+
+        function setStars(n) {
+          modalStars.forEach(s => {
+            s.style.color = parseInt(s.dataset.val, 10) <= n ? '#f5a623' : '#ccc';
+          });
+        }
+
+        // Delegated clicks on review tables
+        document.getElementById('review-customers-body').addEventListener('click', function (e) {
+          const editBtn = e.target.closest('.edit-host-review-btn');
+          const delBtn  = e.target.closest('.delete-host-review-btn');
+          if (editBtn) {
+            e.preventDefault();
+            openReviewModal('edit', {
+              reviewId:     editBtn.dataset.id,
+              rating:       parseInt(editBtn.dataset.rating, 10),
+              comment:      editBtn.dataset.comment,
+              customerName: editBtn.dataset.customer,
+            });
+          }
+          if (delBtn) {
+            e.preventDefault();
+            confirmDeleteReview(delBtn.dataset.id);
+          }
+        });
+
+        document.getElementById('pending-reviews-body').addEventListener('click', function (e) {
+          const btn = e.target.closest('.write-host-review-btn');
+          if (!btn) return;
+          openReviewModal('create', {
+            reservationId: btn.dataset.reservationId,
+            customerName:  btn.dataset.customer,
+          });
+        });
+
+        reviewForm.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          alertSuccess.style.display = 'none';
+          alertError.style.display   = 'none';
+
+          if (!selectedRating) {
+            alertError.textContent    = 'Please select a star rating.';
+            alertError.style.display  = 'block';
+            return;
+          }
+          if (!modalComment.value.trim()) {
+            alertError.textContent    = 'Please enter a review comment.';
+            alertError.style.display  = 'block';
+            return;
+          }
+
+          try {
+            let res;
+            if (currentReviewMode === 'edit') {
+              res = await fetch(`/api/host-reviews/${currentEditReviewId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ rating: selectedRating, comment: modalComment.value.trim() }),
+              });
+            } else {
+              res = await fetch('/api/host-reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                  reservation_id: currentReservationId,
+                  rating: selectedRating,
+                  comment: modalComment.value.trim(),
+                }),
+              });
+            }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            alertSuccess.textContent   = currentReviewMode === 'edit' ? 'Review updated!' : 'Review submitted!';
+            alertSuccess.style.display = 'block';
+            reviewsLoaded = false;
+            setTimeout(() => { closeModal(); loadHostReviews(); reviewsLoaded = true; }, 900);
+          } catch (err) {
+            alertError.textContent   = err.message;
+            alertError.style.display = 'block';
+          }
+        });
+
+        // ── Delete confirm modal ─────────────────────────────────
+        const deleteReviewModal     = document.getElementById('delete-review-modal');
+        const confirmDeleteReviewBtn = document.getElementById('confirm-delete-review-btn');
+        const cancelDeleteReviewBtn  = document.getElementById('cancel-delete-review-btn');
+        let reviewIdToDelete = null;
+
+        function confirmDeleteReview(id) {
+          reviewIdToDelete = id;
+          deleteReviewModal.style.display = 'flex';
+        }
+
+        document.getElementById('close-delete-review-modal').addEventListener('click', () => {
+          deleteReviewModal.style.display = 'none';
+          reviewIdToDelete = null;
+        });
+        cancelDeleteReviewBtn.addEventListener('click', () => {
+          deleteReviewModal.style.display = 'none';
+          reviewIdToDelete = null;
+        });
+
+        confirmDeleteReviewBtn.addEventListener('click', async () => {
+          if (!reviewIdToDelete) return;
+          try {
+            const res = await fetch(`/api/host-reviews/${reviewIdToDelete}`, {
+              method: 'DELETE',
+              credentials: 'include',
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            deleteReviewModal.style.display = 'none';
+            reviewIdToDelete = null;
+            reviewsLoaded = false;
+            loadHostReviews();
+            reviewsLoaded = true;
+          } catch (err) {
+            console.error('Delete review error:', err);
+          }
+        });
+
+        // ── Helpers ──────────────────────────────────────────────
+        function escHtml(s) {
+          return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function escAttr(s) {
+          return String(s || '').replace(/"/g, '&quot;');
+        }
+        function fmtDate(val) {
+          if (!val) return '—';
+          const parts = String(val).substring(0, 10).split('-');
+          if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+          }
+          const d = new Date(val);
+          return isNaN(d) ? val : d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        }
+        function fmtRange(start, end) {
+          if (!start && !end) return '—';
+          return `${fmtDate(start)} – ${fmtDate(end)}`;
+        }
+      });
+
+      // ══════════════════════════════════════════════════════════════
+      //  CHAT ROOM — Mediator pattern (chat-mediator.js)
+      // ══════════════════════════════════════════════════════════════
+      (function () {
+        var hostChatMediator = createChatMediator({
+          // ── Role ──────────────────────────────────────────────────
+          mode: 'host',
+
+          // ── DOM element IDs ───────────────────────────────────────
+          ids: {
+            threadList:       'chat-thread-list',
+            chatMessages:     'chat-messages',
+            chatActive:       'chat-active',
+            chatPlaceholder:  'chat-placeholder',
+            chatHeaderName:   'chat-header-name',
+            chatHeaderVehicle:'chat-header-vehicle',
+            chatInput:        'chat-input',
+            chatSendBtn:      'chat-send-btn',
+            newChatBtn:       'new-chat-btn',
+            newChatPanel:     'new-chat-panel',
+            newChatCancelBtn: 'new-chat-cancel-btn',
+            newChatOpenBtn:   'new-chat-open-btn',
+            newChatSelect:    'new-chat-renter-select',
+          },
+
+          // ── API endpoints ─────────────────────────────────────────
+          api: {
+            threads:  '/api/host/chat-threads',
+            messages: '/api/host/chat-messages',
+            send:     '/api/host/chat-send',
+            contacts: '/api/host/eligible-renters',
+          },
+
+          // ── Thread field that identifies the other party ───────────
+          threadKey: 'renter_username',
+
+          // ── Build query-string for the chat-messages endpoint ─────
+          buildThreadQuery: function (thread) {
+            var q = 'renter_username=' + encodeURIComponent(thread.renter_username);
+            if (thread.vehicle_id) q += '&vehicle_id=' + encodeURIComponent(thread.vehicle_id);
+            return q;
+          },
+
+          // ── Build <option> elements for the new-chat select ───────
+          buildSelectOptions: function (renters, escAttr, escHtml) {
+            return renters.map(function (r) {
+              return (
+                '<option value="' + escAttr(r.renter_username + '::' + r.vehicle_id) + '" ' +
+                'data-label="' + escAttr(r.vehicle_label) + '">' +
+                escHtml(r.renter_name) + ' \u2014 ' + escHtml(r.vehicle_label) +
+                ' (' + escHtml(r.reservation_status) + ')</option>'
+              );
+            }).join('');
+          },
+
+          // ── Panel-toggle wiring (button shows/hides #messaging-content) ──
+          panelToggle: {
+            triggerId: 'view-messaging-btn',
+            contentId: 'messaging-content',
+            hashId:    'messaging',          // auto-open when URL hash = #messaging
+          },
+        });
+
+        hostChatMediator.init();
+      })();
+
+      // ══════════════════════════════════════════════════════════════
+      //  NOTIFICATIONS
+      // ══════════════════════════════════════════════════════════════
+      (function () {
+        var loaded = false;
+
+        document.getElementById('view-notifications-btn').addEventListener('click', function () {
+          var content = document.getElementById('notifications-content');
+          if (content.style.display === 'none' || content.style.display === '') {
+            content.style.display = 'block';
+            if (!loaded) { loaded = true; loadNotifications(); }
+          } else {
+            content.style.display = 'none';
+          }
+        });
+
+        function loadNotifications() {
+          var loading = document.getElementById('notifications-loading');
+          var list    = document.getElementById('notifications-list');
+          var empty   = document.getElementById('notifications-empty');
+          loading.style.display = 'block';
+          list.innerHTML = '';
+          empty.style.display = 'none';
+
+          fetch('/api/notifications', { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (notifs) {
+              loading.style.display = 'none';
+              if (!notifs.length) { empty.style.display = 'flex'; return; }
+              list.innerHTML = notifs.map(function (n) {
+                var icon = n.type === 'price_drop'           ? 'bx-tag' :
+                           n.type === 'available'             ? 'bx-check-circle' :
+                           n.type === 'reservation_confirmed' ? 'bx-calendar-check' :
+                           n.type === 'new_rental'            ? 'bx-car' :
+                           n.type === 'rental_cancelled'      ? 'bx-calendar-x' : 'bx-bell';
+                var time = n.createdAt ? new Date(n.createdAt).toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+                return '<div class="notif-item' + (n.read ? '' : ' notif-unread') + '" data-id="' + escHtml(String(n._id)) + '">' +
+                  '<i class="bx ' + icon + ' notif-icon"></i>' +
+                  '<div class="notif-body"><div class="notif-msg">' + escHtml(n.message || '') + '</div>' +
+                  '<div class="notif-time">' + time + '</div></div>' +
+                  '</div>';
+              }).join('');
+
+              // Mark-as-read on click
+              list.querySelectorAll('.notif-item.notif-unread').forEach(function (el) {
+                el.addEventListener('click', function () {
+                  fetch('/api/notifications/' + el.dataset.id + '/read', {
+                    method: 'PATCH', credentials: 'include',
+                  });
+                  el.classList.remove('notif-unread');
+                });
+              });
+            });
+        }
+
+        function escHtml(s) {
+          return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+      })();
+    </script>
+>>>>>>> Stashed changes
 </body>
 
 </html>
