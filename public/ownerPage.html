@@ -570,25 +570,6 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
-<<<<<<< Updated upstream
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("/userdetail")
-        .then(res => {
-          if (!res.ok) throw new Error("Not logged in");
-          return res.json();
-        })
-        .then(data => {
-          if (data.user_type !== "host") {
-            fetch("/logout", { credentials: "include" })
-              .then(() => window.location.href = "/loginform.html");
-          } else {
-            document.getElementById("main").classList.remove("hidden-page");
-          }
-        })
-        .catch(() => {
-          window.location.href = "/loginform.html"; 
-=======
     <!-- Chat Mediator (Mediator pattern for messaging UI) -->
     <script src="assets/js/chat-mediator.js"></script>
 
@@ -636,22 +617,12 @@
         logoImg.addEventListener("error", function () {
           logoImg.style.display = "none";
           fallbackText.style.display = "block";
->>>>>>> Stashed changes
         });
-    });
-    document.addEventListener("DOMContentLoaded", function () {
-      const logoImg = document.getElementById("logo-img");
-      const fallbackText = document.getElementById("logo-fallback");
 
-      logoImg.addEventListener("error", function () {
-        logoImg.style.display = "none";
-        fallbackText.style.display = "block";
+        logoImg.addEventListener("load", function () {
+          fallbackText.style.display = "none";
+        });
       });
-
-      logoImg.addEventListener("load", function () {
-        fallbackText.style.display = "none";
-      });
-    });
 
     document.addEventListener('DOMContentLoaded', function() {
       // Populate vehicle year dropdowns
@@ -1093,25 +1064,11 @@
               `;
               tbody.appendChild(tr);
             });
-<<<<<<< Updated upstream
           })
           .catch(err => {
             console.error('Failed to load financials:', err);
           });
       }
-    });
-  </script>
-=======
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed');
-            customerReviewModal.style.display = 'none';
-            reviewsLoaded = false;
-            loadHostReviews();
-            reviewsLoaded = true;
-          } catch (err) {
-            alert('Could not delete review: ' + err.message);
-          }
-        });
 
         // ── Write / Edit modal logic ─────────────────────────────
         let currentReviewMode = 'create'; // 'create' | 'edit'
@@ -1436,7 +1393,6 @@
         }
       })();
     </script>
->>>>>>> Stashed changes
 </body>
 
 </html>
