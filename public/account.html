@@ -1607,6 +1607,262 @@
           "</span>"
         );
       }
+      function escapeHtml(value = "") {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function showReviewAlert(type, message) {
+        const successBox = document.getElementById("review-alert-success");
+        const errorBox = document.getElementById("review-alert-error");
+
+        successBox.style.display = "none";
+        errorBox.style.display = "none";
+        successBox.textContent = "";
+        errorBox.textContent = "";
+
+        if (type === "success") {
+          successBox.textContent = message;
+          successBox.style.display = "block";
+        } else if (type === "error") {
+          errorBox.textContent = message;
+          errorBox.style.display = "block";
+        }
+      }
+
+      async function loadReviewableVehicles() {
+        const select = document.getElementById("review-vehicle");
+        if (!select) return;
+
+        try {
+          const res = await fetch("/api/reviews/reviewable", {
+            credentials: "include",
+          });
+          const data = await res.json();
+
+          select.innerHTML = `<option value="">— Select a completed rental —</option>`;
+
+          if (!Array.isArray(data) || data.length === 0) {
+            select.innerHTML = `<option value="">No completed rentals available to review</option>`;
+            select.disabled = true;
+            return;
+          }
+
+          select.disabled = false;
+
+          data.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.reservation_id;
+            option.dataset.vehicleId = item.vehicle_id;
+            option.textContent =
+              `${item.vehicle_name} — Order #${item.order_id}` +
+              (item.end_date
+                ? ` — Returned ${new Date(item.end_date).toLocaleDateString()}`
+                : "");
+            select.appendChild(option);
+          });
+        } catch (err) {
+          console.error("Error loading reviewable rentals:", err);
+          select.innerHTML = `<option value="">Could not load completed rentals</option>`;
+          select.disabled = true;
+        }
+      }
+
+      async function loadMyReviews() {
+        const container = document.getElementById("review-card-container");
+        if (!container) return;
+
+        try {
+          const res = await fetch("/api/reviews/mine", {
+            credentials: "include",
+          });
+          const reviews = await res.json();
+
+          if (!Array.isArray(reviews) || reviews.length === 0) {
+            container.innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-info" style="margin-top: 10px;">
+            You have not submitted any reviews yet.
+          </div>
+        </div>
+      `;
+            return;
+          }
+
+          container.innerHTML = reviews
+            .map((review) => {
+              const createdAt = review.created_at
+                ? new Date(
+                    String(review.created_at).replace(" ", "T"),
+                  ).toLocaleDateString()
+                : "";
+
+              return `
+          <div class="col-md-6 d-flex align-items-stretch mb-3">
+            <div class="info-box w-100">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                <div>
+                  <h3 style="margin-bottom:4px;">${escapeHtml(review.vehicle_name || "Vehicle")}</h3>
+                  <div style="font-size:13px;color:#666;">Order #${escapeHtml(review.order_id || "N/A")}</div>
+                </div>
+                <div style="text-align:right;white-space:nowrap;">
+                  <div style="font-weight:700;">${Number(review.rating || 0).toFixed(1)}/5</div>
+                  <div>${renderStars(review.rating)}</div>
+                </div>
+              </div>
+
+              <div style="margin-top:14px;">
+                <h5 style="margin-bottom:8px;">${escapeHtml(review.title)}</h5>
+                <p style="margin-bottom:10px;">${escapeHtml(review.body)}</p>
+                <small style="color:#777;">${createdAt}</small>
+              </div>
+            </div>
+          </div>
+        `;
+            })
+            .join("");
+        } catch (err) {
+          console.error("Error loading my reviews:", err);
+          container.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-danger" style="margin-top: 10px;">
+          Could not load your reviews.
+        </div>
+      </div>
+    `;
+        }
+      }
+
+      window.submitReview = async function submitReview(event) {
+        event.preventDefault();
+
+        const reservationId = document.getElementById("review-vehicle").value;
+        const rating = Number(document.getElementById("review-rating").value);
+        const title = document.getElementById("review-title").value.trim();
+        const body = document.getElementById("review-body").value.trim();
+
+        if (!reservationId) {
+          showReviewAlert("error", "Please select a completed rental.");
+          return;
+        }
+
+        if (!rating || rating < 1 || rating > 5) {
+          showReviewAlert("error", "Please choose a rating from 1 to 5 stars.");
+          return;
+        }
+
+        if (!title || !body) {
+          showReviewAlert("error", "Please complete all review fields.");
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              reservation_id: reservationId,
+              rating,
+              title,
+              body,
+            }),
+          });
+
+          const result = await res.json();
+
+          if (!res.ok) {
+            showReviewAlert(
+              "error",
+              result.error || "Could not submit review.",
+            );
+            return;
+          }
+
+          document.getElementById("review-form").reset();
+          if (typeof window._resetStarPicker === "function") {
+            window._resetStarPicker();
+          }
+
+          showReviewAlert("success", "Review submitted successfully.");
+
+          await loadReviewableVehicles();
+          await loadMyReviews();
+        } catch (err) {
+          console.error("Submit review error:", err);
+          showReviewAlert("error", "Server error. Please try again.");
+        }
+      };
+
+      async function loadOwnerReviews() {
+        const container = document.getElementById("owner-review-card-container");
+        if (!container) return;
+
+        try {
+          const res = await fetch("/api/host-reviews/for-customer", {
+            credentials: "include",
+          });
+          const reviews = await res.json();
+
+          if (!Array.isArray(reviews) || reviews.length === 0) {
+            container.innerHTML = `
+              <div class="col-12">
+                <div class="alert alert-info" style="margin-top:10px;">
+                  No owners have reviewed you yet.
+                </div>
+              </div>`;
+            return;
+          }
+
+          container.innerHTML = reviews.map((review) => {
+            const createdAt = review.created_at
+              ? new Date(String(review.created_at).replace(" ", "T")).toLocaleDateString()
+              : "";
+            const rentalRange = (review.start_date && review.end_date)
+              ? `${new Date(review.start_date).toLocaleDateString()} – ${new Date(review.end_date).toLocaleDateString()}`
+              : "";
+
+            return `
+              <div class="col-md-6 d-flex align-items-stretch mb-3">
+                <div class="info-box w-100">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                    <div>
+                      <h3 style="margin-bottom:4px;">${escapeHtml(review.vehicle_name)}</h3>
+                      <div style="font-size:13px;color:#666;">By: ${escapeHtml(review.host_username)}</div>
+                    </div>
+                    <div style="text-align:right;white-space:nowrap;">
+                      <div style="font-weight:700;">${Number(review.rating || 0).toFixed(1)}/5</div>
+                      <div>${renderStars(review.rating)}</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:14px;">
+                    <p style="margin-bottom:10px;">${escapeHtml(review.comment)}</p>
+                    <small style="color:#777;">${rentalRange ? rentalRange + " &nbsp;·&nbsp; " : ""}${createdAt}</small>
+                  </div>
+                </div>
+              </div>`;
+          }).join("");
+        } catch (err) {
+          console.error("Error loading owner reviews:", err);
+          const container = document.getElementById("owner-review-card-container");
+          if (container) container.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-danger" style="margin-top:10px;">
+                Could not load owner reviews.
+              </div>
+            </div>`;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loadReviewableVehicles();
+        loadMyReviews();
+        loadOwnerReviews();
+      });
     </script>
   </body>
 </html>

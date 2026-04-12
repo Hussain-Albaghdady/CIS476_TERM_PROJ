@@ -191,6 +191,11 @@ async function connectToDB() {
         { $group: { _id: null, maxHostIdFromHost: { $max: "$hostId" } } },
       ])
       .toArray();
+    await db
+      .collection("Reviews")
+      .createIndex({ reservation_id: 1 }, { unique: true });
+    await db.collection("Reviews").createIndex({ vehicle_id: 1 });
+    await db.collection("Reviews").createIndex({ user_id: 1, created_at: -1 });
     const adminIdMax = a?.maxUserIdFromAdmin || 0;
     const userIdMax = b?.maxUserIdFromRental || 0;
     const orderIdMax = Math.max(c?.maxOrderIdFromRental || 0);
@@ -316,7 +321,58 @@ function toIdArray(val) {
   if (!val) return [];
   return Array.isArray(val) ? val : [val];
 }
+function normalizeObjectId(id) {
+  if (!id) return null;
+  if (id instanceof ObjectId) return id;
+  return ObjectId.isValid(id) ? new ObjectId(id) : null;
+}
 
+function getVehicleLabel(vehicle) {
+  return (
+    [vehicle?.year, vehicle?.make, vehicle?.model].filter(Boolean).join(" ") ||
+    vehicle?.name ||
+    "Unknown Vehicle"
+  );
+}
+
+async function getReviewStatsByVehicleIds(vehicleIds = []) {
+  const ids = vehicleIds.map(normalizeObjectId).filter(Boolean);
+  if (!ids.length) return {};
+
+  const rows = await db
+    .collection("Reviews")
+    .aggregate([
+      { $match: { vehicle_id: { $in: ids } } },
+      {
+        $group: {
+          _id: "$vehicle_id",
+          avg_rating: { $avg: "$rating" },
+          review_count: { $sum: 1 },
+        },
+      },
+    ])
+    .toArray();
+
+  const stats = {};
+  rows.forEach((row) => {
+    stats[row._id.toString()] = {
+      avg_rating: Number((row.avg_rating || 0).toFixed(1)),
+      review_count: row.review_count || 0,
+    };
+  });
+
+  return stats;
+}
+
+function serializeReview(doc) {
+  return {
+    ...doc,
+    _id: doc._id?.toString?.() || "",
+    reservation_id: doc.reservation_id?.toString?.() || "",
+    vehicle_id: doc.vehicle_id?.toString?.() || "",
+    user_id: doc.user_id?.toString?.() || "",
+  };
+}
 app.get("/health", (req, res) => res.status(200).send("OK"));
 
 app.post("/contact_us", async (req, res) => {
@@ -889,7 +945,6 @@ app.get("/api/vehicles/available", async (req, res) => {
 
     let bookedVehicleIds = new Set();
 
-    // Only check overlapping reservations when specific dates are provided
     if (start_date && end_date) {
       const overlapping = await db
         .collection("Reservations")
@@ -899,6 +954,7 @@ app.get("/api/vehicles/available", async (req, res) => {
           end_date: { $gte: start_date },
         })
         .toArray();
+
       overlapping.forEach((r) => {
         toIdArray(r.history_vehicle_id || r.vehicle_id).forEach((id) => {
           bookedVehicleIds.add(id.toString());
@@ -911,26 +967,40 @@ app.get("/api/vehicles/available", async (req, res) => {
         vehicles.filter((v) => v.host_username).map((v) => v.host_username),
       ),
     ];
+
     const hosts = await db
       .collection("HostUsers")
       .find({ username: { $in: hostUsernames } })
       .toArray();
+
     const hostMap = {};
     hosts.forEach((h) => {
       hostMap[h.username] = h.fname;
     });
 
+    const reviewStats = await getReviewStatsByVehicleIds(
+      vehicles.map((v) => v._id),
+    );
+
     const enriched = vehicles
-      .filter((v) => !bookedVehicleIds.has(v._id.toString())) // hide only if dates conflict
+      .filter((v) => !bookedVehicleIds.has(v._id.toString()))
       .map((v) => {
+        const stats = reviewStats[v._id.toString()] || {
+          avg_rating: 0,
+          review_count: 0,
+        };
+
         return {
           ...v,
           host_fname: v.host_username ? hostMap[v.host_username] || null : null,
+          avg_rating: stats.avg_rating,
+          review_count: stats.review_count,
         };
       });
 
     res.json(enriched);
   } catch (err) {
+    console.error("Available vehicles error:", err);
     res.status(500).json({ error: "Failed to fetch available vehicles" });
   }
 });
@@ -938,25 +1008,44 @@ app.get("/api/vehicles/available", async (req, res) => {
 app.get("/api/vehicles", async (req, res) => {
   try {
     const vehicles = await db.collection("Vehicles").find({}).toArray();
+
     const hostUsernames = [
       ...new Set(
         vehicles.filter((v) => v.host_username).map((v) => v.host_username),
       ),
     ];
+
     const hosts = await db
       .collection("HostUsers")
       .find({ username: { $in: hostUsernames } })
       .toArray();
+
     const hostMap = {};
     hosts.forEach((h) => {
       hostMap[h.username] = h.fname;
     });
-    const enriched = vehicles.map((v) => ({
-      ...v,
-      host_fname: v.host_username ? hostMap[v.host_username] || null : null,
-    }));
+
+    const reviewStats = await getReviewStatsByVehicleIds(
+      vehicles.map((v) => v._id),
+    );
+
+    const enriched = vehicles.map((v) => {
+      const stats = reviewStats[v._id.toString()] || {
+        avg_rating: 0,
+        review_count: 0,
+      };
+
+      return {
+        ...v,
+        host_fname: v.host_username ? hostMap[v.host_username] || null : null,
+        avg_rating: stats.avg_rating,
+        review_count: stats.review_count,
+      };
+    });
+
     res.json(enriched);
   } catch (err) {
+    console.error("Vehicles error:", err);
     res.status(500).json({ error: "Failed to fetch vehicles" });
   }
 });
@@ -3068,9 +3157,274 @@ app.put(
       console.error("Update Vehicle error:", err);
       res.status(500).json({ error: "Failed to update Vehicle" });
     }
+  },
+);
 
-    // ── Send a message ──────────────────────────────────────────
-    app.post("/api/messages/send", requireLogin, async (req, res) => {
+// ── Host Reviews ────────────────────────────────────────────
+// GET /api/host-reviews/for-customer  — reviews written about the logged-in customer
+app.get("/api/host-reviews/for-customer", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const reviews = await db
+      .collection("HostReviews")
+      .find({ customer_username: username })
+      .sort({ created_at: -1 })
+      .toArray();
+
+    res.json(
+      reviews.map((r) => ({
+        _id: r._id.toString(),
+        vehicle_name: r.vehicle_name || "—",
+        host_username: r.host_username || "—",
+        rating: r.rating,
+        comment: r.comment || "",
+        start_date: r.start_date || "",
+        end_date: r.end_date || "",
+        created_at: r.created_at || "",
+      }))
+    );
+  } catch (err) {
+    console.error("host-reviews/for-customer error:", err);
+    res.status(500).json({ error: "Failed to load owner reviews" });
+  }
+});
+
+// GET /api/host-reviews  — reviews written + pending
+app.get("/api/host-reviews", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+
+    // Vehicles owned by this host
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ host_username: hostUsername })
+      .toArray();
+
+    const vehicleIds = vehicles.map((v) => v._id);
+    const vehicleMap = {};
+    vehicles.forEach((v) => { vehicleMap[v._id.toString()] = v; });
+
+    // All completed reservations for host's vehicles
+    const allReservations = await db
+      .collection("Reservations")
+      .find({ status: "Complete" })
+      .sort({ end_date: -1 })
+      .toArray();
+
+    const completed = allReservations.filter((r) =>
+      toIdArray(r.history_vehicle_id).some((id) =>
+        vehicleIds.some((vid) => vid.toString() === id.toString())
+      )
+    );
+
+    // Existing host reviews
+    const existing = await db
+      .collection("HostReviews")
+      .find({ host_username: hostUsername })
+      .sort({ created_at: -1 })
+      .toArray();
+
+    const reviewedResIds = new Set(
+      existing.map((r) => r.reservation_id.toString())
+    );
+
+    // Collect unique user_ids to fetch renter names
+    const userIds = [
+      ...new Set(
+        completed
+          .map((r) => r.user_id?.toString())
+          .filter(Boolean)
+      ),
+    ].map((id) => new ObjectId(id));
+
+    const renters = await db
+      .collection("RentalUsers")
+      .find({ _id: { $in: userIds } })
+      .toArray();
+
+    const renterMap = {};
+    renters.forEach((u) => { renterMap[u._id.toString()] = u; });
+
+    // Build pending list
+    const pending = completed
+      .filter((r) => !reviewedResIds.has(r._id.toString()))
+      .map((r) => {
+        const vehicleId = toIdArray(r.history_vehicle_id)[0];
+        const vehicle = vehicleId ? vehicleMap[vehicleId.toString()] : null;
+        const renter = r.user_id ? renterMap[r.user_id.toString()] : null;
+        return {
+          reservation_id: r._id.toString(),
+          order_id: r.orderId || "N/A",
+          vehicle_id: vehicleId ? vehicleId.toString() : "",
+          vehicle_name: getVehicleLabel(vehicle),
+          customer_username: renter?.username || r.customer_name || "—",
+          customer_name: renter
+            ? [renter.fname, renter.lname].filter(Boolean).join(" ") || renter.username
+            : r.customer_name || "—",
+          start_date: r.start_date || "",
+          end_date: r.end_date || "",
+        };
+      });
+
+    // Build written reviews list
+    const written = existing.map((rev) => ({
+      _id: rev._id.toString(),
+      reservation_id: rev.reservation_id.toString(),
+      vehicle_id: rev.vehicle_id ? rev.vehicle_id.toString() : "",
+      vehicle_name: rev.vehicle_name || "—",
+      customer_name: rev.customer_name || "—",
+      customer_username: rev.customer_username || "—",
+      rating: rev.rating,
+      comment: rev.comment || "",
+      start_date: rev.start_date || "",
+      end_date: rev.end_date || "",
+      created_at: rev.created_at || "",
+    }));
+
+    res.json({ written, pending });
+  } catch (err) {
+    console.error("host-reviews GET error:", err);
+    res.status(500).json({ error: "Failed to load reviews" });
+  }
+});
+
+// POST /api/host-reviews  — write a new review
+app.post("/api/host-reviews", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+    const { reservation_id, rating, comment } = req.body;
+
+    if (!reservation_id || !rating || !comment) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    const numRating = Number(rating);
+    if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+      return res.status(400).json({ error: "Rating must be 1–5" });
+    }
+    if (!ObjectId.isValid(reservation_id)) {
+      return res.status(400).json({ error: "Invalid reservation ID" });
+    }
+
+    const reservation = await db
+      .collection("Reservations")
+      .findOne({ _id: new ObjectId(reservation_id), status: "Complete" });
+
+    if (!reservation) {
+      return res.status(404).json({ error: "Completed reservation not found" });
+    }
+
+    // Verify this reservation is for one of the host's vehicles
+    const vehicleId = toIdArray(reservation.history_vehicle_id)[0];
+    if (!vehicleId) {
+      return res.status(400).json({ error: "Vehicle not found on reservation" });
+    }
+    const vehicle = await db
+      .collection("Vehicles")
+      .findOne({ _id: new ObjectId(vehicleId), host_username: hostUsername });
+
+    if (!vehicle) {
+      return res.status(403).json({ error: "Not your vehicle" });
+    }
+
+    const existing = await db
+      .collection("HostReviews")
+      .findOne({ reservation_id: reservation._id, host_username: hostUsername });
+
+    if (existing) {
+      return res.status(409).json({ error: "Already reviewed this rental" });
+    }
+
+    const renter = reservation.user_id
+      ? await db.collection("RentalUsers").findOne({ _id: new ObjectId(reservation.user_id) })
+      : null;
+
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+    const doc = {
+      reservation_id: reservation._id,
+      vehicle_id: new ObjectId(vehicleId),
+      vehicle_name: getVehicleLabel(vehicle),
+      host_username: hostUsername,
+      customer_username: renter?.username || reservation.customer_name || "—",
+      customer_name: renter
+        ? [renter.fname, renter.lname].filter(Boolean).join(" ") || renter.username
+        : reservation.customer_name || "—",
+      start_date: reservation.start_date || "",
+      end_date: reservation.end_date || "",
+      rating: numRating,
+      comment: String(comment).trim(),
+      created_at: now,
+      updated_at: now,
+    };
+
+    const result = await db.collection("HostReviews").insertOne(doc);
+    res.status(201).json({
+      success: true,
+      review: { ...doc, _id: result.insertedId.toString(), reservation_id: doc.reservation_id.toString(), vehicle_id: doc.vehicle_id.toString() },
+    });
+  } catch (err) {
+    console.error("host-reviews POST error:", err);
+    res.status(500).json({ error: "Failed to save review" });
+  }
+});
+
+// PUT /api/host-reviews/:id  — edit a review
+app.put("/api/host-reviews/:id", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid review ID" });
+    }
+    const numRating = Number(rating);
+    if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+      return res.status(400).json({ error: "Rating must be 1–5" });
+    }
+    if (!comment) {
+      return res.status(400).json({ error: "Comment is required" });
+    }
+
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+    const result = await db.collection("HostReviews").updateOne(
+      { _id: new ObjectId(id), host_username: hostUsername },
+      { $set: { rating: numRating, comment: String(comment).trim(), updated_at: now } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error("host-reviews PUT error:", err);
+    res.status(500).json({ error: "Failed to update review" });
+  }
+});
+
+// DELETE /api/host-reviews/:id
+app.delete("/api/host-reviews/:id", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid review ID" });
+    }
+    const result = await db.collection("HostReviews").deleteOne(
+      { _id: new ObjectId(id), host_username: hostUsername }
+    );
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error("host-reviews DELETE error:", err);
+    res.status(500).json({ error: "Failed to delete review" });
+  }
+});
+
+// ── Send a message ──────────────────────────────────────────
+app.post("/api/messages/send", requireLogin, async (req, res) => {
       try {
         const { to_username, subject, body, vehicle_id } = req.body;
         const from_username = req.session.user_name;
@@ -3404,5 +3758,382 @@ app.put(
         }
       },
     );
-  },
-);
+    app.get("/api/reviews/reviewable", requireLogin, async (req, res) => {
+      try {
+        const user = await db
+          .collection("RentalUsers")
+          .findOne({ username: req.session.user_name });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const completeReservations = await db
+          .collection("Reservations")
+          .find({ user_id: user._id, status: "Complete" })
+          .sort({ updated_at: -1, end_date: -1 })
+          .toArray();
+
+        if (!completeReservations.length) return res.json([]);
+
+        const existingReviews = await db
+          .collection("Reviews")
+          .find({ user_id: user._id }, { projection: { reservation_id: 1 } })
+          .toArray();
+
+        const reviewedReservationIds = new Set(
+          existingReviews.map((r) => r.reservation_id.toString()),
+        );
+
+        const vehicleIds = [
+          ...new Set(
+            completeReservations
+              .map((r) =>
+                normalizeObjectId(
+                  toIdArray(r.history_vehicle_id || r.vehicle_id)[0],
+                ),
+              )
+              .filter(Boolean)
+              .map((id) => id.toString()),
+          ),
+        ].map((id) => new ObjectId(id));
+
+        const vehicles = await db
+          .collection("Vehicles")
+          .find({ _id: { $in: vehicleIds } })
+          .toArray();
+
+        const vehicleMap = {};
+        vehicles.forEach((v) => {
+          vehicleMap[v._id.toString()] = v;
+        });
+
+        const result = completeReservations
+          .filter((r) => !reviewedReservationIds.has(r._id.toString()))
+          .map((r) => {
+            const vehicleId = normalizeObjectId(
+              toIdArray(r.history_vehicle_id || r.vehicle_id)[0],
+            );
+            if (!vehicleId) return null;
+
+            const vehicle = vehicleMap[vehicleId.toString()] || null;
+
+            return {
+              reservation_id: r._id.toString(),
+              order_id: r.orderId || "N/A",
+              vehicle_id: vehicleId.toString(),
+              vehicle_name: getVehicleLabel(vehicle),
+              end_date: r.end_date || "",
+              location: r.location || "",
+            };
+          })
+          .filter(Boolean);
+
+        res.json(result);
+      } catch (err) {
+        console.error("Reviewable rentals error:", err);
+        res.status(500).json({ error: "Failed to fetch reviewable rentals" });
+      }
+    });
+
+    app.get("/api/reviews/mine", requireLogin, async (req, res) => {
+      try {
+        const user = await db
+          .collection("RentalUsers")
+          .findOne({ username: req.session.user_name });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const reviews = await db
+          .collection("Reviews")
+          .find({ user_id: user._id })
+          .sort({ created_at: -1 })
+          .toArray();
+
+        res.json(reviews.map(serializeReview));
+      } catch (err) {
+        console.error("My reviews error:", err);
+        res.status(500).json({ error: "Failed to fetch reviews" });
+      }
+    });
+
+    app.post("/api/reviews", requireLogin, async (req, res) => {
+      try {
+        const { reservation_id, rating, title, body } = req.body;
+
+        if (!reservation_id || !rating || !title || !body) {
+          return res.status(400).json({ error: "All fields are required" });
+        }
+
+        const numericRating = Number(rating);
+        if (
+          !Number.isInteger(numericRating) ||
+          numericRating < 1 ||
+          numericRating > 5
+        ) {
+          return res
+            .status(400)
+            .json({ error: "Rating must be between 1 and 5" });
+        }
+
+        if (!ObjectId.isValid(reservation_id)) {
+          return res.status(400).json({ error: "Invalid reservation ID" });
+        }
+
+        const user = await db
+          .collection("RentalUsers")
+          .findOne({ username: req.session.user_name });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const reservation = await db.collection("Reservations").findOne({
+          _id: new ObjectId(reservation_id),
+          user_id: user._id,
+          status: "Complete",
+        });
+
+        if (!reservation) {
+          return res.status(404).json({
+            error: "Only completed rentals can be reviewed",
+          });
+        }
+
+        const existing = await db.collection("Reviews").findOne({
+          reservation_id: reservation._id,
+        });
+
+        if (existing) {
+          return res.status(409).json({
+            error: "This completed rental has already been reviewed",
+          });
+        }
+
+        const vehicleId = normalizeObjectId(
+          toIdArray(
+            reservation.history_vehicle_id || reservation.vehicle_id,
+          )[0],
+        );
+
+        if (!vehicleId) {
+          return res
+            .status(400)
+            .json({ error: "Vehicle not found for reservation" });
+        }
+
+        const vehicle = await db
+          .collection("Vehicles")
+          .findOne({ _id: vehicleId });
+
+        const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+        const reviewDoc = {
+          reservation_id: reservation._id,
+          order_id: reservation.orderId || null,
+          vehicle_id: vehicleId,
+          vehicle_name: getVehicleLabel(vehicle),
+          user_id: user._id,
+          username: user.username,
+          customer_name: [user.fname, user.lname].filter(Boolean).join(" "),
+          host_username:
+            reservation.hostUsername || vehicle?.host_username || null,
+          rating: numericRating,
+          title: String(title).trim(),
+          body: String(body).trim(),
+          created_at: now,
+          updated_at: now,
+        };
+
+        const result = await db.collection("Reviews").insertOne(reviewDoc);
+
+        res.status(201).json({
+          success: true,
+          review: serializeReview({
+            ...reviewDoc,
+            _id: result.insertedId,
+          }),
+        });
+      } catch (err) {
+        console.error("Create review error:", err);
+        res.status(500).json({ error: "Failed to save review" });
+      }
+    });
+    app.get("/api/reviews/reviewable", requireLogin, async (req, res) => {
+      try {
+        const user = await db
+          .collection("RentalUsers")
+          .findOne({ username: req.session.user_name });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const reservations = await db
+          .collection("Reservations")
+          .find({
+            user_id: user._id,
+            status: "Complete",
+          })
+          .sort({ updated_at: -1 })
+          .toArray();
+
+        const existingReviews = await db
+          .collection("Reviews")
+          .find({ user_id: user._id })
+          .toArray();
+
+        const reviewedReservationIds = new Set(
+          existingReviews.map((r) => String(r.reservation_id)),
+        );
+
+        const vehicleIds = [
+          ...new Set(
+            reservations
+              .map((r) => r.history_vehicle_id || r.vehicle_id)
+              .filter(Boolean)
+              .map((id) => String(id)),
+          ),
+        ].map((id) => new ObjectId(id));
+
+        const vehicles = await db
+          .collection("Vehicles")
+          .find({ _id: { $in: vehicleIds } })
+          .toArray();
+
+        const vehicleMap = {};
+        vehicles.forEach((v) => {
+          vehicleMap[String(v._id)] =
+            [v.year, v.make, v.model].filter(Boolean).join(" ") ||
+            "Unknown Vehicle";
+        });
+
+        const result = reservations
+          .filter((r) => !reviewedReservationIds.has(String(r._id)))
+          .map((r) => {
+            const vehicleId = String(
+              r.history_vehicle_id || r.vehicle_id || "",
+            );
+            return {
+              reservation_id: String(r._id),
+              order_id: r.orderId,
+              vehicle_id: vehicleId,
+              vehicle_name: vehicleMap[vehicleId] || "Unknown Vehicle",
+              end_date: r.end_date,
+              location: r.location,
+            };
+          });
+
+        res.json(result);
+      } catch (err) {
+        console.error("reviewable route error:", err);
+        res.status(500).json({ error: "Failed to load completed rentals" });
+      }
+    });
+
+    app.get("/api/reviews/mine", requireLogin, async (req, res) => {
+      try {
+        const user = await db
+          .collection("RentalUsers")
+          .findOne({ username: req.session.user_name });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const reviews = await db
+          .collection("Reviews")
+          .find({ user_id: user._id })
+          .sort({ created_at: -1 })
+          .toArray();
+
+        res.json(
+          reviews.map((r) => ({
+            ...r,
+            _id: String(r._id),
+            reservation_id: String(r.reservation_id),
+            vehicle_id: String(r.vehicle_id),
+            user_id: String(r.user_id),
+          })),
+        );
+      } catch (err) {
+        console.error("mine route error:", err);
+        res.status(500).json({ error: "Failed to load your reviews" });
+      }
+    });
+
+    app.post("/api/reviews", requireLogin, async (req, res) => {
+      try {
+        const { reservation_id, rating, title, body } = req.body;
+
+        if (!reservation_id || !rating || !title || !body) {
+          return res.status(400).json({ error: "All fields are required" });
+        }
+
+        const user = await db
+          .collection("RentalUsers")
+          .findOne({ username: req.session.user_name });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const reservation = await db.collection("Reservations").findOne({
+          _id: new ObjectId(reservation_id),
+          user_id: user._id,
+          status: "Complete",
+        });
+
+        if (!reservation) {
+          return res
+            .status(404)
+            .json({ error: "Completed reservation not found" });
+        }
+
+        const alreadyExists = await db.collection("Reviews").findOne({
+          reservation_id: reservation._id,
+        });
+
+        if (alreadyExists) {
+          return res
+            .status(409)
+            .json({ error: "This reservation was already reviewed" });
+        }
+
+        const vehicleId =
+          reservation.history_vehicle_id || reservation.vehicle_id;
+
+        const vehicle = await db.collection("Vehicles").findOne({
+          _id: new ObjectId(vehicleId),
+        });
+
+        const vehicleName = vehicle
+          ? [vehicle.year, vehicle.make, vehicle.model]
+              .filter(Boolean)
+              .join(" ")
+          : "Unknown Vehicle";
+
+        const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+        const doc = {
+          reservation_id: reservation._id,
+          order_id: reservation.orderId,
+          vehicle_id: new ObjectId(vehicleId),
+          vehicle_name: vehicleName,
+          user_id: user._id,
+          username: user.username,
+          customer_name: [user.fname, user.lname].filter(Boolean).join(" "),
+          rating: Number(rating),
+          title: String(title).trim(),
+          body: String(body).trim(),
+          created_at: now,
+          updated_at: now,
+        };
+
+        const result = await db.collection("Reviews").insertOne(doc);
+
+        res.status(201).json({
+          success: true,
+          review: {
+            ...doc,
+            _id: String(result.insertedId),
+            reservation_id: String(doc.reservation_id),
+            vehicle_id: String(doc.vehicle_id),
+            user_id: String(doc.user_id),
+          },
+        });
+      } catch (err) {
+        console.error("create review error:", err);
+        res.status(500).json({ error: "Failed to save review" });
+      }
+    });

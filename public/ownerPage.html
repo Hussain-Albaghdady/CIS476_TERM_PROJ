@@ -1431,6 +1431,294 @@
           const isVisible = messagingContent.style.display !== 'none';
           messagingContent.style.display = isVisible ? 'none' : 'block';
         });
+
+        // ── Review Customers toggle ──────────────────────────────
+        const viewReviewsBtn     = document.getElementById('view-reviews-btn');
+        const reviewSectionBody  = document.getElementById('review-section-body');
+        let reviewsLoaded        = false;
+
+        viewReviewsBtn.addEventListener('click', function () {
+          const isVisible = reviewSectionBody.style.display !== 'none';
+          if (isVisible) {
+            reviewSectionBody.style.display = 'none';
+            viewReviewsBtn.innerHTML = '<i class="icofont-star"></i> View Customer Reviews';
+          } else {
+            reviewSectionBody.style.display = 'block';
+            viewReviewsBtn.innerHTML = '<i class="icofont-close-circled"></i> Hide Customer Reviews';
+            if (!reviewsLoaded) {
+              loadHostReviews();
+              reviewsLoaded = true;
+            }
+          }
+        });
+
+        function loadHostReviews() {
+          fetch('/api/host-reviews', { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => {
+              renderWrittenReviews(data.written || []);
+              renderPendingReviews(data.pending || []);
+              updateReviewStats(data.written || [], data.pending || []);
+            })
+            .catch(err => console.error('Failed to load host reviews:', err));
+        }
+
+        function updateReviewStats(written, pending) {
+          document.getElementById('stat-reviews-given').textContent = written.length;
+          document.getElementById('stat-pending-reviews').textContent = pending.length;
+          if (written.length > 0) {
+            const avg = written.reduce((s, r) => s + r.rating, 0) / written.length;
+            document.getElementById('stat-avg-rating').textContent = avg.toFixed(1) + ' ★';
+          } else {
+            document.getElementById('stat-avg-rating').textContent = '—';
+          }
+        }
+
+        function renderWrittenReviews(reviews) {
+          const tbody = document.getElementById('review-customers-body');
+          tbody.innerHTML = '';
+          if (reviews.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No reviews written yet.</td></tr>';
+            return;
+          }
+          reviews.forEach(r => {
+            const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${escHtml(r.customer_name)}</td>
+              <td>${escHtml(r.vehicle_name)}</td>
+              <td>${fmtRange(r.start_date, r.end_date)}</td>
+              <td><span style="color:#f5a623;">${stars}</span> ${r.rating}.0</td>
+              <td>"${escHtml(r.comment)}"</td>
+              <td>${fmtDate(r.created_at)}</td>
+              <td>
+                <span style="color:#888;font-size:.75rem;">Customer's Review</span><br>
+                <a href="#" class="text-primary edit-host-review-btn" style="font-size:.85rem;"
+                  data-id="${r._id}"
+                  data-rating="${r.rating}"
+                  data-comment="${escAttr(r.comment)}"
+                  data-customer="${escAttr(r.customer_name)}">Edit</a>
+                &nbsp;
+                <a href="#" class="text-danger delete-host-review-btn" style="font-size:.85rem;"
+                  data-id="${r._id}">Delete</a>
+              </td>`;
+            tbody.appendChild(tr);
+          });
+        }
+
+        function renderPendingReviews(pending) {
+          const tbody = document.getElementById('pending-reviews-body');
+          tbody.innerHTML = '';
+          if (pending.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No pending reviews.</td></tr>';
+            return;
+          }
+          pending.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${escHtml(p.customer_name)}</td>
+              <td>${escHtml(p.vehicle_name)}</td>
+              <td>${fmtRange(p.start_date, p.end_date)}</td>
+              <td><span style="color:#888;font-size:.8rem;">Customer's Review</span></td>
+              <td>
+                <button class="btn btn-success btn-sm write-host-review-btn"
+                  data-reservation-id="${p.reservation_id}"
+                  data-customer="${escAttr(p.customer_name)}">Write Review</button>
+              </td>`;
+            tbody.appendChild(tr);
+          });
+        }
+
+        // ── Write / Edit modal logic ─────────────────────────────
+        let currentReviewMode = 'create'; // 'create' | 'edit'
+        let currentEditReviewId = null;
+        let currentReservationId = null;
+        let selectedRating = 0;
+
+        const reviewModal       = document.getElementById('write-review-modal');
+        const reviewModalTitle  = document.getElementById('review-modal-title');
+        const closeReviewModal  = document.getElementById('close-review-modal');
+        const cancelReviewModal = document.getElementById('cancel-review-modal');
+        const reviewForm        = document.getElementById('write-review-form');
+        const modalCustomer     = document.getElementById('modal-customer-name');
+        const modalComment      = document.getElementById('modal-comment');
+        const modalRatingInput  = document.getElementById('modal-rating');
+        const modalStars        = document.querySelectorAll('.modal-rev-star');
+        const alertSuccess      = document.getElementById('review-modal-alert-success');
+        const alertError        = document.getElementById('review-modal-alert-error');
+
+        function openReviewModal(mode, opts) {
+          currentReviewMode    = mode;
+          currentEditReviewId  = opts.reviewId || null;
+          currentReservationId = opts.reservationId || null;
+          selectedRating       = opts.rating || 0;
+
+          reviewModalTitle.textContent = mode === 'edit' ? 'Edit Review' : 'Write Review';
+          modalCustomer.value  = opts.customerName || '';
+          modalComment.value   = opts.comment || '';
+          modalRatingInput.value = selectedRating;
+          alertSuccess.style.display = 'none';
+          alertError.style.display   = 'none';
+          setStars(selectedRating);
+          reviewModal.style.display = 'flex';
+        }
+
+        function closeModal() {
+          reviewModal.style.display = 'none';
+        }
+
+        closeReviewModal.addEventListener('click', closeModal);
+        cancelReviewModal.addEventListener('click', closeModal);
+        reviewModal.addEventListener('click', e => { if (e.target === reviewModal) closeModal(); });
+
+        modalStars.forEach(star => {
+          star.addEventListener('click', () => {
+            selectedRating = parseInt(star.dataset.val, 10);
+            modalRatingInput.value = selectedRating;
+            setStars(selectedRating);
+          });
+          star.addEventListener('mouseenter', () => setStars(parseInt(star.dataset.val, 10)));
+          star.addEventListener('mouseleave', () => setStars(selectedRating));
+        });
+
+        function setStars(n) {
+          modalStars.forEach(s => {
+            s.style.color = parseInt(s.dataset.val, 10) <= n ? '#f5a623' : '#ccc';
+          });
+        }
+
+        // Delegated clicks on review tables
+        document.getElementById('review-customers-body').addEventListener('click', function (e) {
+          const editBtn = e.target.closest('.edit-host-review-btn');
+          const delBtn  = e.target.closest('.delete-host-review-btn');
+          if (editBtn) {
+            e.preventDefault();
+            openReviewModal('edit', {
+              reviewId:     editBtn.dataset.id,
+              rating:       parseInt(editBtn.dataset.rating, 10),
+              comment:      editBtn.dataset.comment,
+              customerName: editBtn.dataset.customer,
+            });
+          }
+          if (delBtn) {
+            e.preventDefault();
+            confirmDeleteReview(delBtn.dataset.id);
+          }
+        });
+
+        document.getElementById('pending-reviews-body').addEventListener('click', function (e) {
+          const btn = e.target.closest('.write-host-review-btn');
+          if (!btn) return;
+          openReviewModal('create', {
+            reservationId: btn.dataset.reservationId,
+            customerName:  btn.dataset.customer,
+          });
+        });
+
+        reviewForm.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          alertSuccess.style.display = 'none';
+          alertError.style.display   = 'none';
+
+          if (!selectedRating) {
+            alertError.textContent    = 'Please select a star rating.';
+            alertError.style.display  = 'block';
+            return;
+          }
+          if (!modalComment.value.trim()) {
+            alertError.textContent    = 'Please enter a review comment.';
+            alertError.style.display  = 'block';
+            return;
+          }
+
+          try {
+            let res;
+            if (currentReviewMode === 'edit') {
+              res = await fetch(`/api/host-reviews/${currentEditReviewId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ rating: selectedRating, comment: modalComment.value.trim() }),
+              });
+            } else {
+              res = await fetch('/api/host-reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                  reservation_id: currentReservationId,
+                  rating: selectedRating,
+                  comment: modalComment.value.trim(),
+                }),
+              });
+            }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            alertSuccess.textContent   = currentReviewMode === 'edit' ? 'Review updated!' : 'Review submitted!';
+            alertSuccess.style.display = 'block';
+            reviewsLoaded = false;
+            setTimeout(() => { closeModal(); loadHostReviews(); reviewsLoaded = true; }, 900);
+          } catch (err) {
+            alertError.textContent   = err.message;
+            alertError.style.display = 'block';
+          }
+        });
+
+        // ── Delete confirm modal ─────────────────────────────────
+        const deleteReviewModal     = document.getElementById('delete-review-modal');
+        const confirmDeleteReviewBtn = document.getElementById('confirm-delete-review-btn');
+        const cancelDeleteReviewBtn  = document.getElementById('cancel-delete-review-btn');
+        let reviewIdToDelete = null;
+
+        function confirmDeleteReview(id) {
+          reviewIdToDelete = id;
+          deleteReviewModal.style.display = 'flex';
+        }
+
+        document.getElementById('close-delete-review-modal').addEventListener('click', () => {
+          deleteReviewModal.style.display = 'none';
+          reviewIdToDelete = null;
+        });
+        cancelDeleteReviewBtn.addEventListener('click', () => {
+          deleteReviewModal.style.display = 'none';
+          reviewIdToDelete = null;
+        });
+
+        confirmDeleteReviewBtn.addEventListener('click', async () => {
+          if (!reviewIdToDelete) return;
+          try {
+            const res = await fetch(`/api/host-reviews/${reviewIdToDelete}`, {
+              method: 'DELETE',
+              credentials: 'include',
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            deleteReviewModal.style.display = 'none';
+            reviewIdToDelete = null;
+            reviewsLoaded = false;
+            loadHostReviews();
+            reviewsLoaded = true;
+          } catch (err) {
+            console.error('Delete review error:', err);
+          }
+        });
+
+        // ── Helpers ──────────────────────────────────────────────
+        function escHtml(s) {
+          return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function escAttr(s) {
+          return String(s || '').replace(/"/g, '&quot;');
+        }
+        function fmtDate(val) {
+          if (!val) return '—';
+          const d = new Date(val);
+          return isNaN(d) ? val : d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        }
+        function fmtRange(start, end) {
+          if (!start && !end) return '—';
+          return `${fmtDate(start)} – ${fmtDate(end)}`;
+        }
       });
     </script>
 </body>

@@ -271,6 +271,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return allFilters.length ? allFilters.join("") : "*";
   }
+  function formatVehicleRating(avgRating, reviewCount) {
+    if (!reviewCount) {
+      return `N/A <span style="color:#f5a623;">★</span> (0)`;
+    }
+
+    return `${Number(avgRating || 0).toFixed(1)}/5 <span style="color:#f5a623;">★</span> (${Number(reviewCount)})`;
+  }
+
   $(document).ready(function () {
     const $container = $(".vehicle-container");
     if (!$container.length) return;
@@ -340,9 +348,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <h2>${[item.year, item.make, item.model].filter(Boolean).join(" ") || item.category || "Vehicle"}</h2>
               <p class="hosted-by">Hosted By ${item.host_fname || "Unknown"}</p>
               <p class="card-rating">
-                <span class="rating-score">${item.avg_rating ? Number(item.avg_rating).toFixed(1) : "N/A"}</span>
-                <span class="rating-star">&#9733;</span>
-                <span class="rating-count">(${item.review_count || 0})</span>
+                ${formatVehicleRating(item.avg_rating, item.review_count)}    
               </p>
               <p class="desc">${item.description || ""}</p>
               ${item.range ? `<p class="range"><b>Range:</b> ${item.range} mi</p>` : ""}
@@ -561,10 +567,15 @@ document.addEventListener("DOMContentLoaded", function () {
             .querySelectorAll("#my-account-page-link-anchor")
             .forEach((a) => a.parentElement.classList.add("active"));
         }
-        if (current.endsWith("account.html") && !current.includes("my-account.html")) {
+        if (
+          current.endsWith("account.html") &&
+          !current.includes("my-account.html")
+        ) {
           var highlightFlag = sessionStorage.getItem("highlightManageBookings");
           sessionStorage.removeItem("highlightManageBookings");
-          var anchorId = highlightFlag ? "#manage-bookings-page-link-anchor" : "#dashboard-page-link-anchor";
+          var anchorId = highlightFlag
+            ? "#manage-bookings-page-link-anchor"
+            : "#dashboard-page-link-anchor";
           document
             .querySelectorAll(anchorId)
             .forEach((a) => a.parentElement.classList.add("active"));
@@ -673,9 +684,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <h2>${[eq.year, eq.make, eq.model].filter(Boolean).join(" ") || eq.category || "Vehicle"}</h2>
             <p class="hosted-by">Hosted By ${eq.host_fname || "Unknown"}</p>
             <p class="card-rating">
-              <span class="rating-score">${eq.avg_rating ? Number(eq.avg_rating).toFixed(1) : "N/A"}</span>
-              <span class="rating-star">&#9733;</span>
-              <span class="rating-count">(${eq.review_count || 0})</span>
+              ${formatVehicleRating(eq.avg_rating, eq.review_count)}
             </p>
             <p class="desc">${eq.description || ""}</p>
             ${eq.range ? `<p class="range"><b>Range:</b> ${eq.range} mi</p>` : ""}
