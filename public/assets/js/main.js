@@ -11,6 +11,28 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
   }
+
+  // ── Floating message shortcut button ──────────────────────
+  var path = window.location.pathname;
+  if (!path.includes("adminPage") && !path.includes("admin-setup")) {
+    var msgBtn = document.createElement("a");
+    msgBtn.id = "msg-float-btn";
+    msgBtn.className = "msg-float-btn";
+    msgBtn.title = "Messages";
+    msgBtn.innerHTML = '<i class="bx bx-message-dots"></i>';
+    document.body.appendChild(msgBtn);
+
+    fetch("/userdetail", { credentials: "include" })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        if (!data || data.error || data.user_type === "admin") return;
+        msgBtn.href = data.user_type === "host"
+          ? "/ownerPage.html#messaging"
+          : "/account.html#messaging";
+        msgBtn.style.display = "block";
+      })
+      .catch(function () {});
+  }
 });
 !(function ($) {
   "use strict";

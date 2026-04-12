@@ -617,41 +617,67 @@
           </section>
         </div>
 
-        <button class="collapsible">Messaging &amp; Communication</button>
+        <button class="collapsible" id="rc-messaging-collapsible">Messaging &amp; Communication</button>
         <div class="content">
           <section class="account-section messaging-section">
             <div class="section-action-header">
               <h3>Messaging &amp; Communication</h3>
+              <p>Chat with vehicle owners about their listings</p>
             </div>
-            <div class="messaging-info-box info-box w-100">
-              <div class="messaging-info-row">
-                <i class="bx bx-message-dots messaging-icon"></i>
-                <div>
-                  <h5>In-App Messaging</h5>
-                  <p>
-                    DriveShare includes a messaging system to facilitate
-                    communication between car owners and renters.
-                  </p>
+
+            <div class="chat-layout">
+              <!-- Left: thread list + new chat -->
+              <div class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                  <span>Conversations</span>
+                  <button id="rc-new-chat-btn" class="btn btn-sm btn-success" title="Start new chat">
+                    <i class="bx bx-edit"></i> New
+                  </button>
+                </div>
+
+                <!-- New chat panel (hidden by default) -->
+                <div id="rc-new-chat-panel" style="display:none;">
+                  <div class="new-chat-inner">
+                    <label style="font-size:0.8rem;color:#555;margin-bottom:4px;display:block;">Select a vehicle to message the owner about:</label>
+                    <select id="rc-vehicle-select" class="form-control form-control-sm mb-2">
+                      <option value="">Loading...</option>
+                    </select>
+                    <button id="rc-new-chat-open-btn" class="btn btn-sm btn-primary w-100">Open Chat</button>
+                    <button id="rc-new-chat-cancel-btn" class="btn btn-sm btn-secondary w-100 mt-1">Cancel</button>
+                  </div>
+                </div>
+
+                <div id="rc-thread-list" class="chat-thread-list">
+                  <div class="chat-empty-state">
+                    <i class="bx bx-message-dots"></i>
+                    <p>No conversations yet.</p>
+                  </div>
                 </div>
               </div>
-              <div class="messaging-info-row">
-                <i class="bx bx-bell messaging-icon"></i>
-                <div>
-                  <h5>Notifications</h5>
-                  <p>
-                    Receive in-app notifications for booking requests,
-                    confirmations, and important updates.
-                  </p>
+
+              <!-- Right: message window -->
+              <div class="chat-window" id="rc-chat-window">
+                <div class="chat-window-placeholder" id="rc-chat-placeholder">
+                  <i class="bx bx-chat"></i>
+                  <p>Select a conversation to start chatting.</p>
+                </div>
+
+                <div id="rc-chat-active" style="display:none; height:100%; flex-direction:column;">
+                  <div class="chat-window-header" id="rc-chat-header">
+                    <span id="rc-chat-header-name"></span>
+                    <span id="rc-chat-header-vehicle" class="chat-header-vehicle"></span>
+                  </div>
+                  <div class="chat-messages" id="rc-chat-messages"></div>
+                  <div class="chat-input-area">
+                    <textarea id="rc-chat-input" class="chat-input" placeholder="Type a message..." rows="2"></textarea>
+                    <button id="rc-chat-send-btn" class="btn btn-primary chat-send-btn">
+                      <i class="bx bx-send"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div class="messaging-placeholder">
-                <i class="bx bx-chat"></i>
-                <p>
-                  No messages yet. When an owner contacts you about a booking,
-                  it will appear here.
-                </p>
-              </div>
-            </div>
+            </div><!-- end .chat-layout -->
+
           </section>
         </div>
       </section>
@@ -927,6 +953,18 @@
               );
             } else {
               document.getElementById("main").classList.remove("hidden-page");
+              // Auto-open collapsible from URL hash after page is revealed
+              var hash = window.location.hash.replace("#", "").toLowerCase();
+              if (hash) {
+                var collButtons = document.getElementsByClassName("collapsible");
+                for (var ci = 0; ci < collButtons.length; ci++) {
+                  if (collButtons[ci].textContent.trim().toLowerCase().includes(hash)) {
+                    collButtons[ci].click();
+                    collButtons[ci].scrollIntoView({ behavior: "smooth", block: "start" });
+                    break;
+                  }
+                }
+              }
             }
           })
           .catch((err) => {
@@ -947,6 +985,16 @@
           fallbackText.style.display = "none";
         });
       });
+      function fmtDate(val) {
+        if (!val) return 'N/A';
+        const parts = String(val).substring(0, 10).split('-');
+        if (parts.length === 3) {
+          const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        const d = new Date(val);
+        return isNaN(d) ? String(val) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
       // Load the user's reservations and display them in the orders section, including handling for cases where there are no reservations or if the API call fails
       function loadOrders() {
         fetch("/api/myreservations")
@@ -958,8 +1006,8 @@
               const tr = document.createElement("tr");
               tr.innerHTML = `
             <td data-label="OrderID">${r.order_id}</td>
-            <td data-label="Start Date">${r.start_date ? new Date(r.start_date).toLocaleDateString() : "N/A"}</td>
-            <td data-label="Return Date">${new Date(r.end_date).toLocaleDateString()}</td>
+            <td data-label="Start Date">${fmtDate(r.start_date)}</td>
+            <td data-label="Return Date">${fmtDate(r.end_date)}</td>
             <td data-label="Status">${r.status}</td>
             <td data-label="Items">${r.items.join(", ")}</td>
             <td data-label="Mileage">${r.status === "Cancelled" ? "0 mi" : r.miles_driven != null ? Number(r.miles_driven).toLocaleString() + " mi" : "N/A"}</td>
@@ -1661,7 +1709,7 @@
             option.textContent =
               `${item.vehicle_name} — Order #${item.order_id}` +
               (item.end_date
-                ? ` — Returned ${new Date(item.end_date).toLocaleDateString()}`
+                ? ` — Returned ${fmtDate(item.end_date)}`
                 : "");
             select.appendChild(option);
           });
@@ -1696,9 +1744,7 @@
           container.innerHTML = reviews
             .map((review) => {
               const createdAt = review.created_at
-                ? new Date(
-                    String(review.created_at).replace(" ", "T"),
-                  ).toLocaleDateString()
+                ? fmtDate(review.created_at)
                 : "";
 
               return `
@@ -1819,11 +1865,9 @@
           }
 
           container.innerHTML = reviews.map((review) => {
-            const createdAt = review.created_at
-              ? new Date(String(review.created_at).replace(" ", "T")).toLocaleDateString()
-              : "";
+            const createdAt = fmtDate(review.created_at);
             const rentalRange = (review.start_date && review.end_date)
-              ? `${new Date(review.start_date).toLocaleDateString()} – ${new Date(review.end_date).toLocaleDateString()}`
+              ? `${fmtDate(review.start_date)} – ${fmtDate(review.end_date)}`
               : "";
 
             return `
@@ -1863,6 +1907,206 @@
         loadMyReviews();
         loadOwnerReviews();
       });
+
+      // ══════════════════════════════════════════════════════════════
+      //  RENTER CHAT
+      // ══════════════════════════════════════════════════════════════
+      (function () {
+        var activeThread = null;
+        var pollTimer = null;
+        var renterUsername = null;
+        var chatInitialized = false;
+
+        // Fetch logged-in renter's username once
+        fetch('/userdetail', { credentials: 'include' })
+          .then(function (r) { return r.ok ? r.json() : {}; })
+          .then(function (d) { renterUsername = d.user_name || d.username || null; });
+
+        // Lazy-init when the messaging collapsible is opened
+        var collBtn = document.getElementById('rc-messaging-collapsible');
+        if (collBtn) {
+          collBtn.addEventListener('click', function () {
+            if (!chatInitialized) {
+              chatInitialized = true;
+              loadRcThreads();
+            }
+          });
+        }
+
+        // ── Thread list ────────────────────────────────────────────
+        function loadRcThreads() {
+          fetch('/api/renter/chat-threads', { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(renderRcThreads);
+        }
+
+        function renderRcThreads(threads) {
+          var list = document.getElementById('rc-thread-list');
+          if (!threads.length) {
+            list.innerHTML = '<div class="chat-empty-state"><i class="bx bx-message-dots"></i><p>No conversations yet.</p></div>';
+            return;
+          }
+          list.innerHTML = threads.map(function (t) {
+            var isActive = activeThread &&
+              activeThread.host_username === t.host_username &&
+              (activeThread.vehicle_id || null) === (t.vehicle_id || null);
+            var badge = t.unread_count > 0
+              ? '<span class="chat-unread-badge">' + t.unread_count + '</span>'
+              : '';
+            var vehicleTag = t.vehicle_label
+              ? '<span class="chat-thread-vehicle">' + rcEscHtml(t.vehicle_label) + '</span>'
+              : '';
+            var preview = rcEscHtml((t.last_message || '').substring(0, 60));
+            return '<div class="chat-thread-item' + (isActive ? ' active' : '') + '" ' +
+              'data-host="' + rcEscAttr(t.host_username) + '" ' +
+              'data-vehicle="' + rcEscAttr(t.vehicle_id || '') + '">' +
+              '<div class="chat-thread-top"><span class="chat-thread-name">' + rcEscHtml(t.host_username) + '</span>' + badge + '</div>' +
+              vehicleTag +
+              '<div class="chat-thread-preview">' + preview + '</div>' +
+              '</div>';
+          }).join('');
+
+          list.querySelectorAll('.chat-thread-item').forEach(function (el) {
+            el.addEventListener('click', function () {
+              openRcThread(el.dataset.host, el.dataset.vehicle || null);
+            });
+          });
+        }
+
+        function openRcThread(hostUsername, vehicleId) {
+          activeThread = { host_username: hostUsername, vehicle_id: vehicleId || null };
+          document.getElementById('rc-chat-placeholder').style.display = 'none';
+          var chatActive = document.getElementById('rc-chat-active');
+          chatActive.style.display = 'flex';
+
+          document.getElementById('rc-chat-header-name').textContent = hostUsername;
+          document.getElementById('rc-chat-header-vehicle').textContent = '';
+
+          loadRcMessages();
+          startRcPolling();
+          loadRcThreads();
+        }
+
+        // ── Messages ───────────────────────────────────────────────
+        function loadRcMessages() {
+          if (!activeThread) return;
+          var url = '/api/renter/chat-messages?host_username=' + encodeURIComponent(activeThread.host_username);
+          if (activeThread.vehicle_id) url += '&vehicle_id=' + encodeURIComponent(activeThread.vehicle_id);
+
+          fetch(url, { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(renderRcMessages);
+        }
+
+        function renderRcMessages(messages) {
+          var container = document.getElementById('rc-chat-messages');
+          if (!messages.length) {
+            container.innerHTML = '<div class="chat-no-msgs">No messages yet. Say hello!</div>';
+            return;
+          }
+          var html = messages.map(function (m) {
+            var isMine = m.from_username === renterUsername;
+            var time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            return '<div class="chat-msg ' + (isMine ? 'chat-msg-mine' : 'chat-msg-theirs') + '">' +
+              '<div class="chat-bubble">' + rcEscHtml(m.body) + '</div>' +
+              '<div class="chat-msg-time">' + time + '</div>' +
+              '</div>';
+          }).join('');
+          container.innerHTML = html;
+          container.scrollTop = container.scrollHeight;
+        }
+
+        // ── Send ───────────────────────────────────────────────────
+        document.getElementById('rc-chat-send-btn').addEventListener('click', sendRcMessage);
+        document.getElementById('rc-chat-input').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendRcMessage(); }
+        });
+
+        function sendRcMessage() {
+          if (!activeThread) return;
+          var input = document.getElementById('rc-chat-input');
+          var body = input.value.trim();
+          if (!body) return;
+
+          var payload = { to_username: activeThread.host_username, body: body };
+          if (activeThread.vehicle_id) payload.vehicle_id = activeThread.vehicle_id;
+
+          fetch('/api/renter/chat-send', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.success) {
+                input.value = '';
+                loadRcMessages();
+                loadRcThreads();
+              }
+            });
+        }
+
+        // ── Polling ────────────────────────────────────────────────
+        function startRcPolling() {
+          stopRcPolling();
+          pollTimer = setInterval(function () {
+            loadRcMessages();
+            loadRcThreads();
+          }, 5000);
+        }
+        function stopRcPolling() {
+          if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        }
+
+        // ── New Chat ───────────────────────────────────────────────
+        document.getElementById('rc-new-chat-btn').addEventListener('click', function () {
+          var panel = document.getElementById('rc-new-chat-panel');
+          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+          if (panel.style.display === 'block') loadRcAllHostVehicles();
+        });
+
+        document.getElementById('rc-new-chat-cancel-btn').addEventListener('click', function () {
+          document.getElementById('rc-new-chat-panel').style.display = 'none';
+        });
+
+        document.getElementById('rc-new-chat-open-btn').addEventListener('click', function () {
+          var sel = document.getElementById('rc-vehicle-select');
+          if (!sel.value) return;
+          var parts = sel.value.split('::');
+          var hostUsername = parts[0];
+          var vehicleId = parts[1] || null;
+          var opt = sel.options[sel.selectedIndex];
+          document.getElementById('rc-chat-header-vehicle').textContent = opt ? opt.dataset.label || '' : '';
+          document.getElementById('rc-new-chat-panel').style.display = 'none';
+          openRcThread(hostUsername, vehicleId);
+        });
+
+        function loadRcAllHostVehicles() {
+          var sel = document.getElementById('rc-vehicle-select');
+          sel.innerHTML = '<option value="">Loading...</option>';
+          fetch('/api/renter/all-hosts-vehicles', { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (vehicles) {
+              if (!vehicles.length) {
+                sel.innerHTML = '<option value="">No vehicles available</option>';
+                return;
+              }
+              sel.innerHTML = '<option value="">-- Select a vehicle --</option>' +
+                vehicles.map(function (v) {
+                  return '<option value="' + rcEscAttr(v.host_username + '::' + v.vehicle_id) + '" data-label="' + rcEscAttr(v.vehicle_label) + '">' +
+                    rcEscHtml(v.host_username) + ' — ' + rcEscHtml(v.vehicle_label) + '</option>';
+                }).join('');
+            });
+        }
+
+        function rcEscHtml(s) {
+          return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        function rcEscAttr(s) {
+          return String(s || '').replace(/"/g, '&quot;');
+        }
+      })();
     </script>
   </body>
 </html>

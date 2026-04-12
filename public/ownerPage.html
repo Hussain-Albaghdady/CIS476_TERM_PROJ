@@ -556,7 +556,7 @@
           <div class="management-header-box">
             <div class="section-title">
               <h2>Messaging &amp; Communication</h2>
-              <p>Communicate with renters and manage booking notifications</p>
+              <p>Chat with renters about your vehicles</p>
             </div>
             <div class="row mb-4 justify-content-center">
               <div class="col-lg-4 col-md-5 text-center">
@@ -568,39 +568,95 @@
           </div>
 
           <div id="messaging-content" class="management-form" style="display: none;">
-            <div class="row justify-content-center">
-              <div class="col-lg-6 col-md-6 mb-4">
-                <div class="info-box w-100">
-                  <div class="messaging-info-row">
-                    <i class="bx bx-message-dots messaging-icon"></i>
-                    <div>
-                      <h5>In-App Messaging</h5>
-                      <p>DriveShare includes a messaging system to facilitate communication between car owners and renters.</p>
-                    </div>
+            <div class="chat-layout">
+
+              <!-- Left: thread list + new chat -->
+              <div class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                  <span>Conversations</span>
+                  <button id="new-chat-btn" class="btn btn-sm btn-success" title="Start new chat">
+                    <i class="bx bx-edit"></i> New
+                  </button>
+                </div>
+
+                <!-- New chat panel (hidden by default) -->
+                <div id="new-chat-panel" style="display:none;">
+                  <div class="new-chat-inner">
+                    <label style="font-size:0.8rem;color:#555;margin-bottom:4px;display:block;">Start a chat with an active renter:</label>
+                    <select id="new-chat-renter-select" class="form-control form-control-sm mb-2">
+                      <option value="">Loading...</option>
+                    </select>
+                    <button id="new-chat-open-btn" class="btn btn-sm btn-primary w-100">Open Chat</button>
+                    <button id="new-chat-cancel-btn" class="btn btn-sm btn-secondary w-100 mt-1">Cancel</button>
+                  </div>
+                </div>
+
+                <div id="chat-thread-list" class="chat-thread-list">
+                  <div class="chat-empty-state">
+                    <i class="bx bx-message-dots"></i>
+                    <p>No conversations yet.</p>
                   </div>
                 </div>
               </div>
-              <div class="col-lg-6 col-md-6 mb-4">
-                <div class="info-box w-100">
-                  <div class="messaging-info-row">
-                    <i class="bx bx-bell messaging-icon"></i>
-                    <div>
-                      <h5>Notifications</h5>
-                      <p>Send notifications for booking requests, confirmations, and important updates via in-app messages.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-12">
-                <div class="info-box w-100 text-center messaging-placeholder">
+
+              <!-- Right: message window -->
+              <div class="chat-window" id="chat-window">
+                <div class="chat-window-placeholder" id="chat-placeholder">
                   <i class="bx bx-chat"></i>
-                  <p>No messages yet. Renter inquiries and booking requests will appear here.</p>
+                  <p>Select a conversation to start chatting.</p>
+                </div>
+
+                <div id="chat-active" style="display:none; height:100%; flex-direction:column;">
+                  <div class="chat-window-header" id="chat-header">
+                    <span id="chat-header-name"></span>
+                    <span id="chat-header-vehicle" class="chat-header-vehicle"></span>
+                  </div>
+                  <div class="chat-messages" id="chat-messages"></div>
+                  <div class="chat-input-area">
+                    <textarea id="chat-input" class="chat-input" placeholder="Type a message..." rows="2"></textarea>
+                    <button id="chat-send-btn" class="btn btn-primary chat-send-btn">
+                      <i class="bx bx-send"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+
+            </div><!-- end .chat-layout -->
           </div>
         </div>
       </section><!-- End Messaging Section -->
+
+      <!-- ======= Notifications Section ======= -->
+      <section id="notifications" class="vehicle-management section-bg">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+          <div class="management-header-box">
+            <div class="section-title">
+              <h2>Notifications</h2>
+              <p>Stay up to date with booking requests, confirmations, and alerts</p>
+            </div>
+            <div class="row mb-4 justify-content-center">
+              <div class="col-lg-4 col-md-5 text-center">
+                <button id="view-notifications-btn" class="btn btn-primary btn-lg">
+                  <i class="bx bx-bell"></i> View Notifications
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="notifications-content" class="management-form" style="display:none;">
+            <div id="notifications-list">
+              <!-- Populated by JS -->
+            </div>
+            <div id="notifications-empty" class="chat-empty-state" style="display:none;">
+              <i class="bx bx-bell-off"></i>
+              <p>No notifications yet.</p>
+            </div>
+            <div id="notifications-loading" class="text-center text-muted py-3" style="display:none;">
+              Loading notifications...
+            </div>
+          </div>
+        </div>
+      </section><!-- End Notifications Section -->
 
       <!-- ======= Availability Section ======= -->
       <section id="availability" class="availability section-bg">
@@ -856,6 +912,24 @@
                 .then(() => window.location.href = "/loginform.html");
             } else {
               document.getElementById("main").classList.remove("hidden-page");
+              // Auto-open messaging or notifications section from URL hash
+              if (window.location.hash === "#messaging") {
+                var msgContent = document.getElementById("messaging-content");
+                if (msgContent) {
+                  msgContent.style.display = "block";
+                  setTimeout(function () {
+                    document.getElementById("messaging").scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 600);
+                }
+              } else if (window.location.hash === "#notifications") {
+                var notifContent = document.getElementById("notifications-content");
+                if (notifContent) {
+                  notifContent.style.display = "block";
+                  setTimeout(function () {
+                    document.getElementById("notifications").scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 600);
+                }
+              }
             }
           })
           .catch(() => {
@@ -1450,8 +1524,13 @@
 
         function formatDate(value) {
           if (!value || value === '—') return '—';
+          const parts = String(value).substring(0, 10).split('-');
+          if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+          }
           const d = new Date(value);
-          return isNaN(d) ? value : d.toLocaleDateString();
+          return isNaN(d) ? value : d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
         }
 
         document.getElementById('financial-body').addEventListener('click', function (e) {
@@ -1654,7 +1733,7 @@
             document.getElementById('crm-title').textContent     = review.title || '';
             document.getElementById('crm-body').textContent      = review.body  || '';
             document.getElementById('crm-date').textContent      = review.created_at
-              ? new Date(String(review.created_at).replace(' ', 'T')).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+              ? fmtDate(review.created_at)
               : '';
             crmContent.style.display = 'block';
           } catch (err) {
@@ -1865,6 +1944,11 @@
         }
         function fmtDate(val) {
           if (!val) return '—';
+          const parts = String(val).substring(0, 10).split('-');
+          if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+          }
           const d = new Date(val);
           return isNaN(d) ? val : d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
         }
@@ -1873,6 +1957,275 @@
           return `${fmtDate(start)} – ${fmtDate(end)}`;
         }
       });
+
+      // ══════════════════════════════════════════════════════════════
+      //  CHAT ROOM
+      // ══════════════════════════════════════════════════════════════
+      (function () {
+        var hostUsername = null;
+        var activeThread = null; // { renter_username, vehicle_id }
+        var pollTimer    = null;
+        var messagingOpen = false;
+
+        // Fetch the logged-in host's username once
+        fetch('/userdetail', { credentials: 'include' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { if (d) hostUsername = d.username; });
+
+        // If page was opened via #messaging hash, treat panel as already open
+        if (window.location.hash === '#messaging') {
+          messagingOpen = true;
+        }
+
+        // Toggle messaging panel
+        document.getElementById('view-messaging-btn').addEventListener('click', function () {
+          var content = document.getElementById('messaging-content');
+          messagingOpen = !messagingOpen;
+          content.style.display = messagingOpen ? 'block' : 'none';
+          if (messagingOpen) {
+            loadThreads();
+          } else {
+            stopPolling();
+          }
+        });
+
+        // ── Thread list ────────────────────────────────────────────
+        function loadThreads() {
+          fetch('/api/host/chat-threads', { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(renderThreads);
+        }
+
+        function renderThreads(threads) {
+          var list = document.getElementById('chat-thread-list');
+          if (!threads.length) {
+            list.innerHTML = '<div class="chat-empty-state"><i class="bx bx-message-dots"></i><p>No conversations yet.</p></div>';
+            return;
+          }
+          list.innerHTML = threads.map(function (t) {
+            var isActive = activeThread &&
+              activeThread.renter_username === t.renter_username &&
+              (activeThread.vehicle_id || null) === (t.vehicle_id || null);
+            var badge = t.unread_count > 0
+              ? '<span class="chat-unread-badge">' + t.unread_count + '</span>'
+              : '';
+            var vehicleTag = t.vehicle_label
+              ? '<span class="chat-thread-vehicle">' + escHtml(t.vehicle_label) + '</span>'
+              : '';
+            var preview = escHtml((t.last_message || '').substring(0, 60));
+            return '<div class="chat-thread-item' + (isActive ? ' active' : '') + '" ' +
+              'data-renter="' + escAttr(t.renter_username) + '" ' +
+              'data-vehicle="' + escAttr(t.vehicle_id || '') + '">' +
+              '<div class="chat-thread-top"><span class="chat-thread-name">' + escHtml(t.renter_username) + '</span>' + badge + '</div>' +
+              vehicleTag +
+              '<div class="chat-thread-preview">' + preview + '</div>' +
+              '</div>';
+          }).join('');
+
+          list.querySelectorAll('.chat-thread-item').forEach(function (el) {
+            el.addEventListener('click', function () {
+              openThread(el.dataset.renter, el.dataset.vehicle || null);
+            });
+          });
+        }
+
+        function openThread(renterUsername, vehicleId) {
+          activeThread = { renter_username: renterUsername, vehicle_id: vehicleId || null };
+          document.getElementById('chat-placeholder').style.display = 'none';
+          var chatActive = document.getElementById('chat-active');
+          chatActive.style.display = 'flex';
+
+          document.getElementById('chat-header-name').textContent = renterUsername;
+          document.getElementById('chat-header-vehicle').textContent = vehicleId ? '' : '';
+
+          loadMessages();
+          startPolling();
+          loadThreads(); // refresh thread list to update active highlight + clear badge
+        }
+
+        // ── Messages ───────────────────────────────────────────────
+        function loadMessages() {
+          if (!activeThread) return;
+          var url = '/api/host/chat-messages?renter_username=' + encodeURIComponent(activeThread.renter_username);
+          if (activeThread.vehicle_id) url += '&vehicle_id=' + encodeURIComponent(activeThread.vehicle_id);
+
+          fetch(url, { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(renderMessages);
+        }
+
+        function renderMessages(messages) {
+          var container = document.getElementById('chat-messages');
+          if (!messages.length) {
+            container.innerHTML = '<div class="chat-no-msgs">No messages yet. Say hello!</div>';
+            return;
+          }
+          var html = messages.map(function (m) {
+            var isMine = m.from_username === hostUsername;
+            var time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            return '<div class="chat-msg ' + (isMine ? 'chat-msg-mine' : 'chat-msg-theirs') + '">' +
+              '<div class="chat-bubble">' + escHtml(m.body) + '</div>' +
+              '<div class="chat-msg-time">' + time + '</div>' +
+              '</div>';
+          }).join('');
+          container.innerHTML = html;
+          container.scrollTop = container.scrollHeight;
+        }
+
+        // ── Send ───────────────────────────────────────────────────
+        document.getElementById('chat-send-btn').addEventListener('click', sendMessage);
+        document.getElementById('chat-input').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+
+        function sendMessage() {
+          if (!activeThread) return;
+          var input = document.getElementById('chat-input');
+          var body = input.value.trim();
+          if (!body) return;
+
+          var payload = { to_username: activeThread.renter_username, body: body };
+          if (activeThread.vehicle_id) payload.vehicle_id = activeThread.vehicle_id;
+
+          fetch('/api/host/chat-send', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.success) {
+                input.value = '';
+                loadMessages();
+                loadThreads();
+              }
+            });
+        }
+
+        // ── Polling ────────────────────────────────────────────────
+        function startPolling() {
+          stopPolling();
+          pollTimer = setInterval(function () {
+            loadMessages();
+            loadThreads();
+          }, 5000);
+        }
+        function stopPolling() {
+          if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        }
+
+        // ── New Chat ───────────────────────────────────────────────
+        document.getElementById('new-chat-btn').addEventListener('click', function () {
+          var panel = document.getElementById('new-chat-panel');
+          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+          if (panel.style.display === 'block') loadEligibleRenters();
+        });
+
+        document.getElementById('new-chat-cancel-btn').addEventListener('click', function () {
+          document.getElementById('new-chat-panel').style.display = 'none';
+        });
+
+        document.getElementById('new-chat-open-btn').addEventListener('click', function () {
+          var sel = document.getElementById('new-chat-renter-select');
+          if (!sel.value) return;
+          var parts = sel.value.split('::');
+          var renter = parts[0];
+          var vehicleId = parts[1] || null;
+
+          // Update vehicle label in thread header
+          var opt = sel.options[sel.selectedIndex];
+          document.getElementById('chat-header-vehicle').textContent = opt ? opt.dataset.label || '' : '';
+
+          document.getElementById('new-chat-panel').style.display = 'none';
+          openThread(renter, vehicleId);
+        });
+
+        function loadEligibleRenters() {
+          var sel = document.getElementById('new-chat-renter-select');
+          sel.innerHTML = '<option value="">Loading...</option>';
+          fetch('/api/host/eligible-renters', { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (renters) {
+              if (!renters.length) {
+                sel.innerHTML = '<option value="">No active renters available</option>';
+                return;
+              }
+              sel.innerHTML = '<option value="">-- Select renter --</option>' +
+                renters.map(function (r) {
+                  return '<option value="' + escAttr(r.renter_username + '::' + r.vehicle_id) + '" data-label="' + escAttr(r.vehicle_label) + '">' +
+                    escHtml(r.renter_name) + ' — ' + escHtml(r.vehicle_label) + ' (' + escHtml(r.reservation_status) + ')</option>';
+                }).join('');
+            });
+        }
+
+        function escHtml(s) {
+          return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+        function escAttr(s) {
+          return String(s || '').replace(/"/g,'&quot;');
+        }
+      })();
+
+      // ══════════════════════════════════════════════════════════════
+      //  NOTIFICATIONS
+      // ══════════════════════════════════════════════════════════════
+      (function () {
+        var loaded = false;
+
+        document.getElementById('view-notifications-btn').addEventListener('click', function () {
+          var content = document.getElementById('notifications-content');
+          if (content.style.display === 'none' || content.style.display === '') {
+            content.style.display = 'block';
+            if (!loaded) { loaded = true; loadNotifications(); }
+          } else {
+            content.style.display = 'none';
+          }
+        });
+
+        function loadNotifications() {
+          var loading = document.getElementById('notifications-loading');
+          var list    = document.getElementById('notifications-list');
+          var empty   = document.getElementById('notifications-empty');
+          loading.style.display = 'block';
+          list.innerHTML = '';
+          empty.style.display = 'none';
+
+          fetch('/api/notifications', { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (notifs) {
+              loading.style.display = 'none';
+              if (!notifs.length) { empty.style.display = 'flex'; return; }
+              list.innerHTML = notifs.map(function (n) {
+                var icon = n.type === 'price_drop'           ? 'bx-tag' :
+                           n.type === 'available'             ? 'bx-check-circle' :
+                           n.type === 'reservation_confirmed' ? 'bx-calendar-check' :
+                           n.type === 'new_rental'            ? 'bx-car' :
+                           n.type === 'rental_cancelled'      ? 'bx-calendar-x' : 'bx-bell';
+                var time = n.createdAt ? new Date(n.createdAt).toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+                return '<div class="notif-item' + (n.read ? '' : ' notif-unread') + '" data-id="' + escHtml(String(n._id)) + '">' +
+                  '<i class="bx ' + icon + ' notif-icon"></i>' +
+                  '<div class="notif-body"><div class="notif-msg">' + escHtml(n.message || '') + '</div>' +
+                  '<div class="notif-time">' + time + '</div></div>' +
+                  '</div>';
+              }).join('');
+
+              // Mark-as-read on click
+              list.querySelectorAll('.notif-item.notif-unread').forEach(function (el) {
+                el.addEventListener('click', function () {
+                  fetch('/api/notifications/' + el.dataset.id + '/read', {
+                    method: 'PATCH', credentials: 'include',
+                  });
+                  el.classList.remove('notif-unread');
+                });
+              });
+            });
+        }
+
+        function escHtml(s) {
+          return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+      })();
     </script>
 </body>
 

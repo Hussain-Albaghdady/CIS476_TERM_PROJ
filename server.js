@@ -1456,6 +1456,26 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     };
     await db.collection("Reservations").insertOne(data);
 
+    // Notify the host that their vehicle was rented
+    if (hostUsername) {
+      try {
+        const vehicleName =
+          [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
+          "your vehicle";
+        await db.collection("Notifications").insertOne({
+          username: hostUsername,
+          type: "new_rental",
+          message: `${customer_name} has rented ${vehicleName} from ${start_date} to ${end_date}.`,
+          link: "/ownerPage.html#financial-management",
+          vehicle_id: objectId,
+          read: false,
+          createdAt: new Date(),
+        });
+      } catch (err) {
+        console.error("[Notify] Failed to send host rental notification:", err.message);
+      }
+    }
+
     // Send confirmation email to renter
     const renterUser = await db
       .collection("RentalUsers")
@@ -2101,6 +2121,30 @@ app.post("/api/cancel-reservation", requireLogin, async (req, res) => {
     console.log(
       `[CANCEL] Reservation ${reservationId} (Order #${resv.orderId}) cancelled by user at ${new Date().toISOString()}`,
     );
+
+    // Notify the host that a renter cancelled
+    if (resv.hostUsername) {
+      try {
+        const vehicleDoc = await db
+          .collection("Vehicles")
+          .findOne({ _id: resv.history_vehicle_id || resv.vehicle_id });
+        const vehicleName = vehicleDoc
+          ? [vehicleDoc.year, vehicleDoc.make, vehicleDoc.model].filter(Boolean).join(" ")
+          : "your vehicle";
+        await db.collection("Notifications").insertOne({
+          username: resv.hostUsername,
+          type: "rental_cancelled",
+          message: `${resv.customer_name} has cancelled their reservation for ${vehicleName} (${resv.start_date} to ${resv.end_date}).`,
+          link: "/ownerPage.html#financial-management",
+          vehicle_id: resv.history_vehicle_id || resv.vehicle_id,
+          read: false,
+          createdAt: new Date(),
+        });
+      } catch (err) {
+        console.error("[Notify] Failed to send host cancellation notification:", err.message);
+      }
+    }
+
     return res.json({ success: true });
   } catch (err) {
     return res
@@ -4187,3 +4231,406 @@ app.post("/api/messages/send", requireLogin, async (req, res) => {
         res.status(500).json({ error: "Failed to save review" });
       }
     });
+
+// ── Host Chat: eligible renters (active reservations, not Complete/Cancelled) ──
+app.get("/api/host/eligible-renters", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ host_username: hostUsername }, { projection: { _id: 1, year: 1, make: 1, model: 1 } })
+      .toArray();
+
+    if (!vehicles.length) return res.json([]);
+
+    const vehicleIds = vehicles.map((v) => v._id);
+    const vehicleMap = {};
+    vehicles.forEach((v) => {
+      vehicleMap[String(v._id)] = [v.year, v.make, v.model].filter(Boolean).join(" ");
+    });
+
+    const activeReservations = await db
+      .collection("Reservations")
+      .find({
+        status: { $nin: ["Complete", "Cancelled"] },
+        $or: [
+          { history_vehicle_id: { $in: vehicleIds } },
+          { vehicle_id: { $in: vehicleIds } },
+        ],
+      })
+      .toArray();
+
+    if (!activeReservations.length) return res.json([]);
+
+    // Look up renter usernames via user_id
+    const userIds = [
+      ...new Set(
+        activeReservations
+          .map((r) => r.user_id)
+          .filter((id) => id && ObjectId.isValid(String(id)))
+          .map((id) => String(id))
+      ),
+    ];
+    const renterUsers = await db
+      .collection("RentalUsers")
+      .find({ _id: { $in: userIds.map((id) => new ObjectId(id)) } })
+      .toArray();
+    const userMap = {};
+    renterUsers.forEach((u) => { userMap[String(u._id)] = u; });
+
+    const seen = new Set();
+    const result = [];
+    for (const r of activeReservations) {
+      const vehicleId = String(r.history_vehicle_id || r.vehicle_id || "");
+      const renterUser = r.user_id ? userMap[String(r.user_id)] : null;
+      const renterUsername = renterUser?.username || null;
+      if (!renterUsername || !vehicleId) continue;
+      const key = `${renterUsername}::${vehicleId}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push({
+        renter_username: renterUsername,
+        renter_name: r.customer_name || renterUsername,
+        vehicle_id: vehicleId,
+        vehicle_label: vehicleMap[vehicleId] || "Vehicle",
+        reservation_status: r.status,
+      });
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error("eligible-renters error:", err);
+    res.status(500).json({ error: "Failed to load eligible renters." });
+  }
+});
+
+// ── Host Chat: get all threads for this host ─────────────────────────────────
+app.get("/api/host/chat-threads", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+
+    const messages = await db
+      .collection("Messages")
+      .find({ $or: [{ from_username: hostUsername }, { to_username: hostUsername }] })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    if (!messages.length) return res.json([]);
+
+    const threadMap = {};
+    for (const m of messages) {
+      const otherParty = m.from_username === hostUsername ? m.to_username : m.from_username;
+      const vehicleId = m.vehicle_id ? String(m.vehicle_id) : "general";
+      const key = `${otherParty}::${vehicleId}`;
+
+      if (!threadMap[key]) {
+        threadMap[key] = {
+          renter_username: otherParty,
+          vehicle_id: vehicleId === "general" ? null : vehicleId,
+          vehicle_label: null,
+          last_message: m.body || m.message || "",
+          last_message_time: m.createdAt || m.timestamp,
+          unread_count: 0,
+        };
+      }
+      if (m.to_username === hostUsername && !m.read) {
+        threadMap[key].unread_count++;
+      }
+    }
+
+    const vehicleIds = [...new Set(Object.values(threadMap).map((t) => t.vehicle_id).filter(Boolean))];
+    if (vehicleIds.length) {
+      const vehicles = await db
+        .collection("Vehicles")
+        .find({ _id: { $in: vehicleIds.map((id) => new ObjectId(id)) } })
+        .toArray();
+      vehicles.forEach((v) => {
+        const label = [v.year, v.make, v.model].filter(Boolean).join(" ");
+        Object.values(threadMap).forEach((t) => {
+          if (t.vehicle_id === String(v._id)) t.vehicle_label = label;
+        });
+      });
+    }
+
+    const threads = Object.values(threadMap).sort(
+      (a, b) => new Date(b.last_message_time) - new Date(a.last_message_time)
+    );
+    res.json(threads);
+  } catch (err) {
+    console.error("chat-threads error:", err);
+    res.status(500).json({ error: "Failed to load chat threads." });
+  }
+});
+
+// ── Host Chat: get messages for a specific thread ────────────────────────────
+app.get("/api/host/chat-messages", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+    const { renter_username, vehicle_id } = req.query;
+
+    if (!renter_username) return res.status(400).json({ error: "renter_username is required." });
+
+    const baseQuery = {
+      $or: [
+        { from_username: hostUsername, to_username: renter_username },
+        { from_username: renter_username, to_username: hostUsername },
+      ],
+    };
+
+    if (vehicle_id && ObjectId.isValid(vehicle_id)) {
+      baseQuery.vehicle_id = new ObjectId(vehicle_id);
+    } else {
+      baseQuery.vehicle_id = { $in: [null, undefined] };
+    }
+
+    const messages = await db
+      .collection("Messages")
+      .find(baseQuery)
+      .sort({ createdAt: 1, timestamp: 1 })
+      .toArray();
+
+    await db.collection("Messages").updateMany(
+      { ...baseQuery, to_username: hostUsername, read: false },
+      { $set: { read: true } }
+    );
+
+    res.json(
+      messages.map((m) => ({
+        _id: String(m._id),
+        from_username: m.from_username,
+        to_username: m.to_username,
+        body: m.body || m.message || "",
+        vehicle_id: m.vehicle_id ? String(m.vehicle_id) : null,
+        read: m.read || false,
+        createdAt: m.createdAt || m.timestamp,
+      }))
+    );
+  } catch (err) {
+    console.error("chat-messages error:", err);
+    res.status(500).json({ error: "Failed to load messages." });
+  }
+});
+
+// ── Host Chat: send a message ─────────────────────────────────────────────────
+app.post("/api/host/chat-send", requireLogin, async (req, res) => {
+  try {
+    const hostUsername = req.session.user_name;
+    const { to_username, body, vehicle_id } = req.body;
+
+    if (!to_username || !body || !body.trim()) {
+      return res.status(400).json({ error: "Recipient and message are required." });
+    }
+
+    if (vehicle_id && ObjectId.isValid(vehicle_id)) {
+      const vehicle = await db
+        .collection("Vehicles")
+        .findOne({ _id: new ObjectId(vehicle_id), host_username: hostUsername });
+      if (!vehicle) return res.status(403).json({ error: "You do not own this vehicle." });
+    }
+
+    const msg = {
+      from_username: hostUsername,
+      to_username,
+      body: body.trim(),
+      subject: "(chat)",
+      vehicle_id: vehicle_id && ObjectId.isValid(vehicle_id) ? new ObjectId(vehicle_id) : null,
+      read: false,
+      createdAt: new Date(),
+    };
+
+    const result = await db.collection("Messages").insertOne(msg);
+    res.json({ success: true, messageId: String(result.insertedId) });
+  } catch (err) {
+    console.error("host chat-send error:", err);
+    res.status(500).json({ error: "Failed to send message." });
+  }
+});
+
+// ── Renter Chat: all hosts & their vehicles (for "new chat" panel) ────────────
+app.get("/api/renter/all-hosts-vehicles", requireLogin, async (req, res) => {
+  try {
+    const vehicles = await db
+      .collection("Vehicles")
+      .find(
+        { host_username: { $exists: true, $ne: null } },
+        { projection: { _id: 1, year: 1, make: 1, model: 1, host_username: 1 } }
+      )
+      .toArray();
+
+    const result = vehicles.map((v) => ({
+      vehicle_id: String(v._id),
+      vehicle_label: [v.year, v.make, v.model].filter(Boolean).join(" "),
+      host_username: v.host_username,
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("renter all-hosts-vehicles error:", err);
+    res.status(500).json({ error: "Failed to load hosts and vehicles." });
+  }
+});
+
+// ── Renter Chat: get all threads for this renter ──────────────────────────────
+app.get("/api/renter/chat-threads", requireLogin, async (req, res) => {
+  try {
+    const renterUsername = req.session.user_name;
+    const threadMap = {};
+
+    // Pre-populate with active (non-complete, non-cancelled) reservations
+    const activeReservations = await db
+      .collection("Reservations")
+      .find({ customer_username: renterUsername, status: { $nin: ["Complete", "Cancelled"] } })
+      .toArray();
+
+    for (const r of activeReservations) {
+      const vehicleId = String(r.history_vehicle_id || r.vehicle_id || "");
+      if (!vehicleId || !ObjectId.isValid(vehicleId)) continue;
+      const vehicle = await db.collection("Vehicles").findOne({ _id: new ObjectId(vehicleId) });
+      if (!vehicle || !vehicle.host_username) continue;
+      const key = `${vehicle.host_username}::${vehicleId}`;
+      if (!threadMap[key]) {
+        threadMap[key] = {
+          host_username: vehicle.host_username,
+          vehicle_id: vehicleId,
+          vehicle_label: [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" "),
+          last_message: "",
+          last_message_time: r.createdAt || new Date(0),
+          unread_count: 0,
+        };
+      }
+    }
+
+    // Overlay with actual message history
+    const messages = await db
+      .collection("Messages")
+      .find({ $or: [{ from_username: renterUsername }, { to_username: renterUsername }] })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    for (const m of messages) {
+      const otherParty = m.from_username === renterUsername ? m.to_username : m.from_username;
+      const vehicleId = m.vehicle_id ? String(m.vehicle_id) : "general";
+      const key = `${otherParty}::${vehicleId}`;
+      if (!threadMap[key]) {
+        threadMap[key] = {
+          host_username: otherParty,
+          vehicle_id: vehicleId === "general" ? null : vehicleId,
+          vehicle_label: null,
+          last_message: m.body || m.message || "",
+          last_message_time: m.createdAt || m.timestamp,
+          unread_count: 0,
+        };
+      } else {
+        if (!threadMap[key].last_message) {
+          threadMap[key].last_message = m.body || m.message || "";
+          threadMap[key].last_message_time = m.createdAt || m.timestamp;
+        }
+      }
+      if (m.to_username === renterUsername && !m.read) {
+        threadMap[key].unread_count++;
+      }
+    }
+
+    // Fetch vehicle labels for threads missing them
+    const vehicleIds = [...new Set(Object.values(threadMap).map((t) => t.vehicle_id).filter(Boolean))];
+    if (vehicleIds.length) {
+      const vehicles = await db
+        .collection("Vehicles")
+        .find({ _id: { $in: vehicleIds.map((id) => new ObjectId(id)) } })
+        .toArray();
+      vehicles.forEach((v) => {
+        const label = [v.year, v.make, v.model].filter(Boolean).join(" ");
+        Object.values(threadMap).forEach((t) => {
+          if (t.vehicle_id === String(v._id) && !t.vehicle_label) t.vehicle_label = label;
+        });
+      });
+    }
+
+    const threads = Object.values(threadMap).sort(
+      (a, b) => new Date(b.last_message_time) - new Date(a.last_message_time)
+    );
+    res.json(threads);
+  } catch (err) {
+    console.error("renter chat-threads error:", err);
+    res.status(500).json({ error: "Failed to load chat threads." });
+  }
+});
+
+// ── Renter Chat: get messages for a specific thread ───────────────────────────
+app.get("/api/renter/chat-messages", requireLogin, async (req, res) => {
+  try {
+    const renterUsername = req.session.user_name;
+    const { host_username, vehicle_id } = req.query;
+
+    if (!host_username) return res.status(400).json({ error: "host_username is required." });
+
+    const baseQuery = {
+      $or: [
+        { from_username: renterUsername, to_username: host_username },
+        { from_username: host_username, to_username: renterUsername },
+      ],
+    };
+
+    if (vehicle_id && ObjectId.isValid(vehicle_id)) {
+      baseQuery.vehicle_id = new ObjectId(vehicle_id);
+    } else {
+      baseQuery.vehicle_id = { $in: [null, undefined] };
+    }
+
+    const messages = await db
+      .collection("Messages")
+      .find(baseQuery)
+      .sort({ createdAt: 1, timestamp: 1 })
+      .toArray();
+
+    // Mark messages sent to this renter as read
+    await db.collection("Messages").updateMany(
+      { ...baseQuery, to_username: renterUsername, read: false },
+      { $set: { read: true } }
+    );
+
+    res.json(
+      messages.map((m) => ({
+        _id: String(m._id),
+        from_username: m.from_username,
+        to_username: m.to_username,
+        body: m.body || m.message || "",
+        vehicle_id: m.vehicle_id ? String(m.vehicle_id) : null,
+        read: m.read || false,
+        createdAt: m.createdAt || m.timestamp,
+      }))
+    );
+  } catch (err) {
+    console.error("renter chat-messages error:", err);
+    res.status(500).json({ error: "Failed to load messages." });
+  }
+});
+
+// ── Renter Chat: send a message ───────────────────────────────────────────────
+app.post("/api/renter/chat-send", requireLogin, async (req, res) => {
+  try {
+    const renterUsername = req.session.user_name;
+    const { to_username, body, vehicle_id } = req.body;
+
+    if (!to_username || !body || !body.trim()) {
+      return res.status(400).json({ error: "Recipient and message are required." });
+    }
+
+    const msg = {
+      from_username: renterUsername,
+      to_username,
+      body: body.trim(),
+      subject: "(chat)",
+      vehicle_id: vehicle_id && ObjectId.isValid(vehicle_id) ? new ObjectId(vehicle_id) : null,
+      read: false,
+      createdAt: new Date(),
+    };
+
+    const result = await db.collection("Messages").insertOne(msg);
+    res.json({ success: true, messageId: String(result.insertedId) });
+  } catch (err) {
+    console.error("renter chat-send error:", err);
+    res.status(500).json({ error: "Failed to send message." });
+  }
+});
