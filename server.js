@@ -712,11 +712,29 @@ app.post("/reset_password", async (req, res) => {
 // View: No public view, this is intended for initial setup and can be tested via Postman or similar tools
 // Controller: This endpoint allows the creation of a new admin user. It validates the input, checks for existing usernames, hashes the password, and inserts the new admin into the database. It also logs the creation event and handles errors gracefully by returning JSON responses.
 app.post("/add_admin", async (req, res) => {
-  const { fname, lname, email, username, password } = req.body;
+  const {
+    fname,
+    lname,
+    email,
+    username,
+    password,
+    security1,
+    answer1,
+    security2,
+    answer2,
+    security3,
+    answer3,
+  } = req.body;
 
   try {
     if (!fname || !lname || !email || !username || !password) {
       return res.json({ success: false, error: "All fields are required." });
+    }
+    if (!security1 || !security2 || !security3 || !answer1 || !answer2 || !answer3) {
+      return res.json({ success: false, error: "All three security questions and answers are required." });
+    }
+    if (new Set([security1, security2, security3]).size < 3) {
+      return res.json({ success: false, error: "Please choose three different security questions." });
     }
 
     const existing = await db.collection("AdminUsers").findOne({ username });
@@ -728,6 +746,21 @@ app.post("/add_admin", async (req, res) => {
     const adminId = await getNextSequence("adminId");
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
+    const security_questions = [
+      {
+        question: security1,
+        answer: crypto.createHash("sha256").update((answer1 || "").trim().toLowerCase()).digest("hex"),
+      },
+      {
+        question: security2,
+        answer: crypto.createHash("sha256").update((answer2 || "").trim().toLowerCase()).digest("hex"),
+      },
+      {
+        question: security3,
+        answer: crypto.createHash("sha256").update((answer3 || "").trim().toLowerCase()).digest("hex"),
+      },
+    ];
+
     await db.collection("AdminUsers").insertOne({
       adminId,
       fname,
@@ -736,7 +769,7 @@ app.post("/add_admin", async (req, res) => {
       username,
       password: hash,
       user_type: "admin",
-      security_questions: [],
+      security_questions,
       force_password_change: true,
       created_at: now,
       updated_at: now,
@@ -1083,6 +1116,121 @@ app.get("/api/vehicles", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch vehicles" });
   }
 });
+// ── Admin Review Management ──────────────────────────────────
+// GET    /api/admin/reviews          — all customer + host reviews across the platform
+// DELETE /api/admin/reviews/:id      — delete a customer review by ID
+// DELETE /api/admin/host-reviews/:id — delete a host review by ID
+app.get("/api/admin/reviews", requireLogin, async (req, res) => {
+  if (req.session.user?.user_type !== "admin") {
+    return res.status(403).json({ error: "Admin only" });
+  }
+  try {
+    const [customerReviews, hostReviews, vehicles] = await Promise.all([
+      db.collection("Reviews").find({}).sort({ created_at: -1 }).toArray(),
+      db.collection("HostReviews").find({}).sort({ created_at: -1 }).toArray(),
+      db.collection("Vehicles").find({}, { projection: { _id: 1, make: 1, model: 1, year: 1, host_username: 1 } }).toArray(),
+    ]);
+
+    const vehicleMap = {};
+    vehicles.forEach(v => { vehicleMap[v._id.toString()] = v; });
+
+    const label = v => v ? [v.year, v.make, v.model].filter(Boolean).join(" ") : "—";
+
+    // Resolve usernames and reservation start dates for customer reviews
+    const unresolvedIds = customerReviews
+      .filter(r => !r.customer_username && r.user_id)
+      .map(r => new ObjectId(String(r.user_id)));
+
+    const reservationIds = customerReviews
+      .filter(r => r.reservation_id)
+      .map(r => new ObjectId(String(r.reservation_id)));
+
+    const [renters, reservations] = await Promise.all([
+      unresolvedIds.length > 0
+        ? db.collection("RentalUsers").find({ _id: { $in: unresolvedIds } }, { projection: { _id: 1, username: 1 } }).toArray()
+        : [],
+      reservationIds.length > 0
+        ? db.collection("Reservations").find({ _id: { $in: reservationIds } }, { projection: { _id: 1, start_date: 1 } }).toArray()
+        : [],
+    ]);
+
+    const renterMap = {};
+    renters.forEach(u => { renterMap[u._id.toString()] = u.username; });
+
+    const reservationMap = {};
+    reservations.forEach(res => { reservationMap[res._id.toString()] = res; });
+
+    const customer = customerReviews.map(r => {
+      const v = vehicleMap[r.vehicle_id?.toString()];
+      const username = r.customer_username || r.username
+        || renterMap[r.user_id?.toString()]
+        || "—";
+      const reservation = reservationMap[r.reservation_id?.toString()];
+      return {
+        _id: r._id.toString(),
+        vehicle_id: r.vehicle_id?.toString() || "",
+        vehicle_name: r.vehicle_name || label(v),
+        host_username: r.host_username || v?.host_username || "—",
+        customer_username: username,
+        rating: r.rating,
+        comment: r.body || r.comment || "",
+        start_date: r.start_date || reservation?.start_date || "",
+        created_at: r.created_at || "",
+      };
+    });
+
+    const host = hostReviews.map(r => {
+      const v = vehicleMap[r.vehicle_id?.toString()];
+      return {
+        _id: r._id.toString(),
+        vehicle_id: r.vehicle_id?.toString() || "",
+        vehicle_name: r.vehicle_name || label(v),
+        host_username: r.host_username || "—",
+        customer_username: r.customer_username || "—",
+        rating: r.rating,
+        comment: r.comment || "",
+        start_date: r.start_date || "",
+        created_at: r.created_at || "",
+      };
+    });
+
+    res.json({ customer, host });
+  } catch (err) {
+    console.error("admin/reviews GET error:", err);
+    res.status(500).json({ error: "Failed to load reviews" });
+  }
+});
+
+app.delete("/api/admin/reviews/:id", requireLogin, async (req, res) => {
+  if (req.session.user?.user_type !== "admin") {
+    return res.status(403).json({ error: "Admin only" });
+  }
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
+    const result = await db.collection("Reviews").deleteOne({ _id: new ObjectId(id) });
+    res.json({ success: result.deletedCount > 0 });
+  } catch (err) {
+    console.error("admin/reviews DELETE error:", err);
+    res.status(500).json({ error: "Failed to delete review" });
+  }
+});
+
+app.delete("/api/admin/host-reviews/:id", requireLogin, async (req, res) => {
+  if (req.session.user?.user_type !== "admin") {
+    return res.status(403).json({ error: "Admin only" });
+  }
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
+    const result = await db.collection("HostReviews").deleteOne({ _id: new ObjectId(id) });
+    res.json({ success: result.deletedCount > 0 });
+  } catch (err) {
+    console.error("admin/host-reviews DELETE error:", err);
+    res.status(500).json({ error: "Failed to delete review" });
+  }
+});
+
 // ── MVC: Admin Financial Dashboard ──────────────────────────────
 // Model: MongoDB collections (Vehicles, Reservations)
 // View: adminPage.html with a financial dashboard section

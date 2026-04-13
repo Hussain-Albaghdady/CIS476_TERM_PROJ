@@ -617,7 +617,9 @@
           </section>
         </div>
 
-        <button class="collapsible" id="rc-messaging-collapsible">Messaging &amp; Communication</button>
+        <button class="collapsible" id="rc-messaging-collapsible">
+          Messaging &amp; Communication
+        </button>
         <div class="content">
           <section class="account-section messaging-section">
             <div class="section-action-header">
@@ -630,20 +632,45 @@
               <div class="chat-sidebar">
                 <div class="chat-sidebar-header">
                   <span>Conversations</span>
-                  <button id="rc-new-chat-btn" class="btn btn-sm btn-success" title="Start new chat">
+                  <button
+                    id="rc-new-chat-btn"
+                    class="btn btn-sm btn-success"
+                    title="Start new chat"
+                  >
                     <i class="bx bx-edit"></i> New
                   </button>
                 </div>
 
                 <!-- New chat panel (hidden by default) -->
-                <div id="rc-new-chat-panel" style="display:none;">
+                <div id="rc-new-chat-panel" style="display: none">
                   <div class="new-chat-inner">
-                    <label style="font-size:0.8rem;color:#555;margin-bottom:4px;display:block;">Select a vehicle to message the owner about:</label>
-                    <select id="rc-vehicle-select" class="form-control form-control-sm mb-2">
+                    <label
+                      style="
+                        font-size: 0.8rem;
+                        color: #555;
+                        margin-bottom: 4px;
+                        display: block;
+                      "
+                      >Select a vehicle to message the owner about:</label
+                    >
+                    <select
+                      id="rc-vehicle-select"
+                      class="form-control form-control-sm mb-2"
+                    >
                       <option value="">Loading...</option>
                     </select>
-                    <button id="rc-new-chat-open-btn" class="btn btn-sm btn-primary w-100">Open Chat</button>
-                    <button id="rc-new-chat-cancel-btn" class="btn btn-sm btn-secondary w-100 mt-1">Cancel</button>
+                    <button
+                      id="rc-new-chat-open-btn"
+                      class="btn btn-sm btn-primary w-100"
+                    >
+                      Open Chat
+                    </button>
+                    <button
+                      id="rc-new-chat-cancel-btn"
+                      class="btn btn-sm btn-secondary w-100 mt-1"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
 
@@ -662,22 +689,36 @@
                   <p>Select a conversation to start chatting.</p>
                 </div>
 
-                <div id="rc-chat-active" style="display:none; height:100%; flex-direction:column;">
+                <div
+                  id="rc-chat-active"
+                  style="display: none; height: 100%; flex-direction: column"
+                >
                   <div class="chat-window-header" id="rc-chat-header">
                     <span id="rc-chat-header-name"></span>
-                    <span id="rc-chat-header-vehicle" class="chat-header-vehicle"></span>
+                    <span
+                      id="rc-chat-header-vehicle"
+                      class="chat-header-vehicle"
+                    ></span>
                   </div>
                   <div class="chat-messages" id="rc-chat-messages"></div>
                   <div class="chat-input-area">
-                    <textarea id="rc-chat-input" class="chat-input" placeholder="Type a message..." rows="2"></textarea>
-                    <button id="rc-chat-send-btn" class="btn btn-primary chat-send-btn">
+                    <textarea
+                      id="rc-chat-input"
+                      class="chat-input"
+                      placeholder="Type a message..."
+                      rows="2"
+                    ></textarea>
+                    <button
+                      id="rc-chat-send-btn"
+                      class="btn btn-primary chat-send-btn"
+                    >
                       <i class="bx bx-send"></i>
                     </button>
                   </div>
                 </div>
               </div>
-            </div><!-- end .chat-layout -->
-
+            </div>
+            <!-- end .chat-layout -->
           </section>
         </div>
       </section>
@@ -972,11 +1013,20 @@
               // Auto-open collapsible from URL hash after page is revealed
               var hash = window.location.hash.replace("#", "").toLowerCase();
               if (hash) {
-                var collButtons = document.getElementsByClassName("collapsible");
+                var collButtons =
+                  document.getElementsByClassName("collapsible");
                 for (var ci = 0; ci < collButtons.length; ci++) {
-                  if (collButtons[ci].textContent.trim().toLowerCase().includes(hash)) {
+                  if (
+                    collButtons[ci].textContent
+                      .trim()
+                      .toLowerCase()
+                      .includes(hash)
+                  ) {
                     collButtons[ci].click();
-                    collButtons[ci].scrollIntoView({ behavior: "smooth", block: "start" });
+                    collButtons[ci].scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
                     break;
                   }
                 }
@@ -1001,15 +1051,30 @@
           fallbackText.style.display = "none";
         });
       });
+      // Helper function to format date strings in a user-friendly way, with handling for invalid or missing dates
       function fmtDate(val) {
-        if (!val) return 'N/A';
-        const parts = String(val).substring(0, 10).split('-');
+        if (!val) return "N/A";
+        const parts = String(val).substring(0, 10).split("-");
         if (parts.length === 3) {
-          const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const d = new Date(
+            parseInt(parts[0]),
+            parseInt(parts[1]) - 1,
+            parseInt(parts[2]),
+          );
+          return d.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
         }
         const d = new Date(val);
-        return isNaN(d) ? String(val) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return isNaN(d)
+          ? String(val)
+          : d.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            });
       }
       // Load the user's reservations and display them in the orders section, including handling for cases where there are no reservations or if the API call fails
       function loadOrders() {
@@ -1040,6 +1105,11 @@
       document.addEventListener("DOMContentLoaded", loadOrders);
 
       // Watchlist
+      // Load the user's watchlist and display it in the watchlist section, including handling for cases where the watchlist is empty or if the API call fails
+      // This also includes functionality to unwatch a vehicle, with a confirmation modal and error handling for failed API calls
+      // The watchlist displays the vehicle name, rental dates, current rental rate, target price set by the user, and availability status, and allows the user to quickly unwatch a vehicle if they are no longer interested in it
+      // The unwatch action triggers a confirmation modal to prevent accidental unwatches, and upon confirmation, it sends a DELETE request to the API to remove the vehicle from the user's watchlist, with error handling for failed requests and immediate UI updates to reflect the change
+      // The watchlist also handles cases where the vehicle information is incomplete or missing, displaying "Unknown Vehicle" and "N/A" as appropriate, and formats the rental rate and target price as currency for better readability
       function loadWatchlist() {
         fetch("/api/watch", { credentials: "include" })
           .then((res) => res.json())
@@ -1084,7 +1154,7 @@
           .catch((err) => console.error("Error loading watchlist:", err));
       }
       document.addEventListener("DOMContentLoaded", loadWatchlist);
-
+      // Event delegation for unwatch buttons in the watchlist, with a confirmation modal and API call to remove the vehicle from the watchlist, and immediate UI update to reflect the change
       document.addEventListener("click", (e) => {
         if (e.target.classList.contains("unwatch-btn")) {
           const vehicleId = e.target.dataset.vehicleId;
@@ -1148,6 +1218,7 @@
             console.error("Error loading payments:", err);
           });
       });
+      // Event delegation for delete buttons in the payment methods table, with a confirmation modal and API call to delete the payment method, and immediate UI update to reflect the change
       document.addEventListener("click", (e) => {
         if (e.target.classList.contains("delete-btn")) {
           const last4 = e.target.dataset.last4;
@@ -1681,6 +1752,7 @@
           "</span>"
         );
       }
+      // Simple HTML escaper to prevent XSS in review display - this is used when rendering the user's submitted reviews on the page, and ensures that any HTML tags or special characters in the review title or body are properly escaped to prevent malicious code execution, while still allowing the reviews to be displayed safely on the page
       function escapeHtml(value = "") {
         return String(value)
           .replace(/&/g, "&amp;")
@@ -1689,7 +1761,7 @@
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#39;");
       }
-
+      // Utility to show success or error messages in the review form after submission, with automatic hiding of previous messages and proper styling for success vs error
       function showReviewAlert(type, message) {
         const successBox = document.getElementById("review-alert-success");
         const errorBox = document.getElementById("review-alert-error");
@@ -1707,7 +1779,7 @@
           errorBox.style.display = "block";
         }
       }
-
+      // Load the list of vehicles that the user can review (i.e. completed rentals that haven't been reviewed yet) and populate the review form dropdown, including handling for cases where there are no reviewable rentals or if the API call fails
       async function loadReviewableVehicles() {
         const select = document.getElementById("review-vehicle");
         if (!select) return;
@@ -1734,9 +1806,7 @@
             option.dataset.vehicleId = item.vehicle_id;
             option.textContent =
               `${item.vehicle_name} — Order #${item.order_id}` +
-              (item.end_date
-                ? ` — Returned ${fmtDate(item.end_date)}`
-                : "");
+              (item.end_date ? ` — Returned ${fmtDate(item.end_date)}` : "");
             select.appendChild(option);
           });
         } catch (err) {
@@ -1745,7 +1815,7 @@
           select.disabled = true;
         }
       }
-
+      // Load the user's submitted reviews along with details about the vehicle and rental, and handle cases where there are no reviews or if the API call fails
       async function loadMyReviews() {
         const container = document.getElementById("review-card-container");
         if (!container) return;
@@ -1869,9 +1939,11 @@
           showReviewAlert("error", "Server error. Please try again.");
         }
       };
-
+      // Load reviews left by owners for the renter, with details about the vehicle and rental, and handle cases where there are no reviews or if the API call fails
       async function loadOwnerReviews() {
-        const container = document.getElementById("owner-review-card-container");
+        const container = document.getElementById(
+          "owner-review-card-container",
+        );
         if (!container) return;
 
         try {
@@ -1890,13 +1962,15 @@
             return;
           }
 
-          container.innerHTML = reviews.map((review) => {
-            const createdAt = fmtDate(review.created_at);
-            const rentalRange = (review.start_date && review.end_date)
-              ? `${fmtDate(review.start_date)} – ${fmtDate(review.end_date)}`
-              : "";
+          container.innerHTML = reviews
+            .map((review) => {
+              const createdAt = fmtDate(review.created_at);
+              const rentalRange =
+                review.start_date && review.end_date
+                  ? `${fmtDate(review.start_date)} – ${fmtDate(review.end_date)}`
+                  : "";
 
-            return `
+              return `
               <div class="col-md-6 d-flex align-items-stretch mb-3">
                 <div class="info-box w-100">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
@@ -1915,11 +1989,15 @@
                   </div>
                 </div>
               </div>`;
-          }).join("");
+            })
+            .join("");
         } catch (err) {
           console.error("Error loading owner reviews:", err);
-          const container = document.getElementById("owner-review-card-container");
-          if (container) container.innerHTML = `
+          const container = document.getElementById(
+            "owner-review-card-container",
+          );
+          if (container)
+            container.innerHTML = `
             <div class="col-12">
               <div class="alert alert-danger" style="margin-top:10px;">
                 Could not load owner reviews.
@@ -1940,42 +2018,52 @@
       (function () {
         var enc = encodeURIComponent;
         var renterMediator = createChatMediator({
-          mode: 'renter',
+          mode: "renter",
           ids: {
-            threadList:        'rc-thread-list',
-            chatMessages:      'rc-chat-messages',
-            chatActive:        'rc-chat-active',
-            chatPlaceholder:   'rc-chat-placeholder',
-            chatHeaderName:    'rc-chat-header-name',
-            chatHeaderVehicle: 'rc-chat-header-vehicle',
-            chatInput:         'rc-chat-input',
-            chatSendBtn:       'rc-chat-send-btn',
-            newChatPanel:      'rc-new-chat-panel',
-            newChatBtn:        'rc-new-chat-btn',
-            newChatCancelBtn:  'rc-new-chat-cancel-btn',
-            newChatOpenBtn:    'rc-new-chat-open-btn',
-            newChatSelect:     'rc-vehicle-select',
+            threadList: "rc-thread-list",
+            chatMessages: "rc-chat-messages",
+            chatActive: "rc-chat-active",
+            chatPlaceholder: "rc-chat-placeholder",
+            chatHeaderName: "rc-chat-header-name",
+            chatHeaderVehicle: "rc-chat-header-vehicle",
+            chatInput: "rc-chat-input",
+            chatSendBtn: "rc-chat-send-btn",
+            newChatPanel: "rc-new-chat-panel",
+            newChatBtn: "rc-new-chat-btn",
+            newChatCancelBtn: "rc-new-chat-cancel-btn",
+            newChatOpenBtn: "rc-new-chat-open-btn",
+            newChatSelect: "rc-vehicle-select",
           },
           api: {
-            threads:  '/api/renter/chat-threads',
-            messages: '/api/renter/chat-messages',
-            send:     '/api/renter/chat-send',
-            contacts: '/api/renter/all-hosts-vehicles',
+            threads: "/api/renter/chat-threads",
+            messages: "/api/renter/chat-messages",
+            send: "/api/renter/chat-send",
+            contacts: "/api/renter/all-hosts-vehicles",
           },
-          threadKey: 'host_username',
+          threadKey: "host_username",
           buildThreadQuery: function (t) {
-            var q = 'host_username=' + enc(t.host_username);
-            if (t.vehicle_id) q += '&vehicle_id=' + enc(t.vehicle_id);
+            var q = "host_username=" + enc(t.host_username);
+            if (t.vehicle_id) q += "&vehicle_id=" + enc(t.vehicle_id);
             return q;
           },
           buildSelectOptions: function (items, ea, eh) {
-            return items.map(function (v) {
-              return '<option value="' + ea(v.host_username + '::' + v.vehicle_id) +
-                '" data-label="' + ea(v.vehicle_label) + '">' +
-                eh(v.host_username) + ' \u2014 ' + eh(v.vehicle_label) + '</option>';
-            }).join('');
+            return items
+              .map(function (v) {
+                return (
+                  '<option value="' +
+                  ea(v.host_username + "::" + v.vehicle_id) +
+                  '" data-label="' +
+                  ea(v.vehicle_label) +
+                  '">' +
+                  eh(v.host_username) +
+                  " \u2014 " +
+                  eh(v.vehicle_label) +
+                  "</option>"
+                );
+              })
+              .join("");
           },
-          panelCollapsible: { triggerId: 'rc-messaging-collapsible' },
+          panelCollapsible: { triggerId: "rc-messaging-collapsible" },
         });
         renterMediator.init();
       })();

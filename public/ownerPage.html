@@ -31,6 +31,18 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    /* Suppress the ::after underline and the › arrow on drop-down nav items.
+       Drop-down items already have the icofont arrow; the CSS-generated › and
+       the active-state underline both cause visual noise in the Host Portal menu. */
+    .nav-menu li.drop-down > a::after,
+    .nav-menu li.drop-down li > a::after,
+    .nav-menu li.drop-down li.drop-down > a::after {
+      content: none !important;
+      opacity: 0 !important;
+      width: 0 !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -901,6 +913,7 @@
     <script src="assets/js/chat-mediator.js"></script>
 
     <script>
+      // Check if user is logged in and is a host, otherwise redirect to login page
       document.addEventListener("DOMContentLoaded", () => {
         fetch("/userdetail")
           .then(res => {
@@ -937,6 +950,7 @@
             window.location.href = "/loginform.html";
           });
       });
+      // Logo image error handling
       document.addEventListener("DOMContentLoaded", function () {
         const logoImg = document.getElementById("logo-img");
         const fallbackText = document.getElementById("logo-fallback");
@@ -950,7 +964,7 @@
           fallbackText.style.display = "none";
         });
       });
-
+      // Vehicle management JS
       document.addEventListener('DOMContentLoaded', function () {
         // Populate vehicle year dropdowns
         ['vehicle-year', 'edit-vehicle-year'].forEach(function (id) {
@@ -990,7 +1004,7 @@
             loadVehicleForManagement();
           }
         });
-
+        // Use event delegation for dynamically added links
         document.addEventListener('click', function (e) {
           const anchor = e.target.closest('#add-vehicle-link-anchor');
           if (!anchor) return;
@@ -1000,7 +1014,7 @@
           loadVehicleForManagement();
           document.getElementById('vehicle-management').scrollIntoView({ behavior: 'smooth' });
         });
-
+        // Use event delegation for dynamically added links
         document.addEventListener('click', function (e) {
           const anchor = e.target.closest('#manage-existing-link-anchor');
           if (!anchor) return;
@@ -1010,21 +1024,65 @@
           loadVehicleForManagement();
           document.getElementById('vehicle-management').scrollIntoView({ behavior: 'smooth' });
         });
-
+        // ── Nav link wiring (event delegation for dynamically injected links) ──
         document.addEventListener('click', function (e) {
-          const anchor = e.target.closest('#view-financial-link-anchor');
-          if (!anchor) return;
-          e.preventDefault();
-          document.getElementById('view-financials-btn').click();
-          document.getElementById('financial-management').scrollIntoView({ behavior: 'smooth' });
+          // View Financial Records
+          if (e.target.closest('#view-financial-link-anchor')) {
+            e.preventDefault();
+            var btn = document.getElementById('view-financials-btn');
+            var section = document.getElementById('financial-section');
+            if (section && section.style.display === 'none') btn.click();
+            document.getElementById('financial-management').scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
+          // View Reviews
+          if (e.target.closest('#view-review-link-anchor')) {
+            e.preventDefault();
+            var btn = document.getElementById('view-reviews-btn');
+            var section = document.getElementById('review-section-body');
+            if (section && section.style.display === 'none') btn.click();
+            document.getElementById('review-customers').scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
+          // View Messages
+          if (e.target.closest('#view-message-link-anchor')) {
+            e.preventDefault();
+            var btn = document.getElementById('view-messaging-btn');
+            var section = document.getElementById('messaging-content');
+            if (section && section.style.display === 'none') btn.click();
+            document.getElementById('messaging').scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
+          // Vehicle Inventory
+          if (e.target.closest('#return-page-link-anchor')) {
+            e.preventDefault();
+            document.getElementById('availability').scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
+          // Add New Vehicle
+          if (e.target.closest('#add-vehicle-link-anchor')) {
+            e.preventDefault();
+            var form = document.getElementById('add-vehicle-form');
+            if (form && form.style.display === 'none') document.getElementById('add-vehicle-btn').click();
+            document.getElementById('vehicle-management').scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
+          // Manage Existing Vehicle
+          if (e.target.closest('#manage-existing-link-anchor')) {
+            e.preventDefault();
+            var section = document.getElementById('manage-vehicle-section');
+            if (section && section.style.display === 'none') document.getElementById('manage-vehicle-btn').click();
+            document.getElementById('vehicle-management').scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
         });
-
+        // Use event delegation for dynamically added links
         document.getElementById('cancel-add').addEventListener('click', function () {
           addVehicleForm.style.display = 'none';
           vehicleForm.reset();
           clearMessages();
         });
-
+        // Use event delegation for dynamically added links
         vehicleForm.addEventListener('submit', function (e) {
           e.preventDefault();
           clearMessages();
@@ -1070,7 +1128,7 @@
               showMessage('add-vehicle-error', 'Failed to add vehicle. Please check the console for details.');
             });
         });
-
+        // Load vehicles for management
         function loadVehicleForManagement() {
           fetch('/api/my-vehicles')
             .then(res => res.json())
@@ -1114,14 +1172,14 @@
             `;
                 tbody.appendChild(row);
               });
-
+              // Attach event listeners for edit, delete, and toggle availability buttons  
               document.querySelectorAll('.edit-vehicle-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                   const vehicleId = this.getAttribute('data-id');
                   openEditModal(vehicleId);
                 });
               });
-
+              // Attach event listeners for delete buttons
               document.querySelectorAll('.delete-vehicle-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                   const vehicleId = this.getAttribute('data-id');
@@ -1129,7 +1187,7 @@
                   openDeleteModal(vehicleId, vehicleName);
                 });
               });
-
+              // Attach event listeners for toggle availability buttons
               document.querySelectorAll('.toggle-availability-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                   const vehicleId = this.getAttribute('data-id');
@@ -1152,7 +1210,7 @@
               console.error('Failed to load vehicle:', err);
             });
         }
-
+        // Open edit modal and populate with vehicle data
         function openEditModal(vehicleId) {
           fetch('/api/my-vehicles')
             .then(res => res.json())
@@ -1174,7 +1232,7 @@
               }
             });
         }
-
+        // Open delete confirmation modal
         function openDeleteModal(vehicleId, vehicleName) {
           currentVehicleToDelete = vehicleId;
           deleteModal.querySelector('.modal-body p').textContent =
@@ -1224,7 +1282,7 @@
               showMessage('edit-vehicle-error', 'Failed to update vehicle. Please try again.');
             });
         });
-
+        // Handle vehicle deletion
         document.getElementById('confirm-delete-vehicle').addEventListener('click', function () {
           if (currentVehicleToDelete) {
             fetch(`/api/vehicle/${currentVehicleToDelete}`, {
@@ -1245,23 +1303,23 @@
               });
           }
         });
-
+        // Modal close handlers
         document.getElementById('close-edit-modal').addEventListener('click', function () {
           editModal.style.display = 'none';
         });
-
+        // Use event delegation for dynamically added links
         document.getElementById('cancel-edit').addEventListener('click', function () {
           editModal.style.display = 'none';
         });
-
+        // Modal close handlers
         document.getElementById('close-delete-modal').addEventListener('click', function () {
           deleteModal.style.display = 'none';
         });
-
+        // Use event delegation for dynamically added links
         document.getElementById('cancel-delete-vehicle').addEventListener('click', function () {
           deleteModal.style.display = 'none';
         });
-
+        // Close modals when clicking outside of them
         window.addEventListener('click', function (e) {
           if (e.target === editModal) {
             editModal.style.display = 'none';
@@ -1270,7 +1328,7 @@
             deleteModal.style.display = 'none';
           }
         });
-
+        // Utility functions
         function showMessage(elementId, message) {
           const element = document.getElementById(elementId);
           if (element) {
@@ -1281,7 +1339,7 @@
             }, 5000);
           }
         }
-
+        // Use event delegation for dynamically added links
         function clearMessages() {
           ['add-vehicle-success', 'add-vehicle-error', 'edit-vehicle-success', 'edit-vehicle-error'].forEach(id => {
             const element = document.getElementById(id);
@@ -1290,7 +1348,7 @@
             }
           });
         }
-
+        // Refresh the main vehicle display section after edits or deletions
         function refreshMainVehicleDisplay() {
           if (typeof $ !== 'undefined' && $('.vehicle-container').length) {
             fetch('/api/my-vehicles')
@@ -1383,6 +1441,7 @@
           }
         }
       });
+      // Use event delegation for dynamically added "View History" buttons in the financials table
       document.getElementById('financial-body').addEventListener('click', function (e) {
         const btn = e.target.closest('.view-history-btn');
         if (!btn) return;
@@ -1392,6 +1451,7 @@
 
         loadVehicleHistory(vehicleId, vehicleLabel);
       });
+      // Use event delegation for dynamically added links
       document.addEventListener('DOMContentLoaded', function () {
         const viewFinancialsBtn = document.getElementById('view-financials-btn');
         const financialSection = document.getElementById('financial-section');
@@ -1414,7 +1474,7 @@
         });
 
         let openHistoryVehicleId = null;
-
+        // Close history section when clicking outside of it
         function loadFinancials() {
           const historySection = document.getElementById('history-section');
           const ordersBody = document.getElementById('orders-body');
@@ -1477,7 +1537,7 @@
               console.error('Failed to load financials:', err);
             });
         }
-
+        // Load rental history for a specific vehicle
         function loadVehicleHistory(vehicleId, vehicleLabel) {
           const historySection = document.getElementById('history-section');
           const title = document.getElementById('history-title');
@@ -1522,7 +1582,7 @@
               console.error('Failed to load vehicle history:', err);
             });
         }
-
+        // Format date to "MMM D, YYYY" or return "—" if invalid
         function formatDate(value) {
           if (!value || value === '—') return '—';
           const parts = String(value).substring(0, 10).split('-');
@@ -1533,7 +1593,7 @@
           const d = new Date(value);
           return isNaN(d) ? value : d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
         }
-
+        // Use event delegation for dynamically added "View History" buttons in the financials table
         document.getElementById('financial-body').addEventListener('click', function (e) {
           const btn = e.target.closest('.view-history-btn');
           if (!btn) return;
@@ -1559,7 +1619,7 @@
         const viewReviewsBtn     = document.getElementById('view-reviews-btn');
         const reviewSectionBody  = document.getElementById('review-section-body');
         let reviewsLoaded        = false;
-
+        // Use event delegation for dynamically added links
         viewReviewsBtn.addEventListener('click', function () {
           const isVisible = reviewSectionBody.style.display !== 'none';
           if (isVisible) {
@@ -1574,7 +1634,7 @@
             }
           }
         });
-
+        // Load host reviews (both written and pending)
         function loadHostReviews() {
           fetch('/api/host-reviews', { credentials: 'include' })
             .then(res => res.json())
@@ -1585,7 +1645,7 @@
             })
             .catch(err => console.error('Failed to load host reviews:', err));
         }
-
+        // Update the review statistics in the UI
         function updateReviewStats(written, pending) {
           document.getElementById('stat-reviews-given').textContent = written.length;
           document.getElementById('stat-pending-reviews').textContent = pending.length;
@@ -1596,7 +1656,7 @@
             document.getElementById('stat-avg-rating').textContent = '—';
           }
         }
-
+        // Render the table of reviews that the host has written for customers
         function renderWrittenReviews(reviews) {
           const tbody = document.getElementById('review-customers-body');
           tbody.innerHTML = '';
@@ -1638,7 +1698,7 @@
             tbody.appendChild(tr);
           });
         }
-
+        // Render the table of pending reviews that the host needs to write for customers
         function renderPendingReviews(pending) {
           const tbody = document.getElementById('pending-reviews-body');
           tbody.innerHTML = '';
@@ -1696,7 +1756,7 @@
             btn.dataset.vehicle
           );
         });
-
+        // Fetch and display the customer's review for a specific reservation in a modal
         async function openCustomerReviewModal(reservationId, customerName, vehicleName) {
           crmCurrentReviewId = null;
           crmLoading.style.display = 'block';
@@ -1735,7 +1795,7 @@
             crmError.style.display   = 'block';
           }
         }
-
+        // Handle deletion of a host review
         crmDeleteBtn.addEventListener('click', async () => {
           if (!crmCurrentReviewId) return;
           if (!confirm('Delete this customer review? This cannot be undone.')) return;
@@ -1772,7 +1832,7 @@
         const modalStars        = document.querySelectorAll('.modal-rev-star');
         const alertSuccess      = document.getElementById('review-modal-alert-success');
         const alertError        = document.getElementById('review-modal-alert-error');
-
+        // Open the review modal for either creating a new review or editing an existing one, and populate it with the relevant data
         function openReviewModal(mode, opts) {
           currentReviewMode    = mode;
           currentEditReviewId  = opts.reviewId || null;
@@ -1806,7 +1866,7 @@
           star.addEventListener('mouseenter', () => setStars(parseInt(star.dataset.val, 10)));
           star.addEventListener('mouseleave', () => setStars(selectedRating));
         });
-
+        // Update the star colors based on the selected rating
         function setStars(n) {
           modalStars.forEach(s => {
             s.style.color = parseInt(s.dataset.val, 10) <= n ? '#f5a623' : '#ccc';
@@ -1831,7 +1891,7 @@
             confirmDeleteReview(delBtn.dataset.id);
           }
         });
-
+        // Delegated click for "Write Review" buttons in pending reviews table
         document.getElementById('pending-reviews-body').addEventListener('click', function (e) {
           const btn = e.target.closest('.write-host-review-btn');
           if (!btn) return;
@@ -1840,7 +1900,7 @@
             customerName:  btn.dataset.customer,
           });
         });
-
+        // Handle submission of the review form for both creating and editing reviews, with validation and error handling
         reviewForm.addEventListener('submit', async function (e) {
           e.preventDefault();
           alertSuccess.style.display = 'none';
@@ -1895,21 +1955,22 @@
         const confirmDeleteReviewBtn = document.getElementById('confirm-delete-review-btn');
         const cancelDeleteReviewBtn  = document.getElementById('cancel-delete-review-btn');
         let reviewIdToDelete = null;
-
+        // Open a confirmation modal when the host clicks to delete a review, and store the ID of the review to be deleted
         function confirmDeleteReview(id) {
           reviewIdToDelete = id;
           deleteReviewModal.style.display = 'flex';
         }
-
+        // Handle the confirmation of review deletion, send a DELETE request to the server, and refresh the reviews list upon success
         document.getElementById('close-delete-review-modal').addEventListener('click', () => {
           deleteReviewModal.style.display = 'none';
           reviewIdToDelete = null;
         });
+        // Close the delete confirmation modal if the user clicks outside of it
         cancelDeleteReviewBtn.addEventListener('click', () => {
           deleteReviewModal.style.display = 'none';
           reviewIdToDelete = null;
         });
-
+        // Close the delete confirmation modal if the user clicks outside of it
         confirmDeleteReviewBtn.addEventListener('click', async () => {
           if (!reviewIdToDelete) return;
           try {
@@ -1930,12 +1991,15 @@
         });
 
         // ── Helpers ──────────────────────────────────────────────
+        // Simple helper functions for escaping HTML, formatting dates, and formatting date ranges
         function escHtml(s) {
           return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
+        // Similar to escHtml but only escapes double quotes, for safely embedding values in HTML attributes
         function escAttr(s) {
           return String(s || '').replace(/"/g, '&quot;');
         }
+        // Format a date string to "MMM D, YYYY" format, or return "—" if the value is falsy or invalid
         function fmtDate(val) {
           if (!val) return '—';
           const parts = String(val).substring(0, 10).split('-');
@@ -1946,6 +2010,7 @@
           const d = new Date(val);
           return isNaN(d) ? val : d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
         }
+        // Format a date range given a start and end date, using fmtDate for each, and return "—" if both are falsy
         function fmtRange(start, end) {
           if (!start && !end) return '—';
           return `${fmtDate(start)} – ${fmtDate(end)}`;
@@ -1955,6 +2020,7 @@
       // ══════════════════════════════════════════════════════════════
       //  CHAT ROOM  (Mediator pattern — see assets/js/chat-mediator.js)
       // ══════════════════════════════════════════════════════════════
+      // Initialize the chat mediator for the host's messaging interface, setting up API endpoints, DOM element IDs, and helper functions for building queries and rendering options
       (function () {
         var enc = encodeURIComponent;
         var hostMediator = createChatMediator({
@@ -2006,9 +2072,10 @@
       // ══════════════════════════════════════════════════════════════
       //  NOTIFICATIONS
       // ══════════════════════════════════════════════════════════════
+      // Set up the notifications panel toggle and lazy loading of notifications when the panel is first opened, including marking notifications as read when clicked
       (function () {
         var loaded = false;
-
+        // Toggle the visibility of the notifications panel when the "View Notifications" button is clicked, and load notifications from the server on first open
         document.getElementById('view-notifications-btn').addEventListener('click', function () {
           var content = document.getElementById('notifications-content');
           if (content.style.display === 'none' || content.style.display === '') {
@@ -2018,7 +2085,7 @@
             content.style.display = 'none';
           }
         });
-
+        // Fetch the host's notifications from the server, display them in the notifications panel, and set up click handlers to mark them as read
         function loadNotifications() {
           var loading = document.getElementById('notifications-loading');
           var list    = document.getElementById('notifications-list');
@@ -2057,12 +2124,11 @@
               });
             });
         }
-
+        // Simple helper function to escape HTML special characters to prevent XSS when rendering user-generated content
         function escHtml(s) {
           return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         }
       })();
     </script>
 </body>
-
 </html>

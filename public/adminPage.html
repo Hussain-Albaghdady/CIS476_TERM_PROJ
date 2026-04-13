@@ -29,6 +29,9 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    #cancel-add-admin:hover { background: #c0392b !important; border-color: #c0392b !important; }
+  </style>
 </head>
 
 <body>
@@ -161,28 +164,28 @@
 
           <!-- Summary Cards -->
           <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                 <i class="icofont-money" style="font-size:2rem; color:#28a745;"></i>
                 <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Platform Revenue</h4>
                 <p id="stat-total-revenue" style="font-size:1.8rem; font-weight:700; margin:0; color:#28a745;">$0</p>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                 <i class="icofont-car" style="font-size:2rem; color:#007bff;"></i>
                 <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Total Rentals</h4>
                 <p id="stat-total-rentals" style="font-size:1.8rem; font-weight:700; margin:0; color:#007bff;">0</p>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                 <i class="icofont-star" style="font-size:2rem; color:#ffc107;"></i>
                 <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Top Grossing Vehicle</h4>
                 <p id="stat-top-vehicle" style="font-size:1rem; font-weight:700; margin:0; color:#ffc107;">—</p>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <div class="info-box" style="text-align:center; padding: 20px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                 <i class="icofont-clock-time" style="font-size:2rem; color:#17a2b8;"></i>
                 <h4 style="margin-top:8px; font-size:0.9rem; color:#666;">Active Rentals</h4>
@@ -192,8 +195,8 @@
           </div>
           <!-- Per-Vehicle Breakdown Table -->
           <h3 style="margin-bottom: 16px;">All Vehicle Performance</h3>
-          <div class="table-responsive">
-            <table class="table table-striped">
+          <div class="table-wrapper">
+            <table class="responsive-table" id="financial-table">
               <thead>
                 <tr>
                   <th>Vehicle</th>
@@ -232,17 +235,16 @@
 
         <div id="review-management-section" class="management-form" style="display: none;">
 
-          <!-- Customer Reviews by Vehicle -->
-          <h3>Customer Reviews by Vehicle</h3>
-          <div class="table-responsive">
-            <table class="table table-striped" id="vehicle-reviews-table">
+          <!-- Customer Reviews by Reservation -->
+          <h3>Customer Reviews by Reservation</h3>
+          <div class="table-wrapper">
+            <table class="responsive-table" id="vehicle-reviews-table">
               <thead>
                 <tr>
                   <th>Vehicle</th>
-                  <th>Host</th>
                   <th>Customer</th>
+                  <th>Host</th>
                   <th>Rating</th>
-                  <th>Review</th>
                   <th>Rental Date</th>
                   <th>Submitted</th>
                   <th>Actions</th>
@@ -252,18 +254,17 @@
             </table>
           </div>
 
-          <!-- Host Reviews by Vehicle -->
+          <!-- Host Reviews by Reservation -->
           <div style="margin-top: 32px;">
-            <h3>Host Reviews by Vehicle</h3>
-            <div class="table-responsive">
-              <table class="table table-striped" id="host-reviews-table">
+            <h3>Host Reviews by Reservation</h3>
+            <div class="table-wrapper">
+              <table class="responsive-table" id="host-reviews-table">
                 <thead>
                   <tr>
                     <th>Vehicle</th>
                     <th>Host</th>
                     <th>Customer Reviewed</th>
                     <th>Rating</th>
-                    <th>Review</th>
                     <th>Rental Date</th>
                     <th>Submitted</th>
                     <th>Actions</th>
@@ -277,6 +278,16 @@
         </div>
       </div>
     </section><!-- End Review Management Section -->
+
+    <!-- Review Text Modal -->
+    <div id="review-text-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:10px; padding:32px; max-width:480px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,0.18); position:relative;">
+        <button id="close-review-modal" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.4rem; cursor:pointer; color:#666;">&times;</button>
+        <h4 id="review-modal-title" style="margin-bottom:8px;"></h4>
+        <p id="review-modal-stars" style="font-size:1.1rem; margin-bottom:12px;"></p>
+        <p id="review-modal-body" style="font-size:1rem; color:#333; white-space:pre-wrap;"></p>
+      </div>
+    </div>
 
     <!-- ======= Admin User Management Section ======= -->
     <section id="admin-user-management" class="vehicle-management">
@@ -298,48 +309,144 @@
         <div id="add-admin-section" class="management-form" style="display: none;">
           <div class="register-card" style="margin: 24px auto;">
 
+            <!-- Step indicator -->
+            <div class="step-progress">
+              <div class="step-item">
+                <div class="step-bubble active" id="admin-bubble-1">1</div>
+                <div class="step-label active" id="admin-label-1">Account Info</div>
+              </div>
+              <div class="step-line" id="admin-connector-line"></div>
+              <div class="step-item">
+                <div class="step-bubble" id="admin-bubble-2">2</div>
+                <div class="step-label" id="admin-label-2">Security</div>
+              </div>
+            </div>
+
             <div class="form-error" id="admin-inline-error"></div>
             <div id="add-admin-success" class="alert alert-success" style="display:none; margin-bottom:12px;"></div>
 
             <form id="add-admin-form">
-              <h3>New Administrator Account</h3>
 
-              <div class="field-row">
-                <div class="field-group">
-                  <label for="admin-fname">First Name</label>
-                  <input type="text" id="admin-fname" placeholder="Jane">
+              <!-- ══ STEP 1: Account Info ══ -->
+              <div class="step-panel active" id="admin-step-1">
+                <h3>New Administrator Account</h3>
+
+                <div class="field-row">
+                  <div class="field-group">
+                    <label for="admin-fname">First Name</label>
+                    <input type="text" id="admin-fname" placeholder="Jane">
+                  </div>
+                  <div class="field-group">
+                    <label for="admin-lname">Last Name</label>
+                    <input type="text" id="admin-lname" placeholder="Doe">
+                  </div>
                 </div>
+
                 <div class="field-group">
-                  <label for="admin-lname">Last Name</label>
-                  <input type="text" id="admin-lname" placeholder="Doe">
+                  <label for="admin-email">Email Address</label>
+                  <input type="email" id="admin-email" placeholder="admin@example.com">
                 </div>
+
+                <div class="field-group">
+                  <label for="admin-username">Username</label>
+                  <input type="text" id="admin-username" placeholder="Choose a username">
+                </div>
+
+                <div class="field-group">
+                  <label for="admin-password">Password</label>
+                  <input type="password" id="admin-password" placeholder="At least 8 characters">
+                  <div class="pw-strength-bar"><div class="pw-strength-fill" id="admin-pw-fill"></div></div>
+                  <div class="pw-strength-text" id="admin-pw-text"></div>
+                </div>
+
+                <div class="field-group">
+                  <label for="admin-cpassword">Confirm Password</label>
+                  <input type="password" id="admin-cpassword" placeholder="Re-enter your password">
+                </div>
+
+                <button type="button" class="btn-primary-ds" id="admin-next-btn">Continue &rarr;</button>
+                <hr class="divider">
+                <button type="button" class="btn-back-ds" id="cancel-add-admin" style="background:#e74c3c; border-color:#e74c3c;">Cancel</button>
               </div>
 
-              <div class="field-group">
-                <label for="admin-email">Email Address</label>
-                <input type="email" id="admin-email" placeholder="admin@example.com">
+              <!-- ══ STEP 2: Security Questions ══ -->
+              <div class="step-panel" id="admin-step-2">
+                <h3>Security Questions</h3>
+                <p class="subtitle">Set security questions for this admin account</p>
+
+                <!-- Question 1 -->
+                <div class="sq-pair">
+                  <div class="sq-num">Question 1</div>
+                  <div class="field-group" style="margin-bottom:10px">
+                    <label for="admin-security1">Select a question</label>
+                    <select id="admin-security1">
+                      <option value="" disabled selected>Choose a question&hellip;</option>
+                      <option value="first_pet">What was the name of your first pet?</option>
+                      <option value="birth_city">What city were you born in?</option>
+                      <option value="mothers_maiden">What is your mother's maiden name?</option>
+                      <option value="elementary_school">What was the name of your elementary school?</option>
+                      <option value="first_car">What was the make of your first car?</option>
+                      <option value="childhood_nickname">What was your childhood nickname?</option>
+                      <option value="street_grew_up">What is the name of the street you grew up on?</option>
+                      <option value="favorite_team">What is your favorite sports team?</option>
+                    </select>
+                  </div>
+                  <div class="field-group" style="margin-bottom:0">
+                    <label for="admin-answer1">Your Answer</label>
+                    <input type="text" id="admin-answer1" placeholder="Enter answer" autocomplete="off">
+                  </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="sq-pair">
+                  <div class="sq-num">Question 2</div>
+                  <div class="field-group" style="margin-bottom:10px">
+                    <label for="admin-security2">Select a question</label>
+                    <select id="admin-security2">
+                      <option value="" disabled selected>Choose a question&hellip;</option>
+                      <option value="first_pet">What was the name of your first pet?</option>
+                      <option value="birth_city">What city were you born in?</option>
+                      <option value="mothers_maiden">What is your mother's maiden name?</option>
+                      <option value="elementary_school">What was the name of your elementary school?</option>
+                      <option value="first_car">What was the make of your first car?</option>
+                      <option value="childhood_nickname">What was your childhood nickname?</option>
+                      <option value="street_grew_up">What is the name of the street you grew up on?</option>
+                      <option value="favorite_team">What is your favorite sports team?</option>
+                    </select>
+                  </div>
+                  <div class="field-group" style="margin-bottom:0">
+                    <label for="admin-answer2">Your Answer</label>
+                    <input type="text" id="admin-answer2" placeholder="Enter answer" autocomplete="off">
+                  </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="sq-pair">
+                  <div class="sq-num">Question 3</div>
+                  <div class="field-group" style="margin-bottom:10px">
+                    <label for="admin-security3">Select a question</label>
+                    <select id="admin-security3">
+                      <option value="" disabled selected>Choose a question&hellip;</option>
+                      <option value="first_pet">What was the name of your first pet?</option>
+                      <option value="birth_city">What city were you born in?</option>
+                      <option value="mothers_maiden">What is your mother's maiden name?</option>
+                      <option value="elementary_school">What was the name of your elementary school?</option>
+                      <option value="first_car">What was the make of your first car?</option>
+                      <option value="childhood_nickname">What was your childhood nickname?</option>
+                      <option value="street_grew_up">What is the name of the street you grew up on?</option>
+                      <option value="favorite_team">What is your favorite sports team?</option>
+                    </select>
+                  </div>
+                  <div class="field-group" style="margin-bottom:0">
+                    <label for="admin-answer3">Your Answer</label>
+                    <input type="text" id="admin-answer3" placeholder="Enter answer" autocomplete="off">
+                  </div>
+                </div>
+
+                <button type="button" class="btn-submit-ds" id="admin-submit-btn">Create Admin Account</button>
+                <button type="button" class="btn-back-ds" id="admin-back-btn">&larr; Back</button>
               </div>
 
-              <div class="field-group">
-                <label for="admin-username">Username</label>
-                <input type="text" id="admin-username" placeholder="Choose a username">
-              </div>
-
-              <div class="field-group">
-                <label for="admin-password">Password</label>
-                <input type="password" id="admin-password" placeholder="At least 8 characters">
-                <div class="pw-strength-bar"><div class="pw-strength-fill" id="admin-pw-fill"></div></div>
-                <div class="pw-strength-text" id="admin-pw-text"></div>
-              </div>
-
-              <div class="field-group">
-                <label for="admin-cpassword">Confirm Password</label>
-                <input type="password" id="admin-cpassword" placeholder="Re-enter your password">
-              </div>
-
-              <button type="button" class="btn-submit-ds" id="admin-submit-btn">Create Admin Account</button>
-              <hr class="divider">
-              <button type="button" class="btn-back-ds" id="cancel-add-admin">Cancel</button>
             </form>
           </div>
         </div>
@@ -472,6 +579,7 @@
   <script src="assets/js/main.js"></script>
 
   <script>
+    // On page load, check if the user is logged in and has admin privileges; if not, redirect to login page, otherwise show the admin content
     document.addEventListener("DOMContentLoaded", () => {
       fetch("/userdetail")
         .then(res => {
@@ -490,6 +598,7 @@
           window.location.href = "/loginform.html"; 
         });
     });
+    // Handle logo image load error to show fallback text
     document.addEventListener("DOMContentLoaded", function () {
       const logoImg = document.getElementById("logo-img");
       const fallbackText = document.getElementById("logo-fallback");
@@ -503,7 +612,7 @@
         fallbackText.style.display = "none";
       });
     });
-
+    // Vehicle management logic
     document.addEventListener('DOMContentLoaded', function() {
       let currentVehicleToDelete = null;
 
@@ -517,7 +626,7 @@
           loadVehicleForManagement();
         }
       });
-
+      // Function to load vehicles and populate the management table
       function loadVehicleForManagement() {
         fetch('/api/vehicles')
         .then(res => res.json())
@@ -554,7 +663,7 @@
             `;
             tbody.appendChild(row);
           });
-
+          // Add event listeners to the delete buttons after they are added to the DOM
           document.querySelectorAll('.delete-vehicle-btn').forEach(btn => {
             btn.addEventListener('click', function() {
               const vehicleId = this.getAttribute('data-id');
@@ -567,14 +676,14 @@
           console.error('Failed to load vehicle:', err);
         });
       }
-
+      // Function to open the delete confirmation modal with the specific vehicle information
       function openDeleteModal(vehicleId, vehicleName) {
         currentVehicleToDelete = vehicleId;
         deleteModal.querySelector('.modal-body p').textContent =
           `Are you sure you want to delete "${vehicleName}"? This action cannot be undone.`;
         deleteModal.style.display = 'block';
       }
-
+      // Handle the confirmation of vehicle deletion
       document.getElementById('confirm-delete-vehicle').addEventListener('click', function() {
         if (currentVehicleToDelete) {
           fetch(`/api/vehicle/${currentVehicleToDelete}`, {
@@ -596,21 +705,21 @@
         }
       });
 
-
+      // Handle closing the delete modal
       document.getElementById('close-delete-modal').addEventListener('click', function() {
         deleteModal.style.display = 'none';
       });
-
+      // Handle canceling the delete action
       document.getElementById('cancel-delete-vehicle').addEventListener('click', function() {
         deleteModal.style.display = 'none';
       });
-
+      // Close the modal if the user clicks outside of it
       window.addEventListener('click', function(e) {
         if (e.target === deleteModal) {
           deleteModal.style.display = 'none';
         }
       });
-
+      // Utility functions to show messages and refresh the main vehicle display after changes
       function showMessage(elementId, message) {
         const element = document.getElementById(elementId);
         if (element) {
@@ -621,7 +730,7 @@
           }, 5000);
         }
       }
-
+      // Clear all messages (success and error) before showing a new one
       function clearMessages() {
         ['add-vehicle-success', 'add-vehicle-error', 'edit-vehicle-success', 'edit-vehicle-error'].forEach(id => {
           const element = document.getElementById(id);
@@ -630,7 +739,7 @@
           }
         });
       }
-
+      // Refresh the main vehicle display section to reflect any changes made in the management section
       function refreshMainVehicleDisplay() {
         if (typeof $ !== 'undefined' && $('.vehicle-container').length) {
           fetch('/api/vehicles')
@@ -724,9 +833,140 @@
         }
       }
     });
-  </script>
+    // Review Management
+    document.addEventListener('DOMContentLoaded', function () {
+      var viewReviewsBtn = document.getElementById('view-reviews-btn');
+      var reviewSection  = document.getElementById('review-management-section');
+      var customerTbody  = document.getElementById('vehicle-reviews-body');
+      var hostTbody      = document.getElementById('host-reviews-body');
 
-  <script>
+      viewReviewsBtn.addEventListener('click', function () {
+        var isHidden = reviewSection.style.display === 'none' || reviewSection.style.display === '';
+        reviewSection.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) loadAllReviews();
+      });
+
+      function stars(n) {
+        var s = Math.max(0, Math.min(5, n));
+        return '\u2605'.repeat(s) + '\u2606'.repeat(5 - s);
+      }
+
+      function fmtDate(val) {
+        if (!val) return '\u2014';
+        var d = new Date(val);
+        return isNaN(d.getTime()) ? val : d.toLocaleDateString();
+      }
+
+      // Review text modal
+      var reviewModal      = document.getElementById('review-text-modal');
+      var reviewModalTitle = document.getElementById('review-modal-title');
+      var reviewModalStars = document.getElementById('review-modal-stars');
+      var reviewModalBody  = document.getElementById('review-modal-body');
+
+      document.getElementById('close-review-modal').addEventListener('click', function() {
+        reviewModal.style.display = 'none';
+      });
+      reviewModal.addEventListener('click', function(e) {
+        if (e.target === reviewModal) reviewModal.style.display = 'none';
+      });
+
+      function openReviewModal(title, rating, text) {
+        reviewModalTitle.textContent = title;
+        reviewModalStars.textContent = stars(rating) + ' ' + rating + '/5';
+        reviewModalBody.textContent  = text || '(no text provided)';
+        reviewModal.style.display    = 'flex';
+      }
+
+      function buildRow(r, deleteClass) {
+        var tr = document.createElement('tr');
+        var hasReview = r.comment && r.comment.trim();
+        var viewBtn = hasReview
+          ? '<button class="btn btn-sm btn-outline-primary view-review-btn" style="margin-right:4px;" data-title="' + r.vehicle_name + ' \u2013 ' + r.customer_username + '" data-rating="' + r.rating + '" data-text="' + r.comment.replace(/"/g, '&quot;') + '"><i class="icofont-eye"></i> Review</button>'
+          : '<span style="color:#aaa;">No text</span>';
+        var cells = deleteClass === 'del-customer-review' ? [
+          { label: 'Vehicle',     val: r.vehicle_name },
+          { label: 'Customer',    val: r.customer_username },
+          { label: 'Host',        val: r.host_username },
+          { label: 'Rating',      val: stars(r.rating) + ' ' + r.rating },
+          { label: 'Rental Date', val: fmtDate(r.start_date) },
+          { label: 'Submitted',   val: fmtDate(r.created_at) },
+          { label: 'Actions',     val: viewBtn + '<button class="btn btn-sm btn-danger ' + deleteClass + '" data-id="' + r._id + '"><i class="icofont-trash"></i> Delete</button>' }
+        ] : [
+          { label: 'Vehicle',     val: r.vehicle_name },
+          { label: 'Host',        val: r.host_username },
+          { label: 'Customer',    val: r.customer_username },
+          { label: 'Rating',      val: stars(r.rating) + ' ' + r.rating },
+          { label: 'Rental Date', val: fmtDate(r.start_date) },
+          { label: 'Submitted',   val: fmtDate(r.created_at) },
+          { label: 'Actions',     val: viewBtn + '<button class="btn btn-sm btn-danger ' + deleteClass + '" data-id="' + r._id + '"><i class="icofont-trash"></i> Delete</button>' }
+        ];
+        tr.innerHTML = cells.map(function(c) { return '<td data-label="' + c.label + '">' + c.val + '</td>'; }).join('');
+        return tr;
+      }
+
+      function loadAllReviews() {
+        customerTbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+        hostTbody.innerHTML     = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+
+        fetch('/api/admin/reviews')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            customerTbody.innerHTML = '';
+            if (!data.customer || data.customer.length === 0) {
+              customerTbody.innerHTML = '<tr><td colspan="7" class="text-center">No customer reviews found</td></tr>';
+            } else {
+              data.customer.forEach(function(r) { customerTbody.appendChild(buildRow(r, 'del-customer-review')); });
+            }
+
+            hostTbody.innerHTML = '';
+            if (!data.host || data.host.length === 0) {
+              hostTbody.innerHTML = '<tr><td colspan="7" class="text-center">No host reviews found</td></tr>';
+            } else {
+              data.host.forEach(function(r) { hostTbody.appendChild(buildRow(r, 'del-host-review')); });
+            }
+
+            attachHandlers();
+          })
+          .catch(function(err) {
+            console.error('Failed to load reviews:', err);
+            var msg = '<tr><td colspan="7" class="text-center text-danger">Failed to load reviews</td></tr>';
+            customerTbody.innerHTML = msg;
+            hostTbody.innerHTML = msg;
+          });
+      }
+
+      function attachHandlers() {
+        document.querySelectorAll('.view-review-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            openReviewModal(this.dataset.title, Number(this.dataset.rating), this.dataset.text);
+          });
+        });
+
+        document.querySelectorAll('.del-customer-review').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            if (!confirm('Delete this customer review?')) return;
+            var id = this.dataset.id;
+            fetch('/api/admin/reviews/' + id, { method: 'DELETE' })
+              .then(function(r) { return r.json(); })
+              .then(function(d) { if (d.success) loadAllReviews(); else alert('Delete failed'); })
+              .catch(function() { alert('Delete failed'); });
+          });
+        });
+
+        document.querySelectorAll('.del-host-review').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            if (!confirm('Delete this host review?')) return;
+            var id = this.dataset.id;
+            fetch('/api/admin/host-reviews/' + id, { method: 'DELETE' })
+              .then(function(r) { return r.json(); })
+              .then(function(d) { if (d.success) loadAllReviews(); else alert('Delete failed'); })
+              .catch(function() { alert('Delete failed'); });
+          });
+        });
+      }
+    });
+
+    // Admin user management logic
     document.addEventListener('DOMContentLoaded', function() {
       var addAdminBtn     = document.getElementById('add-admin-btn');
       var addAdminSection = document.getElementById('add-admin-section');
@@ -736,7 +976,7 @@
       addAdminBtn.addEventListener('click', function() {
         var isOpen = addAdminSection.style.display !== 'none';
         addAdminSection.style.display = isOpen ? 'none' : 'block';
-        if (!isOpen) { addAdminForm.reset(); clearAdminError(); }
+        if (!isOpen) { addAdminForm.reset(); clearAdminError(); goToAdminStep(1); }
       });
 
       /* ── Cancel ── */
@@ -744,6 +984,7 @@
         addAdminSection.style.display = 'none';
         addAdminForm.reset();
         clearAdminError();
+        goToAdminStep(1);
       });
 
       /* ── Password strength ── */
@@ -783,8 +1024,28 @@
         el.classList.remove('visible');
       }
 
-      /* ── Submit ── */
-      document.getElementById('admin-submit-btn').addEventListener('click', function() {
+      /* ── Step switcher ── */
+      function goToAdminStep(n) {
+        document.querySelectorAll('#add-admin-form .step-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('admin-step-' + n).classList.add('active');
+        var b1 = document.getElementById('admin-bubble-1');
+        var b2 = document.getElementById('admin-bubble-2');
+        var l1 = document.getElementById('admin-label-1');
+        var l2 = document.getElementById('admin-label-2');
+        var ln = document.getElementById('admin-connector-line');
+        if (n === 1) {
+          b1.className = 'step-bubble active'; b2.className = 'step-bubble';
+          l1.className = 'step-label active';  l2.className = 'step-label';
+          ln.className = 'step-line';
+        } else {
+          b1.className = 'step-bubble done';   b2.className = 'step-bubble active';
+          l1.className = 'step-label done';    l2.className = 'step-label active';
+          ln.className = 'step-line done';
+        }
+      }
+
+      /* ── Next: validate step 1 ── */
+      document.getElementById('admin-next-btn').addEventListener('click', function() {
         clearAdminError();
         var fname    = document.getElementById('admin-fname').value.trim();
         var lname    = document.getElementById('admin-lname').value.trim();
@@ -803,22 +1064,57 @@
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))              { showAdminError('Password must contain at least one special character.'); return; }
         if (password !== cpass)                                      { showAdminError('Passwords do not match.'); return; }
 
+        goToAdminStep(2);
+      });
+
+      /* ── Back ── */
+      document.getElementById('admin-back-btn').addEventListener('click', function() {
+        clearAdminError();
+        goToAdminStep(1);
+      });
+
+      /* ── Submit: validate step 2 and create admin ── */
+      document.getElementById('admin-submit-btn').addEventListener('click', function() {
+        clearAdminError();
+        var s1 = document.getElementById('admin-security1').value;
+        var s2 = document.getElementById('admin-security2').value;
+        var s3 = document.getElementById('admin-security3').value;
+        var a1 = document.getElementById('admin-answer1').value.trim();
+        var a2 = document.getElementById('admin-answer2').value.trim();
+        var a3 = document.getElementById('admin-answer3').value.trim();
+
+        if (!s1 || !s2 || !s3) { showAdminError('Please select a question for each security field.'); return; }
+        if (!a1 || !a2 || !a3) { showAdminError('Please provide an answer for each security question.'); return; }
+        if (new Set([s1, s2, s3]).size < 3) { showAdminError('Please choose three different security questions.'); return; }
+
+        var fname    = document.getElementById('admin-fname').value.trim();
+        var lname    = document.getElementById('admin-lname').value.trim();
+        var email    = document.getElementById('admin-email').value.trim();
+        var username = document.getElementById('admin-username').value.trim();
+        var password = document.getElementById('admin-password').value;
+
         var successEl = document.getElementById('add-admin-success');
         successEl.style.display = 'none';
 
         fetch('/add_admin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ fname, lname, email, username, password }).toString()
+          body: new URLSearchParams({
+            fname, lname, email, username, password,
+            security1: s1, answer1: a1,
+            security2: s2, answer2: a2,
+            security3: s3, answer3: a3
+          }).toString()
         })
         .then(function(res) { return res.json(); })
         .then(function(data) {
           if (data.success) {
-            successEl.textContent = 'Admin account created. They will set up security questions on first login.';
+            successEl.textContent = 'Admin account created successfully.';
             successEl.style.display = 'block';
             addAdminForm.reset();
             document.getElementById('admin-pw-fill').style.width = '0%';
             document.getElementById('admin-pw-text').textContent = '';
+            goToAdminStep(1);
           } else {
             showAdminError(data.error || 'Failed to create admin account.');
           }
@@ -828,13 +1124,11 @@
         });
       });
     });
-  </script>
-
-  <script>
+    // Financial management logic
     document.addEventListener('DOMContentLoaded', function() {
       const viewFinancialsBtn = document.getElementById('view-financials-btn');
       const financialSection = document.getElementById('financial-section');
-
+      // Toggle financial section visibility and load data when shown
       viewFinancialsBtn.addEventListener('click', function() {
         const isVisible = financialSection.style.display !== 'none';
         financialSection.style.display = isVisible ? 'none' : 'block';
@@ -858,14 +1152,14 @@
             data.vehicles.forEach(v => {
               const tr = document.createElement('tr');
               tr.innerHTML = `
-                <td>${v.label}</td>
-                <td>${v.hostUsername || 'N/A'}</td>
-                <td>${v.category || 'N/A'}</td>
-                <td>$${Number(v.rate).toFixed(2)}</td>
-                <td>${v.totalRentals}</td>
-                <td><span class="badge ${v.activeRentals > 0 ? 'badge-success' : 'badge-secondary'}">${v.activeRentals}</span></td>
-                <td><strong>$${Number(v.totalRevenue).toFixed(2)}</strong></td>
-                <td>${v.avgDays.toFixed(1)} days</td>
+                <td data-label="Vehicle">${v.label}</td>
+                <td data-label="Host">${v.hostUsername || 'N/A'}</td>
+                <td data-label="Category">${v.category || 'N/A'}</td>
+                <td data-label="Rate/Day">$${Number(v.rate).toFixed(2)}</td>
+                <td data-label="Total Rentals">${v.totalRentals}</td>
+                <td data-label="Active"><span class="badge ${v.activeRentals > 0 ? 'badge-success' : 'badge-secondary'}">${v.activeRentals}</span></td>
+                <td data-label="Total Revenue"><strong>$${Number(v.totalRevenue).toFixed(2)}</strong></td>
+                <td data-label="Avg. Days/Rental">${v.avgDays.toFixed(1)} days</td>
               `;
               tbody.appendChild(tr);
             });

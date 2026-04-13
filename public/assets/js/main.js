@@ -561,13 +561,14 @@ document.addEventListener("DOMContentLoaded", function () {
                   </li>
                 </ul>
               </li>
-              <li id="financial-page-link" class="drop-down">
-                <a href="ownerPage.html" id="financial-page-link-anchor">Financial Management<i class="icofont-simple-down dropdown-arrow"></i></a>
-                <ul>
-                  <li id="view-financial-link">
+              <li id="view-financial-link">
                     <a href="ownerPage.html#financial-management" id="view-financial-link-anchor">View Financial Records</a>
-                  </li>
-                </ul>
+              </li>
+              <li id="view-review-link">
+                    <a href="ownerPage.html#review-customers" id="view-review-link-anchor">View Reviews</a>
+              </li>
+              <li id="view-message-link">
+                    <a href="ownerPage.html#messaging" id="view-message-link-anchor">View Messages</a>
               </li>
               <li id="return-page-link">
                 <a href="ownerPage.html#availability" id="return-page-link-anchor">Vehicle Inventory</a>

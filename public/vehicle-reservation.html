@@ -898,9 +898,13 @@
             });
         });
       })();
-    </script>
-
-    <script>
+      // User authentication check on page load
+      // - When the page loads, it checks if the user is logged in and is a customer. If not logged in, it redirects to the login page. If logged in but not a customer (e.g. a host), it logs them out and then redirects to the login page. This ensures that only authenticated customers can access the vehicle reservation page. Additionally, it handles the case where a user clicks an "unwatch" link from an email notification, preserving that intent across a potential login redirect if they weren't already logged in.
+      // - The logic runs on DOMContentLoaded to ensure it executes as soon as the page is ready, and it uses fetch to check the user's authentication status from the server. Depending on the response, it either allows access to the page or redirects appropriately.
+      // - If the user is authenticated and is a customer, it also checks for any "unwatch" intent in the URL parameters (e.g. from an email link) and processes that unwatch action by sending a DELETE request to the server to remove the watch, providing feedback to the user through a temporary banner message.
+      // - This logic helps secure the page and ensures that only the intended users can access the reservation functionality, while also providing a smooth user experience for managing watch notifications.
+      // - The code also ensures that if a user tries to unwatch a vehicle via an email link but isn't logged in, it saves that intent in sessionStorage so that after they log in, it can automatically process the unwatch action without them having to click the link again.
+      // - Overall, this provides a robust authentication check and user flow for managing vehicle watches and reservations.
       document.addEventListener("DOMContentLoaded", () => {
         fetch("/userdetail")
           .then((res) => {
@@ -958,6 +962,9 @@
             window.location.href = "/loginform.html";
           });
       });
+      // Logo image error handling
+      // - The script listens for errors on the logo image. If the image fails to load
+      //   (e.g. due to a broken URL), it hides the image and displays fallback text instead. If the image loads successfully, it ensures the fallback text is hidden. This provides a better user experience by showing a text alternative when the logo image cannot be displayed, rather than leaving a broken image icon.
       document.addEventListener("DOMContentLoaded", function () {
         const logoImg = document.getElementById("logo-img");
         const fallbackText = document.getElementById("logo-fallback");
