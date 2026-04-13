@@ -40,19 +40,6 @@
     <link href="assets/css/style.css" rel="stylesheet" />
   </head>
 
-
-
-
-
-
-
-
-
-
-
-
-
-  
   <body>
     <!-- ======= Header ======= -->
     <header id="header" class="res-header">
@@ -145,64 +132,265 @@
     </button>
 
     <!-- Watch Modal  -->
-<div id="watch-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-  <div style="background:#fff; padding:32px 36px; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.15); max-width:420px; width:90vw;">
-    <h3 style="margin-bottom:8px;"><i class="bx bx-heart" style="color:#e8604c;"></i> Watch This Vehicle</h3>
-    <p style="color:#666; font-size:13px; margin-bottom:16px;">Get notified when this vehicle becomes available or the price drops.</p>
-    <div id="watch-vehicle-name" style="font-weight:700; margin-bottom:16px; color:#333; font-size:15px;"></div>
-    <div class="form-group">
-      <label style="font-size:13px; font-weight:600; color:#444;">Max Price / Day (optional)</label>
-      <input type="number" id="watch-max-price" class="form-control" placeholder="e.g. 80 — notify me if price drops below this" min="0" step="1" />
-      <small class="text-muted">Leave blank to only get availability notifications.</small>
-    </div>
-    <div style="display:flex; gap:10px; margin-top:20px;">
-      <button id="confirm-watch-btn" class="btn btn-success" style="flex:1;"><i class="bx bx-bell"></i> Watch Vehicle</button>
-      <button id="cancel-watch-btn" class="btn btn-secondary" style="flex:1;">Cancel</button>
-    </div>
-    <div id="watch-result" style="margin-top:12px; font-size:13px; text-align:center;"></div>
-  </div>
-</div>
-
-<!-- Message modaals -->
-<div id="message-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-  <div style="background:#fff; padding:32px 36px; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.15); max-width:480px; width:90vw; position:relative;">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
-      <div>
-        <h3 style="margin:0; font-size:18px; color:#1a1a2e;"><i class="bx bx-message-dots" style="color:#e8604c;"></i> Message Host</h3>
-        <p id="msg-vehicle-label" style="margin:4px 0 0; font-size:13px; color:#888;"></p>
+    <div
+      id="watch-modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          padding: 32px 36px;
+          border-radius: 12px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+          max-width: 420px;
+          width: 90vw;
+        "
+      >
+        <h3 style="margin-bottom: 8px">
+          <i class="bx bx-heart" style="color: #e8604c"></i> Watch This Vehicle
+        </h3>
+        <p style="color: #666; font-size: 13px; margin-bottom: 16px">
+          Get notified when this vehicle becomes available or the price drops.
+        </p>
+        <div
+          id="watch-vehicle-name"
+          style="
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #333;
+            font-size: 15px;
+          "
+        ></div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 600; color: #444"
+            >Max Price / Day (optional)</label
+          >
+          <input
+            type="number"
+            id="watch-max-price"
+            class="form-control"
+            placeholder="e.g. 80 — notify me if price drops below this"
+            min="0"
+            step="1"
+          />
+          <small class="text-muted"
+            >Leave blank to only get availability notifications.</small
+          >
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px">
+          <button
+            id="confirm-watch-btn"
+            class="btn btn-success"
+            style="flex: 1"
+          >
+            <i class="bx bx-bell"></i> Watch Vehicle
+          </button>
+          <button
+            id="cancel-watch-btn"
+            class="btn btn-secondary"
+            style="flex: 1"
+          >
+            Cancel
+          </button>
+        </div>
+        <div
+          id="watch-result"
+          style="margin-top: 12px; font-size: 13px; text-align: center"
+        ></div>
       </div>
-      <button onclick="document.getElementById('message-modal').style.display='none'"
-        style="background:none; border:none; font-size:24px; cursor:pointer; color:#aaa; line-height:1;">&times;</button>
     </div>
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">To</label>
-      <input id="msg-to" type="text" readonly style="width:100%; padding:8px 12px; border:1.5px solid #eee; border-radius:8px; background:#f9f9f9; font-size:13px;" />
+
+    <!-- Message modaals -->
+    <div
+      id="message-modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          padding: 32px 36px;
+          border-radius: 12px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+          max-width: 480px;
+          width: 90vw;
+          position: relative;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+          "
+        >
+          <div>
+            <h3 style="margin: 0; font-size: 18px; color: #1a1a2e">
+              <i class="bx bx-message-dots" style="color: #e8604c"></i> Message
+              Host
+            </h3>
+            <p
+              id="msg-vehicle-label"
+              style="margin: 4px 0 0; font-size: 13px; color: #888"
+            ></p>
+          </div>
+          <button
+            onclick="
+              document.getElementById('message-modal').style.display = 'none'
+            "
+            style="
+              background: none;
+              border: none;
+              font-size: 24px;
+              cursor: pointer;
+              color: #aaa;
+              line-height: 1;
+            "
+          >
+            &times;
+          </button>
+        </div>
+        <div style="margin-bottom: 14px">
+          <label
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              color: #555;
+              display: block;
+              margin-bottom: 4px;
+            "
+            >To</label
+          >
+          <input
+            id="msg-to"
+            type="text"
+            readonly
+            style="
+              width: 100%;
+              padding: 8px 12px;
+              border: 1.5px solid #eee;
+              border-radius: 8px;
+              background: #f9f9f9;
+              font-size: 13px;
+            "
+          />
+        </div>
+        <div style="margin-bottom: 14px">
+          <label
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              color: #555;
+              display: block;
+              margin-bottom: 4px;
+            "
+            >Subject</label
+          >
+          <input
+            id="msg-subject"
+            type="text"
+            style="
+              width: 100%;
+              padding: 8px 12px;
+              border: 1.5px solid #ddd;
+              border-radius: 8px;
+              font-size: 13px;
+              outline: none;
+            "
+            onfocus="this.style.borderColor = '#e8604c'"
+            onblur="this.style.borderColor = '#ddd'"
+          />
+        </div>
+        <div style="margin-bottom: 18px">
+          <label
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              color: #555;
+              display: block;
+              margin-bottom: 4px;
+            "
+            >Message</label
+          >
+          <textarea
+            id="msg-body"
+            rows="5"
+            placeholder="Hi, I have a question about your vehicle..."
+            style="
+              width: 100%;
+              padding: 10px 12px;
+              border: 1.5px solid #ddd;
+              border-radius: 8px;
+              font-size: 13px;
+              resize: vertical;
+              outline: none;
+            "
+            onfocus="this.style.borderColor = '#e8604c'"
+            onblur="this.style.borderColor = '#ddd'"
+          ></textarea>
+        </div>
+        <div style="display: flex; gap: 10px">
+          <button
+            id="send-message-btn"
+            style="
+              flex: 1;
+              padding: 11px;
+              background: #e8604c;
+              color: #fff;
+              border: none;
+              border-radius: 8px;
+              font-size: 14px;
+              font-weight: 600;
+              cursor: pointer;
+            "
+          >
+            <i class="bx bx-send"></i> Send Message
+          </button>
+          <button
+            onclick="
+              document.getElementById('message-modal').style.display = 'none'
+            "
+            style="
+              padding: 11px 20px;
+              background: #eee;
+              color: #555;
+              border: none;
+              border-radius: 8px;
+              font-size: 14px;
+              cursor: pointer;
+            "
+          >
+            Cancel
+          </button>
+        </div>
+        <div
+          id="msg-status"
+          style="margin-top: 12px; font-size: 13px; text-align: center"
+        ></div>
+      </div>
     </div>
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">Subject</label>
-      <input id="msg-subject" type="text"
-        style="width:100%; padding:8px 12px; border:1.5px solid #ddd; border-radius:8px; font-size:13px; outline:none;"
-        onfocus="this.style.borderColor='#e8604c'" onblur="this.style.borderColor='#ddd'" />
-    </div>
-    <div style="margin-bottom:18px;">
-      <label style="font-size:12px; font-weight:600; color:#555; display:block; margin-bottom:4px;">Message</label>
-      <textarea id="msg-body" rows="5" placeholder="Hi, I have a question about your vehicle..."
-        style="width:100%; padding:10px 12px; border:1.5px solid #ddd; border-radius:8px; font-size:13px; resize:vertical; outline:none;"
-        onfocus="this.style.borderColor='#e8604c'" onblur="this.style.borderColor='#ddd'"></textarea>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <button id="send-message-btn"
-        style="flex:1; padding:11px; background:#e8604c; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
-        <i class="bx bx-send"></i> Send Message
-      </button>
-      <button onclick="document.getElementById('message-modal').style.display='none'"
-        style="padding:11px 20px; background:#eee; color:#555; border:none; border-radius:8px; font-size:14px; cursor:pointer;">
-        Cancel
-      </button>
-    </div>
-    <div id="msg-status" style="margin-top:12px; font-size:13px; text-align:center;"></div>
-  </div>
-</div>
 
     <main id="main" class="hidden-page">
       <!-- Reservation Section -->
@@ -399,6 +587,14 @@
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
     <script>
+      // Date input and vehicle card locking logic
+      // - Restrict date inputs to not allow past dates
+      // - Gray out vehicle cards and disable selection until both dates are selected
+      // - Keep return date min in sync with start date
+      // - Re-apply lock whenever new vehicle cards are rendered (MutationObserver)
+      // - Disable the "Watch Selected Vehicle" toolbar button until dates are selected (watching requires a specific vehicle, which requires dates to be selected first)
+      // - Watch checkboxes on vehicle cards also require dates to be selected, so disable them until dates are ready
+      // - If dates aren't ready, disable all vehicle checkboxes and watch-checkboxes, and dim the Watch toolbar button to indicate it can't be used yet
       document.addEventListener("DOMContentLoaded", function () {
         // Restrict dates to today and forward
         var today = new Date().toISOString().split("T")[0];
@@ -431,13 +627,17 @@
             vehicleList.classList.add("vehicles-locked");
           }
           // Disable/enable all rendered checkboxes
-          vehicleList.querySelectorAll(".vehicle-checkbox").forEach(function (cb) {
-            cb.disabled = !datesReady;
-          });
+          vehicleList
+            .querySelectorAll(".vehicle-checkbox")
+            .forEach(function (cb) {
+              cb.disabled = !datesReady;
+            });
           // Disable/enable watch-checkboxes — watch requires dates selected
-          vehicleList.querySelectorAll(".watch-checkbox").forEach(function (cb) {
-            cb.disabled = !datesReady;
-          });
+          vehicleList
+            .querySelectorAll(".watch-checkbox")
+            .forEach(function (cb) {
+              cb.disabled = !datesReady;
+            });
           // Dim the Watch toolbar button when dates aren't ready
           var watchBtn = document.querySelector(".watch-vehicle-btn");
           if (watchBtn) {
@@ -449,11 +649,17 @@
         // Re-apply lock whenever new vehicle cards are rendered (MutationObserver)
         if (vehicleList) {
           vehicleList.classList.add("vehicles-locked");
-          new MutationObserver(updateVehicleLock).observe(vehicleList, { childList: true, subtree: true });
+          new MutationObserver(updateVehicleLock).observe(vehicleList, {
+            childList: true,
+            subtree: true,
+          });
         }
       });
-    </script>
-    <script>
+      // Mobile reservation form toggle logic
+      // - On mobile, the reservation form is hidden by default to prioritize vehicle browsing. The "Reservation" button toggles the visibility of the reservation form section. When toggled, it also updates ARIA attributes for accessibility and ensures that the form fields are hidden until a vehicle is selected, even if the user toggles the form open before selecting dates/vehicle.
+      // - The toggle button also has a visual state change (e.g. changing icon or color) to indicate whether the form is open or closed.
+      // - This logic runs on DOMContentLoaded to ensure the elements are available, and it checks for the existence of the relevant elements before attaching event listeners to avoid errors on desktop where the toggle button is not present.
+      // - The reservation form fields are wrapped in a container that can be hidden on mobile until a vehicle is selected, to prevent users from trying to fill out the form without selecting a vehicle first (which is required to know the total cost and availability).
       document.addEventListener("DOMContentLoaded", function () {
         var section = document.querySelector(".reservation-section");
         var toggleBtn = document.getElementById("toggle-reservation-btn");
@@ -493,173 +699,205 @@
           });
         }
       });
-    </script>
-    <!-- ── Watch Button Logic ─────────────────────────────────────────── -->
-    <script>
-    (function () {
-      var watchModal       = document.getElementById("watch-modal");
-      var watchVehicleName = document.getElementById("watch-vehicle-name");
-      var watchMaxPrice    = document.getElementById("watch-max-price");
-      var watchResult      = document.getElementById("watch-result");
-      var confirmBtn       = document.getElementById("confirm-watch-btn");
-      var cancelBtn        = document.getElementById("cancel-watch-btn");
-      var currentWatchId   = null;
 
-      // watchedIds  = vehicles confirmed as watched on the server
-      // watchPendingId = vehicle the user has selected via the card Watch button (not yet confirmed)
-      var watchedIds     = new Set();
-      var watchPendingId    = null;
-      var watchPendingLabel = null;
+      <!-- ── Watch Button Logic ─────────────────────────────────────────── -->
+      // - Each vehicle card has a heart-shaped "Watch" checkbox. Selecting it opens a modal to confirm watching that specific vehicle with optional price drop notifications. The user can only have one watched vehicle at a time, so selecting a different one will deselect the previous. The modal allows the user to set a target price for notifications. The watch selections are synced with the server, and the UI reflects which vehicle is currently watched by the user.
+      // - The logic handles the following interactions:
+      //   - Clicking the "Watch" checkbox on a vehicle card opens the modal to confirm watching that vehicle. If another vehicle was previously selected as pending watch, it will be deselected.
+      //   - The "Watch Selected Vehicle" toolbar button also opens the modal for the currently selected vehicle (if any). If no vehicle is selected, it prompts the user to select one first.
+      //   - In the modal, confirming the watch sends a request to the server to save the watch, and updates the UI to reflect the new watched vehicle. If the user cancels or clicks outside the modal, it closes without saving, and if they had selected a new vehicle as pending watch, it will be deselected since it wasn't confirmed.
+      // - When the page loads, it fetches the user's current watch from the server and updates the UI to show which vehicle is currently watched (if any).
+      // - The code ensures that only one vehicle can be selected as watched at a time, and provides feedback to the user through the modal interface.
+      // - The watch functionality requires the user to have selected start and return dates first, since watching is tied to a specific vehicle availability which depends on those dates. If the user tries to select a watch before selecting dates, it prompts them to select dates first.
+      // - The code also handles the case where the user unchecks the watch checkbox on a vehicle card that is already confirmed as watched, which will remove the watch from the server and update the UI accordingly.
+      (function () {
+        var watchModal = document.getElementById("watch-modal");
+        var watchVehicleName = document.getElementById("watch-vehicle-name");
+        var watchMaxPrice = document.getElementById("watch-max-price");
+        var watchResult = document.getElementById("watch-result");
+        var confirmBtn = document.getElementById("confirm-watch-btn");
+        var cancelBtn = document.getElementById("cancel-watch-btn");
+        var currentWatchId = null;
 
-      // Load which vehicle the user already watches so its heart stays filled
-      fetch("/api/watch", { credentials: "include" })
-        .then(function (r) { return r.ok ? r.json() : []; })
-        .then(function (list) {
-          list.forEach(function (entry) {
-            watchedIds.add(String(entry.vehicle_id));
-            var cb = document.getElementById("watch_" + entry.vehicle_id);
-            if (cb) {
-              cb.checked = true;
-              watchPendingId = String(entry.vehicle_id);
-              var card = cb.closest(".vehicle-item");
-              watchPendingLabel = card
-                ? (card.querySelector("h2")?.textContent?.trim() || watchPendingId)
-                : watchPendingId;
-            }
-          });
-        })
-        .catch(function () {});
+        // watchedIds  = vehicles confirmed as watched on the server
+        // watchPendingId = vehicle the user has selected via the card Watch button (not yet confirmed)
+        var watchedIds = new Set();
+        var watchPendingId = null;
+        var watchPendingLabel = null;
 
-      function openModal(vehicleId, label) {
-        currentWatchId = vehicleId;
-        watchVehicleName.textContent = label || "Selected Vehicle";
-        watchMaxPrice.value = "";
-        watchResult.textContent = "";
-        watchResult.style.color = "";
-        confirmBtn.disabled = false;
-        watchModal.style.display = "flex";
-      }
-
-      function closeModal() {
-        watchModal.style.display = "none";
-        // If the user cancelled without confirming, deselect card if it wasn't already watched
-        if (currentWatchId && !watchedIds.has(currentWatchId)) {
-          var cb = document.getElementById("watch_" + currentWatchId);
-          if (cb) cb.checked = false;
-          if (watchPendingId === currentWatchId) {
-            watchPendingId = null;
-            watchPendingLabel = null;
-          }
-        }
-        currentWatchId = null;
-      }
-
-      // Close on backdrop click
-      watchModal.addEventListener("click", function (e) {
-        if (e.target === watchModal) closeModal();
-      });
-      cancelBtn.addEventListener("click", closeModal);
-
-      // "Watch Selected Vehicle" toolbar button — opens the modal to confirm
-      document.querySelector(".watch-vehicle-btn").addEventListener("click", function () {
-        var startDate = document.getElementById("start_date")?.value;
-        var endDate   = document.getElementById("end_date")?.value;
-        if (!startDate || !endDate) {
-          alert("Please select a start date and return date first.");
-          return;
-        }
-        if (!watchPendingId) {
-          alert("Please select a vehicle to watch first.");
-          return;
-        }
-        openModal(watchPendingId, watchPendingLabel);
-      });
-
-      // Heart checkboxes on each vehicle card — selection only, no modal
-      document.getElementById("vehicle-list").addEventListener("change", function (e) {
-        var cb = e.target;
-        if (!cb.classList.contains("watch-checkbox")) return;
-        var vehicleId = cb.id.replace("watch_", "");
-
-        if (cb.checked) {
-          // Uncheck every other watch-checkbox (only one watch selection at a time)
-          document.querySelectorAll(".watch-checkbox").forEach(function (other) {
-            if (other !== cb) other.checked = false;
-          });
-          // Set as the pending watch vehicle
-          watchPendingId = vehicleId;
-          var card = cb.closest(".vehicle-item");
-          watchPendingLabel = card
-            ? (card.querySelector("h2")?.textContent?.trim() || vehicleId)
-            : vehicleId;
-        } else {
-          // Unchecking — if already confirmed watched, remove it
-          if (watchedIds.has(vehicleId)) {
-            fetch("/api/watch", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({ vehicle_id: vehicleId }),
-            }).then(function () {
-              watchedIds.delete(vehicleId);
-              cb.checked = false;
+        // Load which vehicle the user already watches so its heart stays filled
+        fetch("/api/watch", { credentials: "include" })
+          .then(function (r) {
+            return r.ok ? r.json() : [];
+          })
+          .then(function (list) {
+            list.forEach(function (entry) {
+              watchedIds.add(String(entry.vehicle_id));
+              var cb = document.getElementById("watch_" + entry.vehicle_id);
+              if (cb) {
+                cb.checked = true;
+                watchPendingId = String(entry.vehicle_id);
+                var card = cb.closest(".vehicle-item");
+                watchPendingLabel = card
+                  ? card.querySelector("h2")?.textContent?.trim() ||
+                    watchPendingId
+                  : watchPendingId;
+              }
             });
-          }
-          if (watchPendingId === vehicleId) {
-            watchPendingId = null;
-            watchPendingLabel = null;
-          }
-        }
-      });
+          })
+          .catch(function () {});
 
-      // Confirm watch via modal button
-      confirmBtn.addEventListener("click", function () {
-        if (!currentWatchId) return;
-        var targetPrice = watchMaxPrice.value ? Number(watchMaxPrice.value) : null;
-        var startDate = document.getElementById("start_date")?.value || null;
-        var endDate   = document.getElementById("end_date")?.value || null;
-        confirmBtn.disabled = true;
-        fetch("/api/watch", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ vehicle_id: currentWatchId, target_price: targetPrice, start_date: startDate, end_date: endDate }),
-        })
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (data.success) {
-              // Update tracked watched set (server enforces one watch at a time)
-              watchedIds.clear();
-              watchedIds.add(currentWatchId);
-              // Reset all watch-checkbox hearts to unfilled — watch is backend-only state
-              document.querySelectorAll(".watch-checkbox").forEach(function (cb) {
-                cb.checked = false;
-              });
-              // Clear pending selection
+        function openModal(vehicleId, label) {
+          currentWatchId = vehicleId;
+          watchVehicleName.textContent = label || "Selected Vehicle";
+          watchMaxPrice.value = "";
+          watchResult.textContent = "";
+          watchResult.style.color = "";
+          confirmBtn.disabled = false;
+          watchModal.style.display = "flex";
+        }
+
+        function closeModal() {
+          watchModal.style.display = "none";
+          // If the user cancelled without confirming, deselect card if it wasn't already watched
+          if (currentWatchId && !watchedIds.has(currentWatchId)) {
+            var cb = document.getElementById("watch_" + currentWatchId);
+            if (cb) cb.checked = false;
+            if (watchPendingId === currentWatchId) {
               watchPendingId = null;
               watchPendingLabel = null;
-              watchResult.textContent = data.alreadyWatching
-                ? "You're already watching this vehicle."
-                : "Watching! We'll email you when it's available" + (targetPrice ? " or the price drops below $" + targetPrice : "") + ".";
-              watchResult.style.color = "#27ae60";
-              setTimeout(function () {
-                watchModal.style.display = "none";
-                currentWatchId = null;
-                location.reload();
-              }, 2200);
+            }
+          }
+          currentWatchId = null;
+        }
+
+        // Close on backdrop click
+        watchModal.addEventListener("click", function (e) {
+          if (e.target === watchModal) closeModal();
+        });
+        cancelBtn.addEventListener("click", closeModal);
+
+        // "Watch Selected Vehicle" toolbar button — opens the modal to confirm
+        document
+          .querySelector(".watch-vehicle-btn")
+          .addEventListener("click", function () {
+            var startDate = document.getElementById("start_date")?.value;
+            var endDate = document.getElementById("end_date")?.value;
+            if (!startDate || !endDate) {
+              alert("Please select a start date and return date first.");
+              return;
+            }
+            if (!watchPendingId) {
+              alert("Please select a vehicle to watch first.");
+              return;
+            }
+            openModal(watchPendingId, watchPendingLabel);
+          });
+
+        // Heart checkboxes on each vehicle card — selection only, no modal
+        document
+          .getElementById("vehicle-list")
+          .addEventListener("change", function (e) {
+            var cb = e.target;
+            if (!cb.classList.contains("watch-checkbox")) return;
+            var vehicleId = cb.id.replace("watch_", "");
+
+            if (cb.checked) {
+              // Uncheck every other watch-checkbox (only one watch selection at a time)
+              document
+                .querySelectorAll(".watch-checkbox")
+                .forEach(function (other) {
+                  if (other !== cb) other.checked = false;
+                });
+              // Set as the pending watch vehicle
+              watchPendingId = vehicleId;
+              var card = cb.closest(".vehicle-item");
+              watchPendingLabel = card
+                ? card.querySelector("h2")?.textContent?.trim() || vehicleId
+                : vehicleId;
             } else {
-              watchResult.textContent = data.error || "Something went wrong.";
+              // Unchecking — if already confirmed watched, remove it
+              if (watchedIds.has(vehicleId)) {
+                fetch("/api/watch", {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ vehicle_id: vehicleId }),
+                }).then(function () {
+                  watchedIds.delete(vehicleId);
+                  cb.checked = false;
+                });
+              }
+              if (watchPendingId === vehicleId) {
+                watchPendingId = null;
+                watchPendingLabel = null;
+              }
+            }
+          });
+
+        // Confirm watch via modal button
+        confirmBtn.addEventListener("click", function () {
+          if (!currentWatchId) return;
+          var targetPrice = watchMaxPrice.value
+            ? Number(watchMaxPrice.value)
+            : null;
+          var startDate = document.getElementById("start_date")?.value || null;
+          var endDate = document.getElementById("end_date")?.value || null;
+          confirmBtn.disabled = true;
+          fetch("/api/watch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              vehicle_id: currentWatchId,
+              target_price: targetPrice,
+              start_date: startDate,
+              end_date: endDate,
+            }),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (data.success) {
+                // Update tracked watched set (server enforces one watch at a time)
+                watchedIds.clear();
+                watchedIds.add(currentWatchId);
+                // Reset all watch-checkbox hearts to unfilled — watch is backend-only state
+                document
+                  .querySelectorAll(".watch-checkbox")
+                  .forEach(function (cb) {
+                    cb.checked = false;
+                  });
+                // Clear pending selection
+                watchPendingId = null;
+                watchPendingLabel = null;
+                watchResult.textContent = data.alreadyWatching
+                  ? "You're already watching this vehicle."
+                  : "Watching! We'll email you when it's available" +
+                    (targetPrice
+                      ? " or the price drops below $" + targetPrice
+                      : "") +
+                    ".";
+                watchResult.style.color = "#27ae60";
+                setTimeout(function () {
+                  watchModal.style.display = "none";
+                  currentWatchId = null;
+                  location.reload();
+                }, 2200);
+              } else {
+                watchResult.textContent = data.error || "Something went wrong.";
+                watchResult.style.color = "#e74c3c";
+                confirmBtn.disabled = false;
+              }
+            })
+            .catch(function () {
+              watchResult.textContent = "Network error. Please try again.";
               watchResult.style.color = "#e74c3c";
               confirmBtn.disabled = false;
-            }
-          })
-          .catch(function () {
-            watchResult.textContent = "Network error. Please try again.";
-            watchResult.style.color = "#e74c3c";
-            confirmBtn.disabled = false;
-          });
-      });
-    })();
+            });
+        });
+      })();
     </script>
 
     <script>
@@ -678,9 +916,10 @@
               document.getElementById("main").classList.remove("hidden-page");
               // Handle unwatch intent from email link (direct or post-login via sessionStorage)
               var params = new URLSearchParams(window.location.search);
-              var unwatchId = (params.get("unwatch") === "1" && params.get("vehicleId"))
-                ? params.get("vehicleId")
-                : sessionStorage.getItem("pendingUnwatch");
+              var unwatchId =
+                params.get("unwatch") === "1" && params.get("vehicleId")
+                  ? params.get("vehicleId")
+                  : sessionStorage.getItem("pendingUnwatch");
               if (unwatchId) {
                 sessionStorage.removeItem("pendingUnwatch");
                 fetch("/api/watch", {
@@ -689,17 +928,22 @@
                   credentials: "include",
                   body: JSON.stringify({ vehicle_id: unwatchId }),
                 })
-                  .then(function (r) { return r.json(); })
+                  .then(function (r) {
+                    return r.json();
+                  })
                   .then(function (d) {
                     var banner = document.createElement("div");
                     banner.textContent = d.success
                       ? "You've been removed from the watch list for this vehicle."
-                      : (d.error || "Could not remove watch.");
-                    banner.style.cssText = "position:fixed;top:16px;left:50%;transform:translateX(-50%);background:" +
+                      : d.error || "Could not remove watch.";
+                    banner.style.cssText =
+                      "position:fixed;top:16px;left:50%;transform:translateX(-50%);background:" +
                       (d.success ? "#27ae60" : "#e74c3c") +
                       ";color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,.2);";
                     document.body.appendChild(banner);
-                    setTimeout(function () { banner.remove(); }, 4000);
+                    setTimeout(function () {
+                      banner.remove();
+                    }, 4000);
                   })
                   .catch(function () {});
               }

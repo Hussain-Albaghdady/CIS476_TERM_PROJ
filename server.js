@@ -18,7 +18,7 @@ const mailer = nodemailer.createTransport({
 
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
-
+// MongoDB connection URI - first try environment variable, then fallback to atlas_uri.js file, and log an error if neither is available
 let uri = process.env.MONGODB_URI;
 if (!uri) {
   try {
@@ -27,8 +27,9 @@ if (!uri) {
     console.error("No MONGODB_URI env and ./atlas_uri not found.");
   }
 }
+// MongoDB database name
 const dbname = "DriveShare";
-
+// Create a new MongoClient with the provided URI and server API version, enabling strict mode and deprecation error handling for better compatibility and debugging. This client will be used to connect to the MongoDB database and perform operations throughout the application.
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -38,13 +39,11 @@ const client = new MongoClient(uri, {
 });
 
 const app = express();
-
 app.set("trust proxy", 1);
-
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
-
+// Configure multer for file uploads with storage settings, file size limits, and file type filtering to allow only image uploads. Uploaded files will be stored in the specified directory with unique filenames to prevent conflicts.
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/assets/img/vehicles/");
@@ -57,6 +56,7 @@ const storage = multer.diskStorage({
     );
   },
 });
+// Configure multer for file uploads with storage settings, file size limits, and file type filtering to allow only image uploads. Uploaded files will be stored in the specified directory with unique filenames to prevent conflicts.
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -65,7 +65,7 @@ const upload = multer({
     else cb(new Error("Only image files are allowed!"), false);
   },
 });
-
+// CORS configuration to allow requests from specified origins and handle preflight requests
 app.use((req, res, next) => {
   const allowedOrigins = (process.env.CORS_ORIGIN || "")
     .split(",")
@@ -92,7 +92,7 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
-
+// Configure session management with secure cookies in production and appropriate settings for development
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "dev_only_change_me",
@@ -106,7 +106,7 @@ app.use(
 );
 
 let db;
-
+// This function connects to the MongoDB database, sets up necessary indexes, initializes counters for unique ID generation, and starts the Express server. It also includes error handling to log any connection issues and exit the process if the connection fails.
 async function connectToDB() {
   try {
     await client.connect();
@@ -249,27 +249,30 @@ async function connectToDB() {
 }
 
 connectToDB();
-// this is the singleton pattern for managing user sessions it connect to the DB first
+// this is the singleton pattern for managing user sessions it connect to the DB first and then creates a single instance of the SessionManager that can be used throughout the app to track active user sessions. The SessionManager provides methods to add, remove, and check active sessions, and logs session events for debugging purposes.
 const SessionManagerSingleton = (() => {
   let instance = null; // Variable to hold the single instance of the SessionManager
   function createInstance() {
     return {
-      activeSessions: new Map(), 
-      addSession(username, sessionId) { // Method to add a new user session
-        this.activeSessions.set(username, sessionId);  // Store the session
-        console.log(`[SessionManager] Session started: ${username}`);  // Log session
+      activeSessions: new Map(),
+      addSession(username, sessionId) {
+        // Method to add a new user session
+        this.activeSessions.set(username, sessionId); // Store the session
+        console.log(`[SessionManager] Session started: ${username}`); // Log session
       },
       removeSession(username) {
         this.activeSessions.delete(username);
         console.log(`[SessionManager] Session ended: ${username}`);
       },
-      isActive(username) {  // Method to check if a session for a given user is active
+      isActive(username) {
+        // Method to check if a session for a given user is active
         return this.activeSessions.has(username);
       },
     };
   }
   return {
-    getInstance() { // Method to get the singleton instance of the SessionManager
+    getInstance() {
+      // Method to get the singleton instance of the SessionManager
       if (!instance) {
         instance = createInstance();
         console.log("[SessionManager] Singleton instance created.");
@@ -279,7 +282,7 @@ const SessionManagerSingleton = (() => {
   };
 })();
 const sessionManager = SessionManagerSingleton.getInstance();
-
+// Utility function to get the next sequence value for a given counter name
 async function getNextSequence(counterName) {
   try {
     const counter = await db
@@ -334,7 +337,7 @@ function getVehicleLabel(vehicle) {
     "Unknown Vehicle"
   );
 }
-
+// Get average rating and review count for a list of vehicle IDs
 async function getReviewStatsByVehicleIds(vehicleIds = []) {
   const ids = vehicleIds.map(normalizeObjectId).filter(Boolean);
   if (!ids.length) return {};
@@ -363,7 +366,7 @@ async function getReviewStatsByVehicleIds(vehicleIds = []) {
 
   return stats;
 }
-
+// Serialize a review document, converting ObjectIds to strings and ensuring all expected fields are present
 function serializeReview(doc) {
   return {
     ...doc,
@@ -374,7 +377,10 @@ function serializeReview(doc) {
   };
 }
 app.get("/health", (req, res) => res.status(200).send("OK"));
-
+// ── MVC: Home Page Endpoint ──────────────────────────────
+// Model: Static HTML/CSS/JS files in the public directory
+// View: Home.html as the landing page for all users
+// Controller: This endpoint serves as the root URL and redirects to the Home.html page, which is the main entry point for users to navigate to login, registration, or explore the site.
 app.post("/contact_us", async (req, res) => {
   const { name, email, subject, message } = req.body;
   try {
@@ -400,7 +406,10 @@ app.post("/contact_us", async (req, res) => {
     );
   }
 });
-
+// ── MVC: Sign-Up Endpoint ──────────────────────────────
+// Model: MongoDB collections (AdminUsers, RentalUsers, HostUsers) with unique username constraints
+// View: register_form.html that submits to this endpoint
+// Controller: This endpoint handles user registration by validating input, checking for existing usernames across all user collections, hashing the password, and inserting the new user into the appropriate collection based on user type. It also logs registration events and handles errors gracefully by redirecting back to the registration form with appropriate messages.
 app.post("/sign_up", async (req, res) => {
   const {
     fname,
@@ -698,7 +707,10 @@ app.post("/reset_password", async (req, res) => {
     );
   }
 });
-
+// ── MVC: Admin Creation Endpoint (for initial setup) ──────────────────────────────
+// Model: AdminUsers collection with unique username constraint
+// View: No public view, this is intended for initial setup and can be tested via Postman or similar tools
+// Controller: This endpoint allows the creation of a new admin user. It validates the input, checks for existing usernames, hashes the password, and inserts the new admin into the database. It also logs the creation event and handles errors gracefully by returning JSON responses.
 app.post("/add_admin", async (req, res) => {
   const { fname, lname, email, username, password } = req.body;
 
@@ -740,7 +752,10 @@ app.post("/add_admin", async (req, res) => {
     });
   }
 });
-
+// ── MVC: Admin First-Time Setup Endpoint ──────────────────────────────
+// Model: AdminUsers collection with force_password_change flag and security questions
+// View: admin-setup.html that submits to this endpoint
+// Controller: This endpoint ensures that only authenticated admins can access it. It validates the new password and security questions, updates the admin's record in the database, and redirects to the admin dashboard upon success. It also handles errors gracefully by redirecting back to the setup page with appropriate messages.
 app.post("/admin_setup", async (req, res) => {
   if (!req.session?.user || req.session.user.user_type !== "admin") {
     return res.redirect("/loginform.html");
@@ -821,7 +836,7 @@ app.post("/admin_setup", async (req, res) => {
     return err_redirect("Setup failed: " + err.message);
   }
 });
-
+// Utility function to find a user across all collections for login
 async function findUser(db, username, hashedPass) {
   const collections = ["AdminUsers", "RentalUsers", "HostUsers"];
   for (const coll of collections) {
@@ -834,6 +849,10 @@ async function findUser(db, username, hashedPass) {
   }
   return null;
 }
+// ── MVC: Login Endpoint ──────────────────────────────
+// Model: MongoDB collections (AdminUsers, RentalUsers, HostUsers) and session management
+// View: loginform.html that submits to this endpoint
+// Controller: This endpoint handles user authentication by validating credentials against the database, managing sessions, and redirecting users to their respective dashboards based on their user type. It also logs login events and handles errors gracefully.
 app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -891,19 +910,25 @@ app.post("/login", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
+// Middleware to protect routes that require authentication
 function requireLogin(req, res, next) {
   if (!req.session?.user) {
     return res.redirect("/loginform.html");
   }
   next();
 }
-
+// ── MVC: Home Page Endpoint ──────────────────────────────
+// Model: Static HTML/CSS/JS files in the public directory
+// View: Home.html as the landing page for all users
+// Controller: This endpoint serves as the root URL and redirects to the Home.html page, which is the main entry point for users to navigate to login, registration, or explore the site.
 app.get("/", (req, res) => {
   res.set({ "Access-control-Allow-Origin": "*" });
   return res.redirect("Home.html");
 });
-
+// ── MVC: Logout Endpoint ──────────────────────────────
+// Model: Session management via express-session and SessionManagerSingleton
+// View: No specific view, but it redirects to Home.html after logout
+// Controller: This endpoint checks for an authenticated session, logs the logout event, removes the session from the SessionManager, destroys the session, clears cookies, and redirects to the homepage.
 app.get("/logout", requireLogin, (req, res) => {
   const user = req.session.userData;
   if (user) {
@@ -922,7 +947,10 @@ app.get("/logout", requireLogin, (req, res) => {
     res.redirect("/Home.html");
   });
 });
-
+// ── MVC: User Detail Endpoint ──────────────────────────────
+// Model: MongoDB collections (AdminUsers, RentalUsers, HostUsers)
+// View: Used by frontend JavaScript to display user info in the UI
+// Controller: This endpoint checks for an authenticated session, retrieves user details from the session, and returns them as JSON for the frontend to consume.
 app.get("/userdetail", requireLogin, (req, res) => {
   const user = req.session.user || req.session.userData;
 
@@ -937,7 +965,10 @@ app.get("/userdetail", requireLogin, (req, res) => {
     force_password_change: user.force_password_change || false,
   });
 });
-
+// ── MVC: Available Vehicles with Booking Conflict Check ──────────────────────────────
+// Model: MongoDB collections (Vehicles, Reservations, HostUsers, Reviews)
+// View: vehicle-reservation.html that allows filtering by date and shows available vehicles
+// Controller: This endpoint checks for overlapping reservations based on provided start and end dates, excludes booked vehicles, enriches available vehicles with host names and review stats, and returns the data as JSON for the frontend to display.
 app.get("/api/vehicles/available", async (req, res) => {
   try {
     const { start_date, end_date } = req.query;
@@ -1004,7 +1035,10 @@ app.get("/api/vehicles/available", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch available vehicles" });
   }
 });
-
+// ── MVC: Vehicle Listing with Host and Review Data ──────────────────────────────
+// Model: MongoDB collections (Vehicles, HostUsers, Reviews)
+// View: vehicle-listing.html that displays vehicles with host names and ratings
+// Controller: This endpoint fetches all vehicles, joins host first names from HostUsers, aggregates review stats from Reviews, and returns enriched vehicle data as JSON for the frontend to display.
 app.get("/api/vehicles", async (req, res) => {
   try {
     const vehicles = await db.collection("Vehicles").find({}).toArray();
@@ -1049,7 +1083,10 @@ app.get("/api/vehicles", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch vehicles" });
   }
 });
-
+// ── MVC: Admin Financial Dashboard ──────────────────────────────
+// Model: MongoDB collections (Vehicles, Reservations)
+// View: adminPage.html with a financial dashboard section
+// Controller: This endpoint aggregates financial data for all vehicles, including total revenue, rentals, and top-performing vehicle, and returns JSON for the frontend to display in the dashboard.
 app.get("/api/admin-financials", requireLogin, async (_req, res) => {
   try {
     const vehicles = await db.collection("Vehicles").find({}).toArray();
@@ -1145,12 +1182,14 @@ app.get("/api/admin-financials", requireLogin, async (_req, res) => {
     res.status(500).json({ error: "Failed to fetch financials" });
   }
 });
-
+// ── MVC: Host Financial Dashboard ──────────────────────────────
+// Model: MongoDB collections (Vehicles, Reservations)
+// View: ownerPage.html with a financial dashboard section
+// Controller: This endpoint aggregates financial data for the logged-in host's vehicles, including total revenue, rentals, and top-performing vehicle, and returns JSON for the frontend to display in the dashboard.
 app.get("/api/host-financials", requireLogin, async (req, res) => {
   try {
     const username = req.session.user_name;
 
-    // Get all vehicles owned by this host
     const vehicles = await db
       .collection("Vehicles")
       .find({ host_username: username })
@@ -1170,7 +1209,6 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
       vehicleMap[v._id.toString()] = v;
     });
 
-    // Get all reservations that include any of these vehicles
     const allReservations = await db
       .collection("Reservations")
       .find({})
@@ -1193,7 +1231,6 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
     });
 
     relevant.forEach((r) => {
-      // Exclude cancelled reservations from all financial calculations
       if (r.status === "Cancelled") return;
 
       const ids = toIdArray(r.history_vehicle_id)
@@ -1213,8 +1250,6 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
         if (r.status === "Booked") stats[id].activeRentals++;
       });
     });
-
-    // Build response
     let totalRevenue = 0,
       totalRentals = 0,
       activeRentals = 0,
@@ -1261,7 +1296,10 @@ app.get("/api/host-financials", requireLogin, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch financials" });
   }
 });
-
+// ── MVC: Host Vehicle Rental History ──────────────────────────────
+// Model: MongoDB collections (Vehicles, Reservations, RentalUsers)
+// View: ownerPage.html with a rental history section
+// Controller: This endpoint retrieves the rental history for a specific vehicle owned by the host, including renter details and reservation info, and returns JSON for the frontend to display in a table.
 app.get(
   "/api/host-financials/history/:vehicleId",
   requireLogin,
@@ -1349,7 +1387,10 @@ app.get(
     }
   },
 );
-
+// ── MVC: Host Vehicle Management ──────────────────────────────
+// Model: MongoDB collections (Vehicles, HostUsers)
+// View: ownerPage.html with forms and tables
+// Controller: This endpoint fetches the host's vehicles, enriches them with the host's first name and review stats, and returns JSON for the frontend to render.
 app.get("/api/my-vehicles", requireLogin, async (req, res) => {
   try {
     const username = req.session.user_name;
@@ -1365,7 +1406,11 @@ app.get("/api/my-vehicles", requireLogin, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch vehicles" });
   }
 });
-
+// ── Observer Pattern: Reservation Notifications ──────────────────────────────
+// When a reservation is created, this endpoint checks for conflicts, saves the reservation, and then sends notifications:
+// 1. If the reservation is for a future date, it sets status to "Reserved". If it's for today or past, it sets status to "Booked" and marks the vehicle as unavailable until the end date.
+// 2. It creates an in-app notification for the host about the new rental.
+// 3. It sends a confirmation email to the renter with reservation details.
 app.post("/api/reservations", requireLogin, async (req, res) => {
   try {
     const {
@@ -1404,8 +1449,6 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
         user_id = user._id;
       }
     }
-
-    // Check for overlapping reservations on this vehicle
     const conflict = await db.collection("Reservations").findOne({
       status: { $nin: ["Complete", "Cancelled"] },
       start_date: { $lte: end_date },
@@ -1456,12 +1499,12 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
     };
     await db.collection("Reservations").insertOne(data);
 
-    // Notify the host that their vehicle was rented
     if (hostUsername) {
       try {
         const vehicleName =
-          [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") ||
-          "your vehicle";
+          [vehicle.year, vehicle.make, vehicle.model]
+            .filter(Boolean)
+            .join(" ") || "your vehicle";
         await db.collection("Notifications").insertOne({
           username: hostUsername,
           type: "new_rental",
@@ -1472,7 +1515,10 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
           createdAt: new Date(),
         });
       } catch (err) {
-        console.error("[Notify] Failed to send host rental notification:", err.message);
+        console.error(
+          "[Notify] Failed to send host rental notification:",
+          err.message,
+        );
       }
     }
 
@@ -1495,8 +1541,6 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
         req.session.user_name,
       );
     }
-
-    // Only mark vehicle unavailable immediately if reservation starts today
     if (reservationStatus === "Booked") {
       await db.collection("Vehicles").updateOne(
         { _id: objectId },
@@ -1517,6 +1561,8 @@ app.post("/api/reservations", requireLogin, async (req, res) => {
       .json({ error: "Failed to create reservation: " + err.message });
   }
 });
+//------Oberver pattern implementation for reservation notifications (also used for host rental alerts)------//
+// Sends a reservation confirmation email and saves an in-app notification for the user after a booking is confirmed.
 async function sendReservationEmail(
   to,
   reservation,
@@ -1525,7 +1571,6 @@ async function sendReservationEmail(
   baseUrl,
   username,
 ) {
-  // Save in-app notification (Observer pattern — same as notifyWatchers)
   if (username && db) {
     try {
       const vehicleName =
@@ -1662,110 +1707,158 @@ async function sendReservationEmail(
   }
 }
 
-// ── Proxy Pattern: Payment Integration ──
+// ── Proxy Pattern: Payment Processing ─────────────────────────────────────
 //
-// PaymentProxy    – proxy: enforces access control, detects duplicates, logs
-//                   every operation, then delegates to the real gateway
-
-const stripeClient = process.env.STRIPE_SECRET_KEY
-  ? require("stripe")(process.env.STRIPE_SECRET_KEY)
-  : null;
+// PaymentService      – abstract subject (interface)
+// FakePaymentService  – real subject: simulates approve / decline / error outcomes
+// PaymentProxy        – proxy: enforces access control, logs every operation,
+//                        then delegates charge() to the real service
 
 // ── Abstract subject ─────────────────────────────────────────────────────────
-class PaymentGateway {
-  async saveCard(_details) {
-    throw new Error("saveCard() not implemented");
-  }
-  async listCards(_username) {
-    throw new Error("listCards() not implemented");
-  }
-  async deleteCard(_username, _key) {
-    throw new Error("deleteCard() not implemented");
+class PaymentService {
+  async charge(_details) {
+    throw new Error("charge() not implemented");
   }
 }
 
 // ── Real subject ─────────────────────────────────────────────────────────────
-// In production, saveCard() expects a Stripe PaymentMethod id created by
-// Stripe Elements on the frontend.  When STRIPE_SECRET_KEY is absent (local
-// dev), it stores card metadata directly in MongoDB so the app stays runnable
-// without Stripe credentials.
-class StripeGateway extends PaymentGateway {
-  async saveCard(details) {
-    const {
-      full_name,
-      address,
-      payment_nickname,
-      card_number,
-      expiration,
-      card_type,
-      payment_zip_code,
-      user,
-      stripePaymentMethodId,
-    } = details;
-
-    const [year, month] = expiration.split("-");
-    const exp = `${month}/${String(year).slice(-2)}`;
-    const cleanCard = card_number.replace(/\D/g, "");
-    const last4 = cleanCard.slice(-4);
-    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
-
-    let stripeCustomerId = null;
-
-    if (stripeClient) {
-      // Retrieve or create a Stripe Customer tied to this user
-      const existing = await db
-        .collection("RentalUsers")
-        .findOne({ _id: user._id }, { projection: { stripe_customer_id: 1 } });
-
-      if (existing?.stripe_customer_id) {
-        stripeCustomerId = existing.stripe_customer_id;
-      } else {
-        const customer = await stripeClient.customers.create({
-          name: full_name,
-          metadata: { username: user.username },
-        });
-        stripeCustomerId = customer.id;
-        await db
-          .collection("RentalUsers")
-          .updateOne(
-            { _id: user._id },
-            { $set: { stripe_customer_id: stripeCustomerId } },
-          );
-      }
-
-      // Attach the PaymentMethod sent from the frontend (Stripe Elements token)
-      if (stripePaymentMethodId) {
-        await stripeClient.paymentMethods.attach(stripePaymentMethodId, {
-          customer: stripeCustomerId,
-        });
-      }
+// Simulates a payment processor with no external dependency.
+// Outcome is determined by card state and requested amount:
+//
+//   card.status !== "Active"  →  CARD_INACTIVE      (card is inactive)
+//   amount > 9 999            →  INSUFFICIENT_FUNDS (balance too low)
+//   amount > 4 999            →  DECLINED           (bank declined)
+//   otherwise                 →  APPROVED + fake transaction ID
+class FakePaymentService extends PaymentService {
+  async charge({ card, amount }) {
+    if (!card || card.status !== "Active") {
+      return {
+        approved: false,
+        code: "CARD_INACTIVE",
+        message: "Card is inactive.",
+      };
     }
+    if (amount > 9999) {
+      return {
+        approved: false,
+        code: "INSUFFICIENT_FUNDS",
+        message: "Insufficient funds.",
+      };
+    }
+    if (amount > 4999) {
+      return {
+        approved: false,
+        code: "DECLINED",
+        message: "Payment declined.",
+      };
+    }
+    const transactionId =
+      "TXN-" +
+      Date.now() +
+      "-" +
+      Math.random().toString(36).slice(2, 10).toUpperCase();
+    return { approved: true, transactionId };
+  }
+}
 
-    const entry = {
-      customer_name: full_name,
-      payment_address: address,
-      last4,
-      card_type,
-      expiration: exp,
-      payment_zip_code,
-      payment_nickname,
-      status: "Active",
-      added_at: now,
-      ...(stripeCustomerId && { stripe_customer_id: stripeCustomerId }),
-    };
-
-    await db.collection("RentalUsers").updateOne(
-      { _id: user._id },
-      {
-        $push: { payment: entry },
-        $set: { updated_at: now },
-      },
-    );
-
-    return entry;
+// ── Proxy Pattern ────────────────────────────────────────────────────────────────────
+// The proxy adds a layer of control and logging around the payment processing.
+// It verifies the user and card details, logs the charge attempt, and then delegates to the real payment service.
+// It also provides additional methods for managing saved payment methods (cards) for users.
+// The proxy ensures that only valid, active cards can be charged, and that all operations are logged for auditing purposes.
+// This design allows us to swap out the underlying payment service in the future (e.g., integrate with Stripe or PayPal) without changing the rest of our application code, as all interactions go through the PaymentProxy.
+// The proxy also centralizes all payment-related logic, making it easier to maintain and enhance (e.g., adding fraud detection, retry logic, etc.) without scattering that code across the application.
+// The proxy assumes that user payment methods are stored in the RentalUsers collection under a "payment" array, where each entry includes at least last4, expiration, and status fields. It uses this information to validate charge requests and manage saved cards.
+class PaymentProxy extends PaymentService {
+  constructor(realService) {
+    super();
+    this._service = realService;
   }
 
-  async listCards(user) {
+  async _resolveUser(username) {
+    const user = await db.collection("RentalUsers").findOne({ username });
+    if (!user)
+      throw Object.assign(new Error("User not found"), { status: 404 });
+    return user;
+  }
+
+  // Intercepts charge requests: verifies user, finds card, logs, delegates
+  async charge({ username, amount, last4, expiration }) {
+    const user = await this._resolveUser(username);
+    const card = (user.payment || []).find(
+      (p) => p.last4 === last4 && p.expiration === expiration,
+    );
+    if (!card)
+      throw Object.assign(new Error("Payment method not found"), {
+        status: 404,
+      });
+
+    console.log(
+      `[PaymentProxy] charge – user: ${username}, amount: $${amount}, last4: ${last4}`,
+    );
+    const result = await this._service.charge({ card, amount });
+    console.log(
+      `[PaymentProxy] charge – ${result.approved ? "APPROVED " + result.transactionId : result.code}`,
+    );
+    return result;
+  }
+  // Validates and saves a new card for the user, ensuring no duplicates and proper formatting
+  async saveCard(details) {
+    const { username } = details;
+    const user = await this._resolveUser(username);
+
+    if (!/^\d{4}-\d{2}$/.test(details.expiration)) {
+      throw Object.assign(new Error("Invalid expiration date format"), {
+        status: 400,
+      });
+    }
+    const cleanCard = details.card_number.replace(/\D/g, "");
+    if (cleanCard.length < 13 || cleanCard.length > 19) {
+      throw Object.assign(new Error("Invalid card number length"), {
+        status: 400,
+      });
+    }
+
+    const last4 = cleanCard.slice(-4);
+    const [year, month] = details.expiration.split("-");
+    const exp = `${month}/${String(year).slice(-2)}`;
+
+    const duplicate = (user.payment || []).some(
+      (p) => p.last4 === last4 && p.expiration === exp,
+    );
+    if (duplicate) {
+      throw Object.assign(
+        new Error("A card with that number and expiration is already saved"),
+        { status: 409 },
+      );
+    }
+
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+    const entry = {
+      customer_name: details.full_name,
+      payment_address: details.address,
+      last4,
+      card_type: details.card_type,
+      expiration: exp,
+      payment_zip_code: details.payment_zip_code,
+      payment_nickname: details.payment_nickname,
+      status: "Active",
+      added_at: now,
+    };
+
+    console.log(`[PaymentProxy] saveCard – user: ${username}, last4: ${last4}`);
+    await db
+      .collection("RentalUsers")
+      .updateOne(
+        { _id: user._id },
+        { $push: { payment: entry }, $set: { updated_at: now } },
+      );
+    console.log(`[PaymentProxy] saveCard – success for user: ${username}`);
+    return entry;
+  }
+  // Lists saved cards for a user, excluding sensitive details
+  async listCards(username) {
+    const user = await this._resolveUser(username);
     const fresh = await db
       .collection("RentalUsers")
       .findOne({ _id: user._id }, { projection: { payment: 1 } });
@@ -1779,98 +1872,34 @@ class StripeGateway extends PaymentGateway {
       payment_nickname: p.payment_nickname || "N/A",
     }));
   }
-
-  async deleteCard(user, { last4, expiration }) {
+  // Deletes a saved card by last4 + expiration (since we don't store full card numbers)
+  async deleteCard(username, { last4, expiration }) {
+    const user = await this._resolveUser(username);
+    console.log(
+      `[PaymentProxy] deleteCard – user: ${username}, last4: ${last4}, exp: ${expiration}`,
+    );
     const result = await db
       .collection("RentalUsers")
       .updateOne(
         { _id: user._id },
         { $pull: { payment: { last4, expiration } } },
       );
-    return result.modifiedCount > 0;
-  }
-}
-
-// ── Proxy ────────────────────────────────────────────────────────────────────
-class PaymentProxy extends PaymentGateway {
-  constructor(realGateway) {
-    super();
-    this._gateway = realGateway;
-  }
-
-  // Shared: resolve and verify the session user
-  async _resolveUser(username) {
-    const user = await db.collection("RentalUsers").findOne({ username });
-    if (!user)
-      throw Object.assign(new Error("User not found"), { status: 404 });
-    return user;
-  }
-
-  async saveCard(details) {
-    const { username } = details;
-
-    // Access control – must be an authenticated RentalUser
-    const user = await this._resolveUser(username);
-    details.user = user;
-
-    // Input validation
-    if (!/^\d{4}-\d{2}$/.test(details.expiration)) {
-      throw Object.assign(new Error("Invalid expiration date format"), {
-        status: 400,
-      });
-    }
-    const cleanCard = details.card_number.replace(/\D/g, "");
-    if (cleanCard.length < 13 || cleanCard.length > 19) {
-      throw Object.assign(new Error("Invalid card number length"), {
-        status: 400,
-      });
-    }
-
-    // Duplicate detection – same last-4 + expiration already saved
-    const last4 = cleanCard.slice(-4);
-    const [year, month] = details.expiration.split("-");
-    const exp = `${month}/${String(year).slice(-2)}`;
-    const duplicate = (user.payment || []).some(
-      (p) => p.last4 === last4 && p.expiration === exp,
-    );
-    if (duplicate) {
-      throw Object.assign(
-        new Error("A card with that number and expiration is already saved"),
-        { status: 409 },
-      );
-    }
-
-    console.log(`[PaymentProxy] saveCard – user: ${username}, last4: ${last4}`);
-    const result = await this._gateway.saveCard(details);
-    console.log(`[PaymentProxy] saveCard – success for user: ${username}`);
-    return result;
-  }
-
-  async listCards(username) {
-    const user = await this._resolveUser(username);
-    return this._gateway.listCards(user);
-  }
-
-  async deleteCard(username, key) {
-    const user = await this._resolveUser(username);
-    console.log(
-      `[PaymentProxy] deleteCard – user: ${username}, last4: ${key.last4}, exp: ${key.expiration}`,
-    );
-    const removed = await this._gateway.deleteCard(user, key);
-    if (!removed) {
+    if (result.modifiedCount === 0)
       throw Object.assign(new Error("Payment method not found"), {
         status: 404,
       });
-    }
     return true;
   }
 }
 
 // Instantiate once at startup
-const paymentProxy = new PaymentProxy(new StripeGateway());
+const paymentProxy = new PaymentProxy(new FakePaymentService());
 
 // ── Routes (thin wrappers – all logic lives in the proxy / gateway) ──────────
-
+// Add a new payment method for the logged-in user
+// Expects: full_name, address, payment_nickname, card_number, expiration (YYYY-MM), card_type, payment_zip_code
+// Validates input, checks for duplicates, saves to user's payment array in DB
+// Returns the saved card entry (without card number, only last4) or an error message
 app.post("/payments", requireLogin, async (req, res) => {
   const required = [
     "full_name",
@@ -1898,7 +1927,7 @@ app.post("/payments", requireLogin, async (req, res) => {
       .json({ error: e.message || "Server error" });
   }
 });
-
+// List saved payment methods for the logged-in user
 app.post("/addresses", requireLogin, async (req, res) => {
   const {
     customer_name,
@@ -1969,7 +1998,11 @@ app.post("/addresses", requireLogin, async (req, res) => {
     return res.redirect(`vehicle-reservation.html`);
   }
 });
-
+// ── Vehicle Return ─────────────────────────────────────────────────────────
+//
+// When a renter returns a vehicle, they submit the return mileage. The system verifies the booking,
+// updates the reservation status to "Complete", sets the return mileage, and marks the vehicle as available again.
+// If the return mileage is less than the pickup mileage, an error is returned.
 app.post("/api/return", requireLogin, async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
@@ -2011,7 +2044,6 @@ app.post("/api/return", requireLogin, async (req, res) => {
       });
     }
 
-    // Validate mileage BEFORE updating anything
     let eqId = ObjectId.isValid(vehicleId)
       ? new ObjectId(vehicleId)
       : vehicleId;
@@ -2028,7 +2060,6 @@ app.post("/api/return", requireLogin, async (req, res) => {
         });
       }
 
-      // Mileage is valid — now complete the reservation
       await db.collection("Reservations").updateOne(
         { _id: reservation._id },
         {
@@ -2081,7 +2112,11 @@ app.post("/api/return", requireLogin, async (req, res) => {
       .json({ success: false, error: "Server error: " + err.message });
   }
 });
-
+// ── Reservation Cancellation ───────────────────────────────
+//
+// Reservations have a "status" field that can be "Reserved", "Booked", "Cancelled", or "Complete".
+// Only "Reserved" bookings can be cancelled by the renter. Cancellation updates the status and timestamps,
+// and notifies the host if applicable.
 app.post("/api/cancel-reservation", requireLogin, async (req, res) => {
   try {
     const { reservationId } = req.body;
@@ -2127,7 +2162,9 @@ app.post("/api/cancel-reservation", requireLogin, async (req, res) => {
           .collection("Vehicles")
           .findOne({ _id: resv.history_vehicle_id || resv.vehicle_id });
         const vehicleName = vehicleDoc
-          ? [vehicleDoc.year, vehicleDoc.make, vehicleDoc.model].filter(Boolean).join(" ")
+          ? [vehicleDoc.year, vehicleDoc.make, vehicleDoc.model]
+              .filter(Boolean)
+              .join(" ")
           : "your vehicle";
         await db.collection("Notifications").insertOne({
           username: resv.hostUsername,
@@ -2139,7 +2176,10 @@ app.post("/api/cancel-reservation", requireLogin, async (req, res) => {
           createdAt: new Date(),
         });
       } catch (err) {
-        console.error("[Notify] Failed to send host cancellation notification:", err.message);
+        console.error(
+          "[Notify] Failed to send host cancellation notification:",
+          err.message,
+        );
       }
     }
 
@@ -2150,7 +2190,9 @@ app.post("/api/cancel-reservation", requireLogin, async (req, res) => {
       .json({ success: false, error: "Server error: " + err.message });
   }
 });
-
+// ── Observer Pattern: Availability Watcher ─────────────────────────────────
+//
+// Vehicles have an "availability" boolean and "unavailable_until" date.
 setInterval(async () => {
   try {
     const now = new Date();
@@ -2275,7 +2317,7 @@ setInterval(async () => {
 
           if (recentNotif) continue; // Already notified recently, skip
 
-          // Save in-app notification
+          // Save email notification
           await db.collection("Notifications").insertOne({
             username: watcher.username,
             type: notif.type,
@@ -2347,7 +2389,7 @@ setInterval(async () => {
     console.error("Error updating vehicle availability:", err);
   }
 }, 60 * 1000);
-
+// Fetches the logged-in user's information and returns their full name. If no user is logged in, returns "Customer" as a default name.
 app.get("/api/userinfo", async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
@@ -2371,6 +2413,7 @@ app.get("/api/userinfo", async (req, res) => {
     return res.json({ name: "Customer" });
   }
 });
+// Fetches the user's past and current reservations, enriches them with vehicle details and mileage driven, and returns them in a structured format.
 app.get("/api/myrentals", async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
@@ -2436,6 +2479,7 @@ app.get("/api/myrentals", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user rentals" });
   }
 });
+// Fetches the user's past and current reservations, enriches them with vehicle details and mileage driven, and returns them in a structured format.
 app.get("/api/myreservations", async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
@@ -2511,6 +2555,7 @@ app.get("/api/myreservations", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch reservations" });
   }
 });
+// Fetches the user's saved payment methods from their profile and returns them in a structured format.
 app.get("/api/mypayments", async (req, res) => {
   if (!req.session?.user_name)
     return res.status(401).json({ error: "Not logged in" });
@@ -2524,6 +2569,7 @@ app.get("/api/mypayments", async (req, res) => {
       .json({ error: err.message || "Failed to fetch Payment Methods" });
   }
 });
+// Fetches the user's saved addresses from their profile and returns them in a structured format.
 app.get("/api/myaddress", async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
@@ -2553,6 +2599,7 @@ app.get("/api/myaddress", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch Address Book" });
   }
 });
+// Deletes a payment method from the user's saved cards based on last4 and expiration.
 app.delete("/api/delete-payment", requireLogin, async (req, res) => {
   const { last4, expiration } = req.body;
   try {
@@ -2565,7 +2612,7 @@ app.delete("/api/delete-payment", requireLogin, async (req, res) => {
       .json({ error: err.message || "Failed to remove Payment Method" });
   }
 });
-
+// Deletes an address from the user's address book based on the unique nickname.
 app.post("/api/delete-address", async (req, res) => {
   const { address_nickname, address_line1 } = req.body;
   if (!req.session || !req.session.user_name) {
@@ -2694,53 +2741,164 @@ class VehicleListingBuilder {
     return { ...this._doc };
   }
 }
-
-app.post("/api/vehicle", upload.single("image"), async (req, res) => {
-  try {
-    const {
-      year,
-      make,
-      model,
-      category,
-      description,
-      rental_rate_per_day,
-      mileage,
-      range,
-      pickup_location,
-    } = req.body;
-
-    const imagePath = req.file
-      ? "assets/img/vehicles/" + req.file.filename
-      : "";
-
-    let vehicleData;
+// ── Vehicle Management (host-only) ───────────────────────────
+// POST   /api/vehicle      – create a new listing (with optional image upload)
+// DELETE /api/vehicle/:id  – remove a listing by ID
+// PUT    /api/vehicle/:id  – update a listing and notify watchers of price drops
+app.post(
+  "/api/vehicle",
+  requireLogin,
+  upload.single("image"),
+  async (req, res) => {
     try {
-      vehicleData = new VehicleListingBuilder()
+      if (req.session.user.user_type !== "host") {
+        return res.status(403).json({ error: "Only hosts can add vehicles" });
+      }
+
+      const {
+        year,
+        make,
+        model,
+        category,
+        description,
+        rental_rate_per_day,
+        mileage,
+        range,
+        pickup_location,
+        image_url,
+      } = req.body;
+
+      // Prefer uploaded file; fall back to image_url string
+      const imagePath = req.file
+        ? "assets/img/vehicles/" + req.file.filename
+        : image_url || "";
+
+      let vehicleData;
+      try {
+        vehicleData = new VehicleListingBuilder()
+          .setBasicInfo(year, make, model, category)
+          .setDescription(description)
+          .setPricing(rental_rate_per_day)
+          .setSpecs(mileage, range)
+          .setLocation(pickup_location)
+          .setMedia(imagePath)
+          .setHost(req.session.user.username)
+          .build();
+      } catch (validationErr) {
+        return res
+          .status(validationErr.status || 400)
+          .json({ error: validationErr.message });
+      }
+
+      const result = await db.collection("Vehicles").insertOne(vehicleData);
+      res.json({
+        success: true,
+        message: "Vehicle added successfully",
+        vehicle: { _id: result.insertedId, ...vehicleData },
+      });
+    } catch (err) {
+      console.error("Add vehicle error:", err);
+      res.status(500).json({ error: "Failed to add vehicle" });
+    }
+  },
+);
+app.delete("/api/vehicle/:id", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid vehicle ID" });
+    }
+
+    const result = await db
+      .collection("Vehicles")
+      .deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount > 0) {
+      res.json({ success: true, message: "Vehicle deleted successfully" });
+    } else {
+      res.json({ success: false, error: "Vehicle not found" });
+    }
+  } catch (err) {
+    console.error("Delete vehicle error:", err);
+    res.status(500).json({ error: "Failed to delete vehicle" });
+  }
+});
+app.put(
+  "/api/vehicle/:id",
+  requireLogin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const {
+        model,
+        category,
+        description,
+        rental_rate_per_day,
+        make,
+        year,
+        mileage,
+        range,
+        pickup_location,
+      } = req.body;
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid vehicle ID" });
+      }
+
+      if (!model || !category || !rental_rate_per_day || !make || !year) {
+        return res.status(400).json({
+          error: "Year, make, model, category, and rental rate are required",
+        });
+      }
+
+      const imagePath = req.file
+        ? "assets/img/vehicles/" + req.file.filename
+        : "";
+
+      const updateData = new VehicleListingBuilder()
         .setBasicInfo(year, make, model, category)
         .setDescription(description)
         .setPricing(rental_rate_per_day)
         .setSpecs(mileage, range)
         .setLocation(pickup_location)
         .setMedia(imagePath)
-        .setHost(req.session?.user_name)
+        .asUpdate()
         .build();
-    } catch (validationErr) {
-      return res
-        .status(validationErr.status || 400)
-        .json({ error: validationErr.message });
+
+      const before = await db
+        .collection("Vehicles")
+        .findOne(
+          { _id: new ObjectId(id) },
+          { projection: { rental_rate_per_day: 1 } },
+        );
+      const oldPrice = before?.rental_rate_per_day ?? null;
+
+      const result = await db
+        .collection("Vehicles")
+        .updateOne({ _id: new ObjectId(id) }, { $set: updateData });
+
+      if (result.modifiedCount > 0) {
+        res.json({ success: true, message: "Vehicle updated successfully" });
+        // Notify watchers asynchronously if price dropped
+        const newPrice = updateData.rental_rate_per_day;
+        if (oldPrice !== null && newPrice < oldPrice) {
+          notifyWatchers(id, "price", newPrice);
+        }
+      } else {
+        res.json({
+          success: false,
+          error: "Vehicle not found or no changes made",
+        });
+      }
+    } catch (err) {
+      console.error("Update Vehicle error:", err);
+      res.status(500).json({ error: "Failed to update Vehicle" });
     }
-
-    const result = await db.collection("Vehicles").insertOne(vehicleData);
-    res.json({
-      message: "Vehicle added successfully",
-      vehicle: { _id: result.insertedId, ...vehicleData },
-    });
-  } catch (err) {
-    console.error("Add vehicle error:", err);
-    res.status(500).json({ error: "Failed to add vehicle" });
-  }
-});
-
+  },
+);
+// Updates a vehicle’s availability status and notifies watchers if the vehicle becomes available.
 app.patch("/api/vehicle/:id/availability", requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -2761,39 +2919,6 @@ app.patch("/api/vehicle/:id/availability", requireLogin, async (req, res) => {
     res.status(500).json({ error: "Failed to update availability" });
   }
 });
-
-// ADD VEHICLE
-app.post("/api/add-vehicle", requireLogin, async (req, res) => {
-  try {
-    if (req.session.user.user_type !== "host") {
-      return res.status(403).json({ error: "Only hosts can add vehicles" });
-    }
-
-    const { make, model, year, price, mileage, image_url, category } = req.body;
-
-    let vehicle;
-    try {
-      vehicle = new VehicleListingBuilder()
-        .setBasicInfo(year, make, model, category)
-        .setPricing(price)
-        .setSpecs(mileage)
-        .setMedia(image_url)
-        .setHost(req.session.user.username)
-        .build();
-    } catch (validationErr) {
-      return res
-        .status(validationErr.status || 400)
-        .json({ error: validationErr.message });
-    }
-
-    await db.collection("Vehicles").insertOne(vehicle);
-    res.json({ success: true, vehicle });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to add vehicle" });
-  }
-});
-
 // ── Watchlist notification helper ───────────────────────────────────────────
 // changeType: "availability" (vehicle became available) | "price" (price dropped)
 // newValue  : true for availability; new price number for price
@@ -2817,48 +2942,24 @@ async function notifyWatchers(vehicleId, changeType, newValue) {
     if (!watchers.length) return;
 
     for (const watcher of watchers) {
-      // For price-drop alerts, only notify if new price is at or below target
       if (changeType === "price") {
         if (!watcher.target_price || newValue > watcher.target_price) continue;
       }
 
-      // Look up the watcher's email
-      const user = await db
-        .collection("RentalUsers")
-        .findOne(
-          { username: watcher.username },
-          { projection: { email: 1, fname: 1, lname: 1 } },
-        );
-      if (!user?.email) continue;
-
-      const displayName =
-        [user.fname, user.lname].filter(Boolean).join(" ") || watcher.username;
-
-      let subject, html;
-      if (changeType === "availability") {
-        subject = `DriveShare: ${vehicleName} is now available!`;
-        html = `
-          <p>Hi ${displayName},</p>
-          <p>Good news! A vehicle on your watchlist is now available to rent:</p>
-          <p><strong>${vehicleName}</strong> — $${Number(vehicle.rental_rate_per_day).toFixed(2)}/day</p>
-          <p><a href="${process.env.APP_URL || "http://localhost:3000"}/vehicle-reservation.html">Book it now &rarr;</a></p>
-          <p style="color:#999;font-size:12px;">You received this because you watched this vehicle on DriveShare.</p>`;
-      } else {
-        subject = `DriveShare: Price drop on ${vehicleName}!`;
-        html = `
-          <p>Hi ${displayName},</p>
-          <p>The price on a vehicle you're watching just dropped:</p>
-          <p><strong>${vehicleName}</strong> — now <strong>$${Number(newValue).toFixed(2)}/day</strong>
-            (your target: $${Number(watcher.target_price).toFixed(2)}/day)</p>
-          <p><a href="${process.env.APP_URL || "http://localhost:3000"}/vehicle-reservation.html">Book it now &rarr;</a></p>
-          <p style="color:#999;font-size:12px;">You received this because you watched this vehicle on DriveShare.</p>`;
-      }
-
-      await mailer.sendMail({
-        from: `"DriveShare" <${process.env.GMAIL_USER}>`,
-        to: user.email,
-        subject,
-        html,
+      // Save email notification (acts as dedup marker for the polling loop)
+      const notifType = changeType === "price" ? "price_drop" : "car_available";
+      const notifMessage =
+        changeType === "price"
+          ? `Price alert! ${vehicleName} is now $${Number(newValue).toFixed(2)}/day — at or below your target of $${Number(watcher.target_price).toFixed(2)}/day.`
+          : `Good news! ${vehicleName} is now available for rental.`;
+      await db.collection("Notifications").insertOne({
+        username: watcher.username,
+        type: notifType,
+        message: notifMessage,
+        link: "/vehicle-reservation.html",
+        vehicle_id: objId,
+        read: false,
+        createdAt: new Date(),
       });
 
       console.log(
@@ -2889,7 +2990,6 @@ app.post("/api/watch", requireLogin, async (req, res) => {
       return res.json({ success: true, alreadyWatching: true });
     }
 
-    // Enforce one watch per user — remove any existing watch before adding the new one
     await db.collection("WatchList").deleteMany({ username });
 
     await db.collection("WatchList").insertOne({
@@ -2901,7 +3001,7 @@ app.post("/api/watch", requireLogin, async (req, res) => {
       created_at: new Date(),
     });
 
-    // Save in-app notification + send watch confirmation email (Observer pattern)
+    // Save email notification + send watch confirmation email (Observer pattern)
     try {
       const [user, vehicle] = await Promise.all([
         db
@@ -3103,105 +3203,6 @@ app.get("/api/messages", requireLogin, async (req, res) => {
   res.json(messages);
 });
 
-app.delete("/api/vehicle/:id", requireLogin, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid vehicle ID" });
-    }
-
-    const result = await db
-      .collection("Vehicles")
-      .deleteOne({ _id: new ObjectId(id) });
-
-    if (result.deletedCount > 0) {
-      res.json({ success: true, message: "Vehicle deleted successfully" });
-    } else {
-      res.json({ success: false, error: "Vehicle not found" });
-    }
-  } catch (err) {
-    console.error("Delete vehicle error:", err);
-    res.status(500).json({ error: "Failed to delete vehicle" });
-  }
-});
-
-app.put(
-  "/api/vehicle/:id",
-  requireLogin,
-  upload.single("image"),
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-      const {
-        model,
-        category,
-        description,
-        rental_rate_per_day,
-        make,
-        year,
-        mileage,
-        range,
-        pickup_location,
-      } = req.body;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid vehicle ID" });
-      }
-
-      if (!model || !category || !rental_rate_per_day || !make || !year) {
-        return res.status(400).json({
-          error: "Year, make, model, category, and rental rate are required",
-        });
-      }
-
-      const imagePath = req.file
-        ? "assets/img/vehicles/" + req.file.filename
-        : "";
-
-      const updateData = new VehicleListingBuilder()
-        .setBasicInfo(year, make, model, category)
-        .setDescription(description)
-        .setPricing(rental_rate_per_day)
-        .setSpecs(mileage, range)
-        .setLocation(pickup_location)
-        .setMedia(imagePath)
-        .asUpdate()
-        .build();
-
-      // Capture old price before updating so we can detect a drop
-      const before = await db
-        .collection("Vehicles")
-        .findOne(
-          { _id: new ObjectId(id) },
-          { projection: { rental_rate_per_day: 1 } },
-        );
-      const oldPrice = before?.rental_rate_per_day ?? null;
-
-      const result = await db
-        .collection("Vehicles")
-        .updateOne({ _id: new ObjectId(id) }, { $set: updateData });
-
-      if (result.modifiedCount > 0) {
-        res.json({ success: true, message: "Vehicle updated successfully" });
-        // Notify watchers asynchronously if price dropped
-        const newPrice = updateData.rental_rate_per_day;
-        if (oldPrice !== null && newPrice < oldPrice) {
-          notifyWatchers(id, "price", newPrice);
-        }
-      } else {
-        res.json({
-          success: false,
-          error: "Vehicle not found or no changes made",
-        });
-      }
-    } catch (err) {
-      console.error("Update Vehicle error:", err);
-      res.status(500).json({ error: "Failed to update Vehicle" });
-    }
-  },
-);
-
 // ── Host Reviews ────────────────────────────────────────────
 // GET /api/reviews/by-reservation/:id  — customer review for a given reservation (host view)
 app.get("/api/reviews/by-reservation/:id", requireLogin, async (req, res) => {
@@ -3215,7 +3216,9 @@ app.get("/api/reviews/by-reservation/:id", requireLogin, async (req, res) => {
       .findOne({ reservation_id: new ObjectId(id) });
 
     if (!review) {
-      return res.status(404).json({ error: "No customer review found for this reservation" });
+      return res
+        .status(404)
+        .json({ error: "No customer review found for this reservation" });
     }
     res.json(serializeReview(review));
   } catch (err) {
@@ -3234,7 +3237,9 @@ app.delete("/api/reviews/:id", requireLogin, async (req, res) => {
     }
 
     // Verify the review is for one of this host's vehicles
-    const review = await db.collection("Reviews").findOne({ _id: new ObjectId(id) });
+    const review = await db
+      .collection("Reviews")
+      .findOne({ _id: new ObjectId(id) });
     if (!review) return res.status(404).json({ error: "Review not found" });
 
     const vehicle = await db
@@ -3273,7 +3278,7 @@ app.get("/api/host-reviews/for-customer", requireLogin, async (req, res) => {
         start_date: r.start_date || "",
         end_date: r.end_date || "",
         created_at: r.created_at || "",
-      }))
+      })),
     );
   } catch (err) {
     console.error("host-reviews/for-customer error:", err);
@@ -3294,9 +3299,10 @@ app.get("/api/host-reviews", requireLogin, async (req, res) => {
 
     const vehicleIds = vehicles.map((v) => v._id);
     const vehicleMap = {};
-    vehicles.forEach((v) => { vehicleMap[v._id.toString()] = v; });
+    vehicles.forEach((v) => {
+      vehicleMap[v._id.toString()] = v;
+    });
 
-    // All completed reservations for host's vehicles
     const allReservations = await db
       .collection("Reservations")
       .find({ status: "Complete" })
@@ -3305,11 +3311,10 @@ app.get("/api/host-reviews", requireLogin, async (req, res) => {
 
     const completed = allReservations.filter((r) =>
       toIdArray(r.history_vehicle_id).some((id) =>
-        vehicleIds.some((vid) => vid.toString() === id.toString())
-      )
+        vehicleIds.some((vid) => vid.toString() === id.toString()),
+      ),
     );
 
-    // Existing host reviews
     const existing = await db
       .collection("HostReviews")
       .find({ host_username: hostUsername })
@@ -3317,16 +3322,11 @@ app.get("/api/host-reviews", requireLogin, async (req, res) => {
       .toArray();
 
     const reviewedResIds = new Set(
-      existing.map((r) => r.reservation_id.toString())
+      existing.map((r) => r.reservation_id.toString()),
     );
 
-    // Collect unique user_ids to fetch renter names
     const userIds = [
-      ...new Set(
-        completed
-          .map((r) => r.user_id?.toString())
-          .filter(Boolean)
-      ),
+      ...new Set(completed.map((r) => r.user_id?.toString()).filter(Boolean)),
     ].map((id) => new ObjectId(id));
 
     const renters = await db
@@ -3335,7 +3335,9 @@ app.get("/api/host-reviews", requireLogin, async (req, res) => {
       .toArray();
 
     const renterMap = {};
-    renters.forEach((u) => { renterMap[u._id.toString()] = u; });
+    renters.forEach((u) => {
+      renterMap[u._id.toString()] = u;
+    });
 
     // Build pending list
     const pending = completed
@@ -3351,7 +3353,8 @@ app.get("/api/host-reviews", requireLogin, async (req, res) => {
           vehicle_name: getVehicleLabel(vehicle),
           customer_username: renter?.username || r.customer_name || "—",
           customer_name: renter
-            ? [renter.fname, renter.lname].filter(Boolean).join(" ") || renter.username
+            ? [renter.fname, renter.lname].filter(Boolean).join(" ") ||
+              renter.username
             : r.customer_name || "—",
           start_date: r.start_date || "",
           end_date: r.end_date || "",
@@ -3405,10 +3408,11 @@ app.post("/api/host-reviews", requireLogin, async (req, res) => {
       return res.status(404).json({ error: "Completed reservation not found" });
     }
 
-    // Verify this reservation is for one of the host's vehicles
     const vehicleId = toIdArray(reservation.history_vehicle_id)[0];
     if (!vehicleId) {
-      return res.status(400).json({ error: "Vehicle not found on reservation" });
+      return res
+        .status(400)
+        .json({ error: "Vehicle not found on reservation" });
     }
     const vehicle = await db
       .collection("Vehicles")
@@ -3418,16 +3422,19 @@ app.post("/api/host-reviews", requireLogin, async (req, res) => {
       return res.status(403).json({ error: "Not your vehicle" });
     }
 
-    const existing = await db
-      .collection("HostReviews")
-      .findOne({ reservation_id: reservation._id, host_username: hostUsername });
+    const existing = await db.collection("HostReviews").findOne({
+      reservation_id: reservation._id,
+      host_username: hostUsername,
+    });
 
     if (existing) {
       return res.status(409).json({ error: "Already reviewed this rental" });
     }
 
     const renter = reservation.user_id
-      ? await db.collection("RentalUsers").findOne({ _id: new ObjectId(reservation.user_id) })
+      ? await db
+          .collection("RentalUsers")
+          .findOne({ _id: new ObjectId(reservation.user_id) })
       : null;
 
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
@@ -3438,7 +3445,8 @@ app.post("/api/host-reviews", requireLogin, async (req, res) => {
       host_username: hostUsername,
       customer_username: renter?.username || reservation.customer_name || "—",
       customer_name: renter
-        ? [renter.fname, renter.lname].filter(Boolean).join(" ") || renter.username
+        ? [renter.fname, renter.lname].filter(Boolean).join(" ") ||
+          renter.username
         : reservation.customer_name || "—",
       start_date: reservation.start_date || "",
       end_date: reservation.end_date || "",
@@ -3451,7 +3459,12 @@ app.post("/api/host-reviews", requireLogin, async (req, res) => {
     const result = await db.collection("HostReviews").insertOne(doc);
     res.status(201).json({
       success: true,
-      review: { ...doc, _id: result.insertedId.toString(), reservation_id: doc.reservation_id.toString(), vehicle_id: doc.vehicle_id.toString() },
+      review: {
+        ...doc,
+        _id: result.insertedId.toString(),
+        reservation_id: doc.reservation_id.toString(),
+        vehicle_id: doc.vehicle_id.toString(),
+      },
     });
   } catch (err) {
     console.error("host-reviews POST error:", err);
@@ -3480,7 +3493,13 @@ app.put("/api/host-reviews/:id", requireLogin, async (req, res) => {
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
     const result = await db.collection("HostReviews").updateOne(
       { _id: new ObjectId(id), host_username: hostUsername },
-      { $set: { rating: numRating, comment: String(comment).trim(), updated_at: now } }
+      {
+        $set: {
+          rating: numRating,
+          comment: String(comment).trim(),
+          updated_at: now,
+        },
+      },
     );
 
     if (result.matchedCount === 0) {
@@ -3502,9 +3521,9 @@ app.delete("/api/host-reviews/:id", requireLogin, async (req, res) => {
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid review ID" });
     }
-    const result = await db.collection("HostReviews").deleteOne(
-      { _id: new ObjectId(id), host_username: hostUsername }
-    );
+    const result = await db
+      .collection("HostReviews")
+      .deleteOne({ _id: new ObjectId(id), host_username: hostUsername });
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: "Review not found" });
     }
@@ -3517,51 +3536,45 @@ app.delete("/api/host-reviews/:id", requireLogin, async (req, res) => {
 
 // ── Send a message ──────────────────────────────────────────
 app.post("/api/messages/send", requireLogin, async (req, res) => {
+  try {
+    const { to_username, subject, body, vehicle_id } = req.body;
+    const from_username = req.session.user_name;
+
+    if (!to_username || !body) {
+      return res
+        .status(400)
+        .json({ error: "Recipient and message body are required." });
+    }
+
+    // Verify recipient exists (check both RentalUsers and HostUsers)
+    const recipient =
+      (await db.collection("RentalUsers").findOne({ username: to_username })) ||
+      (await db.collection("HostUsers").findOne({ username: to_username }));
+
+    if (!recipient) {
+      return res.status(404).json({ error: "Recipient not found." });
+    }
+
+    const message = {
+      from_username,
+      to_username,
+      subject: subject || "(no subject)",
+      body,
+      vehicle_id: vehicle_id || null,
+      read: false,
+      createdAt: new Date(),
+    };
+
+    const result = await db.collection("Messages").insertOne(message);
+
+    // Send email notification to recipient if they have an email
+    if (recipient.email && process.env.GMAIL_USER && process.env.GMAIL_PASS) {
       try {
-        const { to_username, subject, body, vehicle_id } = req.body;
-        const from_username = req.session.user_name;
-
-        if (!to_username || !body) {
-          return res
-            .status(400)
-            .json({ error: "Recipient and message body are required." });
-        }
-
-        // Verify recipient exists (check both RentalUsers and HostUsers)
-        const recipient =
-          (await db
-            .collection("RentalUsers")
-            .findOne({ username: to_username })) ||
-          (await db.collection("HostUsers").findOne({ username: to_username }));
-
-        if (!recipient) {
-          return res.status(404).json({ error: "Recipient not found." });
-        }
-
-        const message = {
-          from_username,
-          to_username,
-          subject: subject || "(no subject)",
-          body,
-          vehicle_id: vehicle_id || null,
-          read: false,
-          createdAt: new Date(),
-        };
-
-        const result = await db.collection("Messages").insertOne(message);
-
-        // Send email notification to recipient if they have an email
-        if (
-          recipient.email &&
-          process.env.GMAIL_USER &&
-          process.env.GMAIL_PASS
-        ) {
-          try {
-            await mailer.sendMail({
-              from: `"DriveShare" <${process.env.GMAIL_USER}>`,
-              to: recipient.email,
-              subject: `New message from ${from_username} — ${message.subject}`,
-              html: `
+        await mailer.sendMail({
+          from: `"DriveShare" <${process.env.GMAIL_USER}>`,
+          to: recipient.email,
+          subject: `New message from ${from_username} — ${message.subject}`,
+          html: `
             <div style="font-family:Arial,sans-serif; max-width:560px; margin:0 auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
               <div style="background:#e8604c; padding:16px 24px;">
                 <h2 style="color:#fff; margin:0; font-size:18px;">New Message on DriveShare</h2>
@@ -3578,658 +3591,549 @@ app.post("/api/messages/send", requireLogin, async (req, res) => {
               </div>
             </div>
           `,
-            });
-          } catch (emailErr) {
-            console.error(
-              "Message email notification failed:",
-              emailErr.message,
-            );
-            // Don't fail the request if email fails
-          }
-        }
-
-        res.json({ success: true, messageId: result.insertedId });
-      } catch (err) {
-        console.error("Send message error:", err);
-        res.status(500).json({ error: "Failed to send message." });
-      }
-    });
-
-    // ── Get inbox (messages TO the logged-in user) ──────────────
-    app.get("/api/messages/inbox", requireLogin, async (req, res) => {
-      try {
-        const username = req.session.user_name;
-        const messages = await db
-          .collection("Messages")
-          .find({ to_username: username })
-          .sort({ createdAt: -1 })
-          .toArray();
-
-        // Enrich with vehicle info if present
-        const enriched = await Promise.all(
-          messages.map(async (m) => {
-            let vehicleLabel = null;
-            if (m.vehicle_id && ObjectId.isValid(m.vehicle_id)) {
-              const v = await db
-                .collection("Vehicles")
-                .findOne({ _id: new ObjectId(m.vehicle_id) });
-              if (v)
-                vehicleLabel = [v.year, v.make, v.model]
-                  .filter(Boolean)
-                  .join(" ");
-            }
-            return { ...m, vehicleLabel };
-          }),
-        );
-
-        res.json(enriched);
-      } catch (err) {
-        console.error("Inbox error:", err);
-        res.status(500).json({ error: "Failed to load inbox." });
-      }
-    });
-
-    // ── Get sent messages (messages FROM the logged-in user) ────
-    app.get("/api/messages/sent", requireLogin, async (req, res) => {
-      try {
-        const username = req.session.user_name;
-        const messages = await db
-          .collection("Messages")
-          .find({ from_username: username })
-          .sort({ createdAt: -1 })
-          .toArray();
-
-        const enriched = await Promise.all(
-          messages.map(async (m) => {
-            let vehicleLabel = null;
-            if (m.vehicle_id && ObjectId.isValid(m.vehicle_id)) {
-              const v = await db
-                .collection("Vehicles")
-                .findOne({ _id: new ObjectId(m.vehicle_id) });
-              if (v)
-                vehicleLabel = [v.year, v.make, v.model]
-                  .filter(Boolean)
-                  .join(" ");
-            }
-            return { ...m, vehicleLabel };
-          }),
-        );
-
-        res.json(enriched);
-      } catch (err) {
-        console.error("Sent messages error:", err);
-        res.status(500).json({ error: "Failed to load sent messages." });
-      }
-    });
-
-    // ── Mark message as read ────────────────────────────────────
-    app.patch("/api/messages/:id/read", requireLogin, async (req, res) => {
-      try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id))
-          return res.status(400).json({ error: "Invalid ID." });
-        await db
-          .collection("Messages")
-          .updateOne({ _id: new ObjectId(id) }, { $set: { read: true } });
-        res.json({ success: true });
-      } catch (err) {
-        res.status(500).json({ error: "Failed to mark as read." });
-      }
-    });
-
-    // ── Unread count (for notification badge) ───────────────────
-    app.get("/api/messages/unread-count", requireLogin, async (req, res) => {
-      try {
-        const username = req.session.user_name;
-        const count = await db
-          .collection("Messages")
-          .countDocuments({ to_username: username, read: false });
-        res.json({ count });
-      } catch (err) {
-        res.status(500).json({ count: 0 });
-      }
-    });
-
-    // ── Get host username for a vehicle (so renter can message them) ──
-    app.get("/api/vehicle/:id/host", requireLogin, async (req, res) => {
-      try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id))
-          return res.status(400).json({ error: "Invalid vehicle ID." });
-        const vehicle = await db
-          .collection("Vehicles")
-          .findOne({ _id: new ObjectId(id) });
-        if (!vehicle)
-          return res.status(404).json({ error: "Vehicle not found." });
-        res.json({ host_username: vehicle.host_username });
-      } catch (err) {
-        res.status(500).json({ error: "Failed to get host info." });
-      }
-    });
-
-    //  OBSERVER PATTERN API Routes
-
-    app.post("/api/watchlist", requireLogin, async (req, res) => {
-      try {
-        const { vehicleId, maxPrice } = req.body;
-        const username = req.session.user_name;
-
-        if (!vehicleId || !ObjectId.isValid(vehicleId)) {
-          return res.status(400).json({ error: "Invalid vehicle ID." });
-        }
-
-        // Remove existing watch for this vehicle first (upsert behavior)
-        await db.collection("WatchList").deleteOne({
-          username,
-          vehicle_id: new ObjectId(vehicleId),
         });
-
-        // Add new watch entry
-        await db.collection("WatchList").insertOne({
-          username,
-          vehicle_id: new ObjectId(vehicleId),
-          target_price: maxPrice ? Number(maxPrice) : null,
-          notify_available: true,
-          createdAt: new Date(),
-        });
-
-        console.log(
-          `[Observer] ${username} is now watching vehicle ${vehicleId}`,
-        );
-        res.json({ success: true });
-      } catch (err) {
-        console.error("Watchlist error:", err);
-        res.status(500).json({ error: "Failed to watch vehicle." });
+      } catch (emailErr) {
+        console.error("Message email notification failed:", emailErr.message);
+        // Don't fail the request if email fails
       }
-    });
+    }
 
-    // ── Get current user's watchlist ─────────────────────────────
-    app.get("/api/watchlist", requireLogin, async (req, res) => {
-      try {
-        const username = req.session.user_name;
-        const list = await db
-          .collection("WatchList")
-          .find({ username })
-          .toArray();
+    res.json({ success: true, messageId: result.insertedId });
+  } catch (err) {
+    console.error("Send message error:", err);
+    res.status(500).json({ error: "Failed to send message." });
+  }
+});
 
-        // Enrich with vehicle details
-        const enriched = await Promise.all(
-          list.map(async (w) => {
-            const v = await db
-              .collection("Vehicles")
-              .findOne({ _id: w.vehicle_id });
-            return {
-              ...w,
-              vehicle: v
-                ? {
-                    label: [v.year, v.make, v.model].filter(Boolean).join(" "),
-                    price: v.rental_rate_per_day,
-                    availability: v.availability,
-                    image_url: v.image_url || "",
-                  }
-                : null,
-            };
-          }),
-        );
+// ── Get inbox (messages TO the logged-in user) ──────────────
+app.get("/api/messages/inbox", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const messages = await db
+      .collection("Messages")
+      .find({ to_username: username })
+      .sort({ createdAt: -1 })
+      .toArray();
 
-        res.json(enriched);
-      } catch (err) {
-        res.status(500).json({ error: "Failed to get watchlist." });
-      }
-    });
-
-    // Remove from watchlist
-    app.delete("/api/watchlist/:vehicleId", requireLogin, async (req, res) => {
-      try {
-        const username = req.session.user_name;
-        const { vehicleId } = req.params;
-
-        if (!ObjectId.isValid(vehicleId)) {
-          return res.status(400).json({ error: "Invalid vehicle ID." });
+    // Enrich with vehicle info if present
+    const enriched = await Promise.all(
+      messages.map(async (m) => {
+        let vehicleLabel = null;
+        if (m.vehicle_id && ObjectId.isValid(m.vehicle_id)) {
+          const v = await db
+            .collection("Vehicles")
+            .findOne({ _id: new ObjectId(m.vehicle_id) });
+          if (v)
+            vehicleLabel = [v.year, v.make, v.model].filter(Boolean).join(" ");
         }
-
-        await db.collection("WatchList").deleteOne({
-          username,
-          vehicle_id: new ObjectId(vehicleId),
-        });
-
-        res.json({ success: true });
-      } catch (err) {
-        res.status(500).json({ error: "Failed to remove from watchlist." });
-      }
-    });
-
-    // Get notifications for logged-in user
-    app.get("/api/notifications", requireLogin, async (req, res) => {
-      try {
-        const username = req.session.user_name;
-        const notifications = await db
-          .collection("Notifications")
-          .find({ username })
-          .sort({ createdAt: -1 })
-          .limit(20)
-          .toArray();
-
-        res.json(notifications);
-      } catch (err) {
-        res.status(500).json({ error: "Failed to get notifications." });
-      }
-    });
-
-    //  Mark notification as read
-    app.patch("/api/notifications/:id/read", requireLogin, async (req, res) => {
-      try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id))
-          return res.status(400).json({ error: "Invalid ID." });
-
-        await db
-          .collection("Notifications")
-          .updateOne({ _id: new ObjectId(id) }, { $set: { read: true } });
-
-        res.json({ success: true });
-      } catch (err) {
-        res.status(500).json({ error: "Failed to mark as read." });
-      }
-    });
-
-    //  Unread notification count
-    app.get(
-      "/api/notifications/unread-count",
-      requireLogin,
-      async (req, res) => {
-        try {
-          const username = req.session.user_name;
-          const count = await db
-            .collection("Notifications")
-            .countDocuments({ username, read: false });
-
-          res.json({ count });
-        } catch (err) {
-          res.status(500).json({ count: 0 });
-        }
-      },
+        return { ...m, vehicleLabel };
+      }),
     );
-    app.get("/api/reviews/reviewable", requireLogin, async (req, res) => {
-      try {
-        const user = await db
-          .collection("RentalUsers")
-          .findOne({ username: req.session.user_name });
 
-        if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(enriched);
+  } catch (err) {
+    console.error("Inbox error:", err);
+    res.status(500).json({ error: "Failed to load inbox." });
+  }
+});
 
-        const completeReservations = await db
-          .collection("Reservations")
-          .find({ user_id: user._id, status: "Complete" })
-          .sort({ updated_at: -1, end_date: -1 })
-          .toArray();
+// ── Get sent messages (messages FROM the logged-in user) ────
+app.get("/api/messages/sent", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const messages = await db
+      .collection("Messages")
+      .find({ from_username: username })
+      .sort({ createdAt: -1 })
+      .toArray();
 
-        if (!completeReservations.length) return res.json([]);
+    const enriched = await Promise.all(
+      messages.map(async (m) => {
+        let vehicleLabel = null;
+        if (m.vehicle_id && ObjectId.isValid(m.vehicle_id)) {
+          const v = await db
+            .collection("Vehicles")
+            .findOne({ _id: new ObjectId(m.vehicle_id) });
+          if (v)
+            vehicleLabel = [v.year, v.make, v.model].filter(Boolean).join(" ");
+        }
+        return { ...m, vehicleLabel };
+      }),
+    );
 
-        const existingReviews = await db
-          .collection("Reviews")
-          .find({ user_id: user._id }, { projection: { reservation_id: 1 } })
-          .toArray();
+    res.json(enriched);
+  } catch (err) {
+    console.error("Sent messages error:", err);
+    res.status(500).json({ error: "Failed to load sent messages." });
+  }
+});
 
-        const reviewedReservationIds = new Set(
-          existingReviews.map((r) => r.reservation_id.toString()),
-        );
+// ── Mark message as read ────────────────────────────────────
+app.patch("/api/messages/:id/read", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id))
+      return res.status(400).json({ error: "Invalid ID." });
+    await db
+      .collection("Messages")
+      .updateOne({ _id: new ObjectId(id) }, { $set: { read: true } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to mark as read." });
+  }
+});
 
-        const vehicleIds = [
-          ...new Set(
-            completeReservations
-              .map((r) =>
-                normalizeObjectId(
-                  toIdArray(r.history_vehicle_id || r.vehicle_id)[0],
-                ),
-              )
-              .filter(Boolean)
-              .map((id) => id.toString()),
-          ),
-        ].map((id) => new ObjectId(id));
+// ── Unread count (for notification badge) ───────────────────
+app.get("/api/messages/unread-count", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const count = await db
+      .collection("Messages")
+      .countDocuments({ to_username: username, read: false });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ count: 0 });
+  }
+});
 
-        const vehicles = await db
+// ── Get host username for a vehicle (so renter can message them) ──
+app.get("/api/vehicle/:id/host", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id))
+      return res.status(400).json({ error: "Invalid vehicle ID." });
+    const vehicle = await db
+      .collection("Vehicles")
+      .findOne({ _id: new ObjectId(id) });
+    if (!vehicle) return res.status(404).json({ error: "Vehicle not found." });
+    res.json({ host_username: vehicle.host_username });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get host info." });
+  }
+});
+
+//  OBSERVER PATTERN API Routes
+app.post("/api/watchlist", requireLogin, async (req, res) => {
+  try {
+    const { vehicleId, maxPrice } = req.body;
+    const username = req.session.user_name;
+
+    if (!vehicleId || !ObjectId.isValid(vehicleId)) {
+      return res.status(400).json({ error: "Invalid vehicle ID." });
+    }
+
+    // Remove existing watch for this vehicle first (upsert behavior)
+    await db.collection("WatchList").deleteOne({
+      username,
+      vehicle_id: new ObjectId(vehicleId),
+    });
+
+    // Add new watch entry
+    await db.collection("WatchList").insertOne({
+      username,
+      vehicle_id: new ObjectId(vehicleId),
+      target_price: maxPrice ? Number(maxPrice) : null,
+      notify_available: true,
+      createdAt: new Date(),
+    });
+
+    console.log(`[Observer] ${username} is now watching vehicle ${vehicleId}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Watchlist error:", err);
+    res.status(500).json({ error: "Failed to watch vehicle." });
+  }
+});
+
+// ── Get current user's watchlist ─────────────────────────────
+app.get("/api/watchlist", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const list = await db.collection("WatchList").find({ username }).toArray();
+
+    // Enrich with vehicle details
+    const enriched = await Promise.all(
+      list.map(async (w) => {
+        const v = await db
           .collection("Vehicles")
-          .find({ _id: { $in: vehicleIds } })
-          .toArray();
+          .findOne({ _id: w.vehicle_id });
+        return {
+          ...w,
+          vehicle: v
+            ? {
+                label: [v.year, v.make, v.model].filter(Boolean).join(" "),
+                price: v.rental_rate_per_day,
+                availability: v.availability,
+                image_url: v.image_url || "",
+              }
+            : null,
+        };
+      }),
+    );
 
-        const vehicleMap = {};
-        vehicles.forEach((v) => {
-          vehicleMap[v._id.toString()] = v;
-        });
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get watchlist." });
+  }
+});
 
-        const result = completeReservations
-          .filter((r) => !reviewedReservationIds.has(r._id.toString()))
-          .map((r) => {
-            const vehicleId = normalizeObjectId(
+// Remove from watchlist
+app.delete("/api/watchlist/:vehicleId", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const { vehicleId } = req.params;
+
+    if (!ObjectId.isValid(vehicleId)) {
+      return res.status(400).json({ error: "Invalid vehicle ID." });
+    }
+
+    await db.collection("WatchList").deleteOne({
+      username,
+      vehicle_id: new ObjectId(vehicleId),
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to remove from watchlist." });
+  }
+});
+
+// Get notifications for logged-in user
+app.get("/api/notifications", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const notifications = await db
+      .collection("Notifications")
+      .find({ username })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .toArray();
+
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get notifications." });
+  }
+});
+
+//  Mark notification as read
+app.patch("/api/notifications/:id/read", requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id))
+      return res.status(400).json({ error: "Invalid ID." });
+
+    await db
+      .collection("Notifications")
+      .updateOne({ _id: new ObjectId(id) }, { $set: { read: true } });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to mark as read." });
+  }
+});
+
+//  Unread notification count
+app.get("/api/notifications/unread-count", requireLogin, async (req, res) => {
+  try {
+    const username = req.session.user_name;
+    const count = await db
+      .collection("Notifications")
+      .countDocuments({ username, read: false });
+
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ count: 0 });
+  }
+});
+// Returns the logged-in user's completed reservations that have not already been reviewed, along with their vehicle details.
+app.get("/api/reviews/reviewable", requireLogin, async (req, res) => {
+  try {
+    const user = await db
+      .collection("RentalUsers")
+      .findOne({ username: req.session.user_name });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const completeReservations = await db
+      .collection("Reservations")
+      .find({ user_id: user._id, status: "Complete" })
+      .sort({ updated_at: -1, end_date: -1 })
+      .toArray();
+
+    if (!completeReservations.length) return res.json([]);
+
+    const existingReviews = await db
+      .collection("Reviews")
+      .find({ user_id: user._id }, { projection: { reservation_id: 1 } })
+      .toArray();
+
+    const reviewedReservationIds = new Set(
+      existingReviews.map((r) => r.reservation_id.toString()),
+    );
+
+    const vehicleIds = [
+      ...new Set(
+        completeReservations
+          .map((r) =>
+            normalizeObjectId(
               toIdArray(r.history_vehicle_id || r.vehicle_id)[0],
-            );
-            if (!vehicleId) return null;
+            ),
+          )
+          .filter(Boolean)
+          .map((id) => id.toString()),
+      ),
+    ].map((id) => new ObjectId(id));
 
-            const vehicle = vehicleMap[vehicleId.toString()] || null;
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ _id: { $in: vehicleIds } })
+      .toArray();
 
-            return {
-              reservation_id: r._id.toString(),
-              order_id: r.orderId || "N/A",
-              vehicle_id: vehicleId.toString(),
-              vehicle_name: getVehicleLabel(vehicle),
-              end_date: r.end_date || "",
-              location: r.location || "",
-            };
-          })
-          .filter(Boolean);
-
-        res.json(result);
-      } catch (err) {
-        console.error("Reviewable rentals error:", err);
-        res.status(500).json({ error: "Failed to fetch reviewable rentals" });
-      }
+    const vehicleMap = {};
+    vehicles.forEach((v) => {
+      vehicleMap[v._id.toString()] = v;
     });
 
-    app.get("/api/reviews/mine", requireLogin, async (req, res) => {
-      try {
-        const user = await db
-          .collection("RentalUsers")
-          .findOne({ username: req.session.user_name });
-
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        const reviews = await db
-          .collection("Reviews")
-          .find({ user_id: user._id })
-          .sort({ created_at: -1 })
-          .toArray();
-
-        res.json(reviews.map(serializeReview));
-      } catch (err) {
-        console.error("My reviews error:", err);
-        res.status(500).json({ error: "Failed to fetch reviews" });
-      }
-    });
-
-    app.post("/api/reviews", requireLogin, async (req, res) => {
-      try {
-        const { reservation_id, rating, title, body } = req.body;
-
-        if (!reservation_id || !rating || !title || !body) {
-          return res.status(400).json({ error: "All fields are required" });
-        }
-
-        const numericRating = Number(rating);
-        if (
-          !Number.isInteger(numericRating) ||
-          numericRating < 1 ||
-          numericRating > 5
-        ) {
-          return res
-            .status(400)
-            .json({ error: "Rating must be between 1 and 5" });
-        }
-
-        if (!ObjectId.isValid(reservation_id)) {
-          return res.status(400).json({ error: "Invalid reservation ID" });
-        }
-
-        const user = await db
-          .collection("RentalUsers")
-          .findOne({ username: req.session.user_name });
-
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        const reservation = await db.collection("Reservations").findOne({
-          _id: new ObjectId(reservation_id),
-          user_id: user._id,
-          status: "Complete",
-        });
-
-        if (!reservation) {
-          return res.status(404).json({
-            error: "Only completed rentals can be reviewed",
-          });
-        }
-
-        const existing = await db.collection("Reviews").findOne({
-          reservation_id: reservation._id,
-        });
-
-        if (existing) {
-          return res.status(409).json({
-            error: "This completed rental has already been reviewed",
-          });
-        }
-
+    const result = completeReservations
+      .filter((r) => !reviewedReservationIds.has(r._id.toString()))
+      .map((r) => {
         const vehicleId = normalizeObjectId(
-          toIdArray(
-            reservation.history_vehicle_id || reservation.vehicle_id,
-          )[0],
+          toIdArray(r.history_vehicle_id || r.vehicle_id)[0],
         );
+        if (!vehicleId) return null;
 
-        if (!vehicleId) {
-          return res
-            .status(400)
-            .json({ error: "Vehicle not found for reservation" });
-        }
+        const vehicle = vehicleMap[vehicleId.toString()] || null;
 
-        const vehicle = await db
-          .collection("Vehicles")
-          .findOne({ _id: vehicleId });
-
-        const now = new Date().toISOString().replace("T", " ").substring(0, 19);
-
-        const reviewDoc = {
-          reservation_id: reservation._id,
-          order_id: reservation.orderId || null,
-          vehicle_id: vehicleId,
+        return {
+          reservation_id: r._id.toString(),
+          order_id: r.orderId || "N/A",
+          vehicle_id: vehicleId.toString(),
           vehicle_name: getVehicleLabel(vehicle),
-          user_id: user._id,
-          username: user.username,
-          customer_name: [user.fname, user.lname].filter(Boolean).join(" "),
-          host_username:
-            reservation.hostUsername || vehicle?.host_username || null,
-          rating: numericRating,
-          title: String(title).trim(),
-          body: String(body).trim(),
-          created_at: now,
-          updated_at: now,
+          end_date: r.end_date || "",
+          location: r.location || "",
         };
+      })
+      .filter(Boolean);
 
-        const result = await db.collection("Reviews").insertOne(reviewDoc);
+    res.json(result);
+  } catch (err) {
+    console.error("Reviewable rentals error:", err);
+    res.status(500).json({ error: "Failed to fetch reviewable rentals" });
+  }
+});
+// Returns the logged-in user's reviews, sorted by newest first, and formats them for the response.
+app.get("/api/reviews/mine", requireLogin, async (req, res) => {
+  try {
+    const user = await db
+      .collection("RentalUsers")
+      .findOne({ username: req.session.user_name });
 
-        res.status(201).json({
-          success: true,
-          review: serializeReview({
-            ...reviewDoc,
-            _id: result.insertedId,
-          }),
-        });
-      } catch (err) {
-        console.error("Create review error:", err);
-        res.status(500).json({ error: "Failed to save review" });
-      }
-    });
-    app.get("/api/reviews/reviewable", requireLogin, async (req, res) => {
-      try {
-        const user = await db
-          .collection("RentalUsers")
-          .findOne({ username: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-        if (!user) return res.status(404).json({ error: "User not found" });
+    const reviews = await db
+      .collection("Reviews")
+      .find({ user_id: user._id })
+      .sort({ created_at: -1 })
+      .toArray();
 
-        const reservations = await db
-          .collection("Reservations")
-          .find({
-            user_id: user._id,
-            status: "Complete",
-          })
-          .sort({ updated_at: -1 })
-          .toArray();
+    res.json(reviews.map(serializeReview));
+  } catch (err) {
+    console.error("My reviews error:", err);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+// Creates a review for a completed reservation after validating the user, rating, reservation, and duplicate review status.
+app.post("/api/reviews", requireLogin, async (req, res) => {
+  try {
+    const { reservation_id, rating, title, body } = req.body;
 
-        const existingReviews = await db
-          .collection("Reviews")
-          .find({ user_id: user._id })
-          .toArray();
+    if (!reservation_id || !rating || !title || !body) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
 
-        const reviewedReservationIds = new Set(
-          existingReviews.map((r) => String(r.reservation_id)),
-        );
+    const numericRating = Number(rating);
+    if (
+      !Number.isInteger(numericRating) ||
+      numericRating < 1 ||
+      numericRating > 5
+    ) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5" });
+    }
 
-        const vehicleIds = [
-          ...new Set(
-            reservations
-              .map((r) => r.history_vehicle_id || r.vehicle_id)
-              .filter(Boolean)
-              .map((id) => String(id)),
-          ),
-        ].map((id) => new ObjectId(id));
+    if (!ObjectId.isValid(reservation_id)) {
+      return res.status(400).json({ error: "Invalid reservation ID" });
+    }
 
-        const vehicles = await db
-          .collection("Vehicles")
-          .find({ _id: { $in: vehicleIds } })
-          .toArray();
+    const user = await db
+      .collection("RentalUsers")
+      .findOne({ username: req.session.user_name });
 
-        const vehicleMap = {};
-        vehicles.forEach((v) => {
-          vehicleMap[String(v._id)] =
-            [v.year, v.make, v.model].filter(Boolean).join(" ") ||
-            "Unknown Vehicle";
-        });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-        const result = reservations
-          .filter((r) => !reviewedReservationIds.has(String(r._id)))
-          .map((r) => {
-            const vehicleId = String(
-              r.history_vehicle_id || r.vehicle_id || "",
-            );
-            return {
-              reservation_id: String(r._id),
-              order_id: r.orderId,
-              vehicle_id: vehicleId,
-              vehicle_name: vehicleMap[vehicleId] || "Unknown Vehicle",
-              end_date: r.end_date,
-              location: r.location,
-            };
-          });
-
-        res.json(result);
-      } catch (err) {
-        console.error("reviewable route error:", err);
-        res.status(500).json({ error: "Failed to load completed rentals" });
-      }
+    const reservation = await db.collection("Reservations").findOne({
+      _id: new ObjectId(reservation_id),
+      user_id: user._id,
+      status: "Complete",
     });
 
-    app.get("/api/reviews/mine", requireLogin, async (req, res) => {
-      try {
-        const user = await db
-          .collection("RentalUsers")
-          .findOne({ username: req.session.user_name });
+    if (!reservation) {
+      return res.status(404).json({
+        error: "Only completed rentals can be reviewed",
+      });
+    }
 
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        const reviews = await db
-          .collection("Reviews")
-          .find({ user_id: user._id })
-          .sort({ created_at: -1 })
-          .toArray();
-
-        res.json(
-          reviews.map((r) => ({
-            ...r,
-            _id: String(r._id),
-            reservation_id: String(r.reservation_id),
-            vehicle_id: String(r.vehicle_id),
-            user_id: String(r.user_id),
-          })),
-        );
-      } catch (err) {
-        console.error("mine route error:", err);
-        res.status(500).json({ error: "Failed to load your reviews" });
-      }
+    const existing = await db.collection("Reviews").findOne({
+      reservation_id: reservation._id,
     });
 
-    app.post("/api/reviews", requireLogin, async (req, res) => {
-      try {
-        const { reservation_id, rating, title, body } = req.body;
+    if (existing) {
+      return res.status(409).json({
+        error: "This completed rental has already been reviewed",
+      });
+    }
 
-        if (!reservation_id || !rating || !title || !body) {
-          return res.status(400).json({ error: "All fields are required" });
-        }
+    const vehicleId = normalizeObjectId(
+      toIdArray(reservation.history_vehicle_id || reservation.vehicle_id)[0],
+    );
 
-        const user = await db
-          .collection("RentalUsers")
-          .findOne({ username: req.session.user_name });
+    if (!vehicleId) {
+      return res
+        .status(400)
+        .json({ error: "Vehicle not found for reservation" });
+    }
 
-        if (!user) return res.status(404).json({ error: "User not found" });
+    const vehicle = await db.collection("Vehicles").findOne({ _id: vehicleId });
 
-        const reservation = await db.collection("Reservations").findOne({
-          _id: new ObjectId(reservation_id),
-          user_id: user._id,
-          status: "Complete",
-        });
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
-        if (!reservation) {
-          return res
-            .status(404)
-            .json({ error: "Completed reservation not found" });
-        }
+    const reviewDoc = {
+      reservation_id: reservation._id,
+      order_id: reservation.orderId || null,
+      vehicle_id: vehicleId,
+      vehicle_name: getVehicleLabel(vehicle),
+      user_id: user._id,
+      username: user.username,
+      customer_name: [user.fname, user.lname].filter(Boolean).join(" "),
+      host_username: reservation.hostUsername || vehicle?.host_username || null,
+      rating: numericRating,
+      title: String(title).trim(),
+      body: String(body).trim(),
+      created_at: now,
+      updated_at: now,
+    };
 
-        const alreadyExists = await db.collection("Reviews").findOne({
-          reservation_id: reservation._id,
-        });
+    const result = await db.collection("Reviews").insertOne(reviewDoc);
 
-        if (alreadyExists) {
-          return res
-            .status(409)
-            .json({ error: "This reservation was already reviewed" });
-        }
+    res.status(201).json({
+      success: true,
+      review: serializeReview({
+        ...reviewDoc,
+        _id: result.insertedId,
+      }),
+    });
+  } catch (err) {
+    console.error("Create review error:", err);
+    res.status(500).json({ error: "Failed to save review" });
+  }
+});
+// Returns the logged-in user's completed reservations that still need a review, including related vehicle information.
+app.get("/api/reviews/reviewable", requireLogin, async (req, res) => {
+  try {
+    const user = await db
+      .collection("RentalUsers")
+      .findOne({ username: req.session.user_name });
 
-        const vehicleId =
-          reservation.history_vehicle_id || reservation.vehicle_id;
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-        const vehicle = await db.collection("Vehicles").findOne({
-          _id: new ObjectId(vehicleId),
-        });
+    const reservations = await db
+      .collection("Reservations")
+      .find({
+        user_id: user._id,
+        status: "Complete",
+      })
+      .sort({ updated_at: -1 })
+      .toArray();
 
-        const vehicleName = vehicle
-          ? [vehicle.year, vehicle.make, vehicle.model]
-              .filter(Boolean)
-              .join(" ")
-          : "Unknown Vehicle";
+    const existingReviews = await db
+      .collection("Reviews")
+      .find({ user_id: user._id })
+      .toArray();
 
-        const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+    const reviewedReservationIds = new Set(
+      existingReviews.map((r) => String(r.reservation_id)),
+    );
 
-        const doc = {
-          reservation_id: reservation._id,
-          order_id: reservation.orderId,
-          vehicle_id: new ObjectId(vehicleId),
-          vehicle_name: vehicleName,
-          user_id: user._id,
-          username: user.username,
-          customer_name: [user.fname, user.lname].filter(Boolean).join(" "),
-          rating: Number(rating),
-          title: String(title).trim(),
-          body: String(body).trim(),
-          created_at: now,
-          updated_at: now,
+    const vehicleIds = [
+      ...new Set(
+        reservations
+          .map((r) => r.history_vehicle_id || r.vehicle_id)
+          .filter(Boolean)
+          .map((id) => String(id)),
+      ),
+    ].map((id) => new ObjectId(id));
+
+    const vehicles = await db
+      .collection("Vehicles")
+      .find({ _id: { $in: vehicleIds } })
+      .toArray();
+
+    const vehicleMap = {};
+    vehicles.forEach((v) => {
+      vehicleMap[String(v._id)] =
+        [v.year, v.make, v.model].filter(Boolean).join(" ") ||
+        "Unknown Vehicle";
+    });
+
+    const result = reservations
+      .filter((r) => !reviewedReservationIds.has(String(r._id)))
+      .map((r) => {
+        const vehicleId = String(r.history_vehicle_id || r.vehicle_id || "");
+        return {
+          reservation_id: String(r._id),
+          order_id: r.orderId,
+          vehicle_id: vehicleId,
+          vehicle_name: vehicleMap[vehicleId] || "Unknown Vehicle",
+          end_date: r.end_date,
+          location: r.location,
         };
+      });
 
-        const result = await db.collection("Reviews").insertOne(doc);
+    res.json(result);
+  } catch (err) {
+    console.error("reviewable route error:", err);
+    res.status(500).json({ error: "Failed to load completed rentals" });
+  }
+});
+// Returns all reviews written by the logged-in user, sorted newest first, with ObjectIds converted to strings.
+app.get("/api/reviews/mine", requireLogin, async (req, res) => {
+  try {
+    const user = await db
+      .collection("RentalUsers")
+      .findOne({ username: req.session.user_name });
 
-        res.status(201).json({
-          success: true,
-          review: {
-            ...doc,
-            _id: String(result.insertedId),
-            reservation_id: String(doc.reservation_id),
-            vehicle_id: String(doc.vehicle_id),
-            user_id: String(doc.user_id),
-          },
-        });
-      } catch (err) {
-        console.error("create review error:", err);
-        res.status(500).json({ error: "Failed to save review" });
-      }
-    });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
+    const reviews = await db
+      .collection("Reviews")
+      .find({ user_id: user._id })
+      .sort({ created_at: -1 })
+      .toArray();
+
+    res.json(
+      reviews.map((r) => ({
+        ...r,
+        _id: String(r._id),
+        reservation_id: String(r.reservation_id),
+        vehicle_id: String(r.vehicle_id),
+        user_id: String(r.user_id),
+      })),
+    );
+  } catch (err) {
+    console.error("mine route error:", err);
+    res.status(500).json({ error: "Failed to load your reviews" });
+  }
+});
+// Creates a new review for a completed reservation if it belongs to the logged-in user and has not already been reviewed.
 // ── Host Chat: eligible renters (active reservations, not Complete/Cancelled) ──
 app.get("/api/host/eligible-renters", requireLogin, async (req, res) => {
   try {
@@ -4237,7 +4141,10 @@ app.get("/api/host/eligible-renters", requireLogin, async (req, res) => {
 
     const vehicles = await db
       .collection("Vehicles")
-      .find({ host_username: hostUsername }, { projection: { _id: 1, year: 1, make: 1, model: 1 } })
+      .find(
+        { host_username: hostUsername },
+        { projection: { _id: 1, year: 1, make: 1, model: 1 } },
+      )
       .toArray();
 
     if (!vehicles.length) return res.json([]);
@@ -4245,7 +4152,9 @@ app.get("/api/host/eligible-renters", requireLogin, async (req, res) => {
     const vehicleIds = vehicles.map((v) => v._id);
     const vehicleMap = {};
     vehicles.forEach((v) => {
-      vehicleMap[String(v._id)] = [v.year, v.make, v.model].filter(Boolean).join(" ");
+      vehicleMap[String(v._id)] = [v.year, v.make, v.model]
+        .filter(Boolean)
+        .join(" ");
     });
 
     const activeReservations = await db
@@ -4267,7 +4176,7 @@ app.get("/api/host/eligible-renters", requireLogin, async (req, res) => {
         activeReservations
           .map((r) => r.user_id)
           .filter((id) => id && ObjectId.isValid(String(id)))
-          .map((id) => String(id))
+          .map((id) => String(id)),
       ),
     ];
     const renterUsers = await db
@@ -4275,7 +4184,9 @@ app.get("/api/host/eligible-renters", requireLogin, async (req, res) => {
       .find({ _id: { $in: userIds.map((id) => new ObjectId(id)) } })
       .toArray();
     const userMap = {};
-    renterUsers.forEach((u) => { userMap[String(u._id)] = u; });
+    renterUsers.forEach((u) => {
+      userMap[String(u._id)] = u;
+    });
 
     const seen = new Set();
     const result = [];
@@ -4310,7 +4221,9 @@ app.get("/api/host/chat-threads", requireLogin, async (req, res) => {
 
     const messages = await db
       .collection("Messages")
-      .find({ $or: [{ from_username: hostUsername }, { to_username: hostUsername }] })
+      .find({
+        $or: [{ from_username: hostUsername }, { to_username: hostUsername }],
+      })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -4318,7 +4231,8 @@ app.get("/api/host/chat-threads", requireLogin, async (req, res) => {
 
     const threadMap = {};
     for (const m of messages) {
-      const otherParty = m.from_username === hostUsername ? m.to_username : m.from_username;
+      const otherParty =
+        m.from_username === hostUsername ? m.to_username : m.from_username;
       const vehicleId = m.vehicle_id ? String(m.vehicle_id) : "general";
       const key = `${otherParty}::${vehicleId}`;
 
@@ -4337,7 +4251,13 @@ app.get("/api/host/chat-threads", requireLogin, async (req, res) => {
       }
     }
 
-    const vehicleIds = [...new Set(Object.values(threadMap).map((t) => t.vehicle_id).filter(Boolean))];
+    const vehicleIds = [
+      ...new Set(
+        Object.values(threadMap)
+          .map((t) => t.vehicle_id)
+          .filter(Boolean),
+      ),
+    ];
     if (vehicleIds.length) {
       const vehicles = await db
         .collection("Vehicles")
@@ -4352,7 +4272,7 @@ app.get("/api/host/chat-threads", requireLogin, async (req, res) => {
     }
 
     const threads = Object.values(threadMap).sort(
-      (a, b) => new Date(b.last_message_time) - new Date(a.last_message_time)
+      (a, b) => new Date(b.last_message_time) - new Date(a.last_message_time),
     );
     res.json(threads);
   } catch (err) {
@@ -4367,7 +4287,8 @@ app.get("/api/host/chat-messages", requireLogin, async (req, res) => {
     const hostUsername = req.session.user_name;
     const { renter_username, vehicle_id } = req.query;
 
-    if (!renter_username) return res.status(400).json({ error: "renter_username is required." });
+    if (!renter_username)
+      return res.status(400).json({ error: "renter_username is required." });
 
     const baseQuery = {
       $or: [
@@ -4388,10 +4309,12 @@ app.get("/api/host/chat-messages", requireLogin, async (req, res) => {
       .sort({ createdAt: 1, timestamp: 1 })
       .toArray();
 
-    await db.collection("Messages").updateMany(
-      { ...baseQuery, to_username: hostUsername, read: false },
-      { $set: { read: true } }
-    );
+    await db
+      .collection("Messages")
+      .updateMany(
+        { ...baseQuery, to_username: hostUsername, read: false },
+        { $set: { read: true } },
+      );
 
     res.json(
       messages.map((m) => ({
@@ -4402,7 +4325,7 @@ app.get("/api/host/chat-messages", requireLogin, async (req, res) => {
         vehicle_id: m.vehicle_id ? String(m.vehicle_id) : null,
         read: m.read || false,
         createdAt: m.createdAt || m.timestamp,
-      }))
+      })),
     );
   } catch (err) {
     console.error("chat-messages error:", err);
@@ -4417,14 +4340,18 @@ app.post("/api/host/chat-send", requireLogin, async (req, res) => {
     const { to_username, body, vehicle_id } = req.body;
 
     if (!to_username || !body || !body.trim()) {
-      return res.status(400).json({ error: "Recipient and message are required." });
+      return res
+        .status(400)
+        .json({ error: "Recipient and message are required." });
     }
 
     if (vehicle_id && ObjectId.isValid(vehicle_id)) {
-      const vehicle = await db
-        .collection("Vehicles")
-        .findOne({ _id: new ObjectId(vehicle_id), host_username: hostUsername });
-      if (!vehicle) return res.status(403).json({ error: "You do not own this vehicle." });
+      const vehicle = await db.collection("Vehicles").findOne({
+        _id: new ObjectId(vehicle_id),
+        host_username: hostUsername,
+      });
+      if (!vehicle)
+        return res.status(403).json({ error: "You do not own this vehicle." });
     }
 
     const msg = {
@@ -4432,7 +4359,10 @@ app.post("/api/host/chat-send", requireLogin, async (req, res) => {
       to_username,
       body: body.trim(),
       subject: "(chat)",
-      vehicle_id: vehicle_id && ObjectId.isValid(vehicle_id) ? new ObjectId(vehicle_id) : null,
+      vehicle_id:
+        vehicle_id && ObjectId.isValid(vehicle_id)
+          ? new ObjectId(vehicle_id)
+          : null,
       read: false,
       createdAt: new Date(),
     };
@@ -4452,7 +4382,9 @@ app.get("/api/renter/all-hosts-vehicles", requireLogin, async (req, res) => {
       .collection("Vehicles")
       .find(
         { host_username: { $exists: true, $ne: null } },
-        { projection: { _id: 1, year: 1, make: 1, model: 1, host_username: 1 } }
+        {
+          projection: { _id: 1, year: 1, make: 1, model: 1, host_username: 1 },
+        },
       )
       .toArray();
 
@@ -4478,20 +4410,27 @@ app.get("/api/renter/chat-threads", requireLogin, async (req, res) => {
     // Pre-populate with active (non-complete, non-cancelled) reservations
     const activeReservations = await db
       .collection("Reservations")
-      .find({ customer_username: renterUsername, status: { $nin: ["Complete", "Cancelled"] } })
+      .find({
+        customer_username: renterUsername,
+        status: { $nin: ["Complete", "Cancelled"] },
+      })
       .toArray();
 
     for (const r of activeReservations) {
       const vehicleId = String(r.history_vehicle_id || r.vehicle_id || "");
       if (!vehicleId || !ObjectId.isValid(vehicleId)) continue;
-      const vehicle = await db.collection("Vehicles").findOne({ _id: new ObjectId(vehicleId) });
+      const vehicle = await db
+        .collection("Vehicles")
+        .findOne({ _id: new ObjectId(vehicleId) });
       if (!vehicle || !vehicle.host_username) continue;
       const key = `${vehicle.host_username}::${vehicleId}`;
       if (!threadMap[key]) {
         threadMap[key] = {
           host_username: vehicle.host_username,
           vehicle_id: vehicleId,
-          vehicle_label: [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" "),
+          vehicle_label: [vehicle.year, vehicle.make, vehicle.model]
+            .filter(Boolean)
+            .join(" "),
           last_message: "",
           last_message_time: r.createdAt || new Date(0),
           unread_count: 0,
@@ -4502,12 +4441,18 @@ app.get("/api/renter/chat-threads", requireLogin, async (req, res) => {
     // Overlay with actual message history
     const messages = await db
       .collection("Messages")
-      .find({ $or: [{ from_username: renterUsername }, { to_username: renterUsername }] })
+      .find({
+        $or: [
+          { from_username: renterUsername },
+          { to_username: renterUsername },
+        ],
+      })
       .sort({ createdAt: -1 })
       .toArray();
 
     for (const m of messages) {
-      const otherParty = m.from_username === renterUsername ? m.to_username : m.from_username;
+      const otherParty =
+        m.from_username === renterUsername ? m.to_username : m.from_username;
       const vehicleId = m.vehicle_id ? String(m.vehicle_id) : "general";
       const key = `${otherParty}::${vehicleId}`;
       if (!threadMap[key]) {
@@ -4531,7 +4476,13 @@ app.get("/api/renter/chat-threads", requireLogin, async (req, res) => {
     }
 
     // Fetch vehicle labels for threads missing them
-    const vehicleIds = [...new Set(Object.values(threadMap).map((t) => t.vehicle_id).filter(Boolean))];
+    const vehicleIds = [
+      ...new Set(
+        Object.values(threadMap)
+          .map((t) => t.vehicle_id)
+          .filter(Boolean),
+      ),
+    ];
     if (vehicleIds.length) {
       const vehicles = await db
         .collection("Vehicles")
@@ -4540,13 +4491,14 @@ app.get("/api/renter/chat-threads", requireLogin, async (req, res) => {
       vehicles.forEach((v) => {
         const label = [v.year, v.make, v.model].filter(Boolean).join(" ");
         Object.values(threadMap).forEach((t) => {
-          if (t.vehicle_id === String(v._id) && !t.vehicle_label) t.vehicle_label = label;
+          if (t.vehicle_id === String(v._id) && !t.vehicle_label)
+            t.vehicle_label = label;
         });
       });
     }
 
     const threads = Object.values(threadMap).sort(
-      (a, b) => new Date(b.last_message_time) - new Date(a.last_message_time)
+      (a, b) => new Date(b.last_message_time) - new Date(a.last_message_time),
     );
     res.json(threads);
   } catch (err) {
@@ -4561,7 +4513,8 @@ app.get("/api/renter/chat-messages", requireLogin, async (req, res) => {
     const renterUsername = req.session.user_name;
     const { host_username, vehicle_id } = req.query;
 
-    if (!host_username) return res.status(400).json({ error: "host_username is required." });
+    if (!host_username)
+      return res.status(400).json({ error: "host_username is required." });
 
     const baseQuery = {
       $or: [
@@ -4583,10 +4536,12 @@ app.get("/api/renter/chat-messages", requireLogin, async (req, res) => {
       .toArray();
 
     // Mark messages sent to this renter as read
-    await db.collection("Messages").updateMany(
-      { ...baseQuery, to_username: renterUsername, read: false },
-      { $set: { read: true } }
-    );
+    await db
+      .collection("Messages")
+      .updateMany(
+        { ...baseQuery, to_username: renterUsername, read: false },
+        { $set: { read: true } },
+      );
 
     res.json(
       messages.map((m) => ({
@@ -4597,7 +4552,7 @@ app.get("/api/renter/chat-messages", requireLogin, async (req, res) => {
         vehicle_id: m.vehicle_id ? String(m.vehicle_id) : null,
         read: m.read || false,
         createdAt: m.createdAt || m.timestamp,
-      }))
+      })),
     );
   } catch (err) {
     console.error("renter chat-messages error:", err);
@@ -4612,7 +4567,9 @@ app.post("/api/renter/chat-send", requireLogin, async (req, res) => {
     const { to_username, body, vehicle_id } = req.body;
 
     if (!to_username || !body || !body.trim()) {
-      return res.status(400).json({ error: "Recipient and message are required." });
+      return res
+        .status(400)
+        .json({ error: "Recipient and message are required." });
     }
 
     const msg = {
@@ -4620,7 +4577,10 @@ app.post("/api/renter/chat-send", requireLogin, async (req, res) => {
       to_username,
       body: body.trim(),
       subject: "(chat)",
-      vehicle_id: vehicle_id && ObjectId.isValid(vehicle_id) ? new ObjectId(vehicle_id) : null,
+      vehicle_id:
+        vehicle_id && ObjectId.isValid(vehicle_id)
+          ? new ObjectId(vehicle_id)
+          : null,
       read: false,
       createdAt: new Date(),
     };
