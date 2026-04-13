@@ -4701,3 +4701,211 @@ body.auth-page #main {
 #history-section {
   display: none;
 }
+
+/* Watch Modal */
+#watch-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+#watch-modal .watch-modal-content {
+  background: #fff;
+  padding: 32px 36px;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  max-width: 420px;
+  width: 90vw;
+}
+
+#watch-modal .watch-modal-content h3 {
+  margin-bottom: 8px;
+}
+
+#watch-modal .watch-modal-content h3 i {
+  color: #e8604c;
+}
+
+#watch-modal .watch-modal-content p {
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+#watch-modal .watch-modal-content label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+#watch-vehicle-name {
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 15px;
+}
+
+.watch-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#confirm-watch-btn,
+#cancel-watch-btn {
+  flex: 1;
+}
+
+#watch-result {
+  margin-top: 12px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Message Modal */
+#message-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+#message-modal .message-modal-content {
+  background: #fff;
+  padding: 32px 36px;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  max-width: 480px;
+  width: 90vw;
+  position: relative;
+}
+
+.message-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.message-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1a1a2e;
+}
+
+.message-modal-header h3 i {
+  color: #e8604c;
+}
+
+#msg-vehicle-label {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #888;
+}
+
+.message-modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #aaa;
+  line-height: 1;
+}
+
+.message-modal-field {
+  margin-bottom: 14px;
+}
+
+.message-modal-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.message-modal-field input[readonly] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid #eee;
+  border-radius: 8px;
+  background: #f9f9f9;
+  font-size: 13px;
+}
+
+.message-modal-field input:not([readonly]) {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+}
+
+.message-modal-field input:not([readonly]):focus {
+  border-color: #e8604c;
+}
+
+.message-modal-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+}
+
+.message-modal-field textarea:focus {
+  border-color: #e8604c;
+}
+
+.message-modal-body-field {
+  margin-bottom: 18px;
+}
+
+.message-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+#send-message-btn {
+  flex: 1;
+  padding: 11px;
+  background: #e8604c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.message-modal-cancel-btn {
+  padding: 11px 20px;
+  background: #eee;
+  color: #555;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#msg-status {
+  margin-top: 12px;
+  font-size: 13px;
+  text-align: center;
+}

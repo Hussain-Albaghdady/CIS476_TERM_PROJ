@@ -374,7 +374,7 @@
         </div>
       </section><!-- End Financial Management Section -->
 
-      <!-- ======= Review Customers Section ======= -->
+      <!-- ======= Review Section ======= -->
       <section id="review-customers" class="vehicle-management">
         <div class="container" data-aos="fade-up" data-aos-delay="100">
           <div class="management-header-box">
@@ -385,7 +385,7 @@
             <div class="row mb-4 justify-content-center">
               <div class="col-lg-4 col-md-5 text-center">
                 <button id="view-reviews-btn" class="btn btn-success btn-lg">
-                  <i class="icofont-star"></i> View Customer Reviews
+                  <i class="icofont-star"></i> View Reviews
                 </button>
               </div>
             </div>
@@ -1312,8 +1312,7 @@
                 showMessage('edit-vehicle-success', 'Vehicle updated successfully!');
                 setTimeout(() => {
                   editModal.style.display = 'none';
-                  loadVehicleForManagement();
-                  refreshMainVehicleDisplay();
+                  location.reload();
                 }, 1500);
               }
             })

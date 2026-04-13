@@ -132,50 +132,17 @@
     </button>
 
     <!-- Watch Modal  -->
-    <div
-      id="watch-modal"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-      "
-    >
-      <div
-        style="
-          background: #fff;
-          padding: 32px 36px;
-          border-radius: 12px;
-          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-          max-width: 420px;
-          width: 90vw;
-        "
-      >
-        <h3 style="margin-bottom: 8px">
-          <i class="bx bx-heart" style="color: #e8604c"></i> Watch This Vehicle
+    <div id="watch-modal">
+      <div class="watch-modal-content">
+        <h3>
+          <i class="bx bx-heart"></i> Watch This Vehicle
         </h3>
-        <p style="color: #666; font-size: 13px; margin-bottom: 16px">
+        <p>
           Get notified when this vehicle becomes available or the price drops.
         </p>
-        <div
-          id="watch-vehicle-name"
-          style="
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #333;
-            font-size: 15px;
-          "
-        ></div>
+        <div id="watch-vehicle-name"></div>
         <div class="form-group">
-          <label style="font-size: 13px; font-weight: 600; color: #444"
-            >Max Price / Day (optional)</label
-          >
+          <label>Max Price / Day (optional)</label>
           <input
             type="number"
             id="watch-max-price"
@@ -188,207 +155,63 @@
             >Leave blank to only get availability notifications.</small
           >
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 20px">
-          <button
-            id="confirm-watch-btn"
-            class="btn btn-success"
-            style="flex: 1"
-          >
+        <div class="watch-modal-actions">
+          <button id="confirm-watch-btn" class="btn btn-success">
             <i class="bx bx-bell"></i> Watch Vehicle
           </button>
-          <button
-            id="cancel-watch-btn"
-            class="btn btn-secondary"
-            style="flex: 1"
-          >
+          <button id="cancel-watch-btn" class="btn btn-secondary">
             Cancel
           </button>
         </div>
-        <div
-          id="watch-result"
-          style="margin-top: 12px; font-size: 13px; text-align: center"
-        ></div>
+        <div id="watch-result"></div>
       </div>
     </div>
 
-    <!-- Message modaals -->
-    <div
-      id="message-modal"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-      "
-    >
-      <div
-        style="
-          background: #fff;
-          padding: 32px 36px;
-          border-radius: 12px;
-          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-          max-width: 480px;
-          width: 90vw;
-          position: relative;
-        "
-      >
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-          "
-        >
+    <!-- Message Modal -->
+    <div id="message-modal">
+      <div class="message-modal-content">
+        <div class="message-modal-header">
           <div>
-            <h3 style="margin: 0; font-size: 18px; color: #1a1a2e">
-              <i class="bx bx-message-dots" style="color: #e8604c"></i> Message
-              Host
+            <h3>
+              <i class="bx bx-message-dots"></i> Message Host
             </h3>
-            <p
-              id="msg-vehicle-label"
-              style="margin: 4px 0 0; font-size: 13px; color: #888"
-            ></p>
+            <p id="msg-vehicle-label"></p>
           </div>
           <button
-            onclick="
-              document.getElementById('message-modal').style.display = 'none'
-            "
-            style="
-              background: none;
-              border: none;
-              font-size: 24px;
-              cursor: pointer;
-              color: #aaa;
-              line-height: 1;
-            "
+            class="message-modal-close-btn"
+            onclick="document.getElementById('message-modal').style.display = 'none'"
           >
             &times;
           </button>
         </div>
-        <div style="margin-bottom: 14px">
-          <label
-            style="
-              font-size: 12px;
-              font-weight: 600;
-              color: #555;
-              display: block;
-              margin-bottom: 4px;
-            "
-            >To</label
-          >
-          <input
-            id="msg-to"
-            type="text"
-            readonly
-            style="
-              width: 100%;
-              padding: 8px 12px;
-              border: 1.5px solid #eee;
-              border-radius: 8px;
-              background: #f9f9f9;
-              font-size: 13px;
-            "
-          />
+        <div class="message-modal-field">
+          <label>To</label>
+          <input id="msg-to" type="text" readonly />
         </div>
-        <div style="margin-bottom: 14px">
-          <label
-            style="
-              font-size: 12px;
-              font-weight: 600;
-              color: #555;
-              display: block;
-              margin-bottom: 4px;
-            "
-            >Subject</label
-          >
-          <input
-            id="msg-subject"
-            type="text"
-            style="
-              width: 100%;
-              padding: 8px 12px;
-              border: 1.5px solid #ddd;
-              border-radius: 8px;
-              font-size: 13px;
-              outline: none;
-            "
-            onfocus="this.style.borderColor = '#e8604c'"
-            onblur="this.style.borderColor = '#ddd'"
-          />
+        <div class="message-modal-field">
+          <label>Subject</label>
+          <input id="msg-subject" type="text" />
         </div>
-        <div style="margin-bottom: 18px">
-          <label
-            style="
-              font-size: 12px;
-              font-weight: 600;
-              color: #555;
-              display: block;
-              margin-bottom: 4px;
-            "
-            >Message</label
-          >
+        <div class="message-modal-field message-modal-body-field">
+          <label>Message</label>
           <textarea
             id="msg-body"
             rows="5"
             placeholder="Hi, I have a question about your vehicle..."
-            style="
-              width: 100%;
-              padding: 10px 12px;
-              border: 1.5px solid #ddd;
-              border-radius: 8px;
-              font-size: 13px;
-              resize: vertical;
-              outline: none;
-            "
-            onfocus="this.style.borderColor = '#e8604c'"
-            onblur="this.style.borderColor = '#ddd'"
           ></textarea>
         </div>
-        <div style="display: flex; gap: 10px">
-          <button
-            id="send-message-btn"
-            style="
-              flex: 1;
-              padding: 11px;
-              background: #e8604c;
-              color: #fff;
-              border: none;
-              border-radius: 8px;
-              font-size: 14px;
-              font-weight: 600;
-              cursor: pointer;
-            "
-          >
+        <div class="message-modal-actions">
+          <button id="send-message-btn">
             <i class="bx bx-send"></i> Send Message
           </button>
           <button
-            onclick="
-              document.getElementById('message-modal').style.display = 'none'
-            "
-            style="
-              padding: 11px 20px;
-              background: #eee;
-              color: #555;
-              border: none;
-              border-radius: 8px;
-              font-size: 14px;
-              cursor: pointer;
-            "
+            class="message-modal-cancel-btn"
+            onclick="document.getElementById('message-modal').style.display = 'none'"
           >
             Cancel
           </button>
         </div>
-        <div
-          id="msg-status"
-          style="margin-top: 12px; font-size: 13px; text-align: center"
-        ></div>
+        <div id="msg-status"></div>
       </div>
     </div>
 
@@ -884,7 +707,7 @@
                   watchModal.style.display = "none";
                   currentWatchId = null;
                   location.reload();
-                }, 2200);
+                }, 1500);
               } else {
                 watchResult.textContent = data.error || "Something went wrong.";
                 watchResult.style.color = "#e74c3c";
