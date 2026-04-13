@@ -835,6 +835,7 @@
 
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/chat-mediator.js"></script>
     <script>
       // Collapsible sections for orders, addresses, and payments, with smooth expand/collapse animation and support for multiple collapsible sections on the same page
       var coll = document.getElementsByClassName("collapsible");
@@ -1909,203 +1910,49 @@
       });
 
       // ══════════════════════════════════════════════════════════════
-      //  RENTER CHAT
+      //  RENTER CHAT  (Mediator pattern — see assets/js/chat-mediator.js)
       // ══════════════════════════════════════════════════════════════
       (function () {
-        var activeThread = null;
-        var pollTimer = null;
-        var renterUsername = null;
-        var chatInitialized = false;
-
-        // Fetch logged-in renter's username once
-        fetch('/userdetail', { credentials: 'include' })
-          .then(function (r) { return r.ok ? r.json() : {}; })
-          .then(function (d) { renterUsername = d.user_name || d.username || null; });
-
-        // Lazy-init when the messaging collapsible is opened
-        var collBtn = document.getElementById('rc-messaging-collapsible');
-        if (collBtn) {
-          collBtn.addEventListener('click', function () {
-            if (!chatInitialized) {
-              chatInitialized = true;
-              loadRcThreads();
-            }
-          });
-        }
-
-        // ── Thread list ────────────────────────────────────────────
-        function loadRcThreads() {
-          fetch('/api/renter/chat-threads', { credentials: 'include' })
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(renderRcThreads);
-        }
-
-        function renderRcThreads(threads) {
-          var list = document.getElementById('rc-thread-list');
-          if (!threads.length) {
-            list.innerHTML = '<div class="chat-empty-state"><i class="bx bx-message-dots"></i><p>No conversations yet.</p></div>';
-            return;
-          }
-          list.innerHTML = threads.map(function (t) {
-            var isActive = activeThread &&
-              activeThread.host_username === t.host_username &&
-              (activeThread.vehicle_id || null) === (t.vehicle_id || null);
-            var badge = t.unread_count > 0
-              ? '<span class="chat-unread-badge">' + t.unread_count + '</span>'
-              : '';
-            var vehicleTag = t.vehicle_label
-              ? '<span class="chat-thread-vehicle">' + rcEscHtml(t.vehicle_label) + '</span>'
-              : '';
-            var preview = rcEscHtml((t.last_message || '').substring(0, 60));
-            return '<div class="chat-thread-item' + (isActive ? ' active' : '') + '" ' +
-              'data-host="' + rcEscAttr(t.host_username) + '" ' +
-              'data-vehicle="' + rcEscAttr(t.vehicle_id || '') + '">' +
-              '<div class="chat-thread-top"><span class="chat-thread-name">' + rcEscHtml(t.host_username) + '</span>' + badge + '</div>' +
-              vehicleTag +
-              '<div class="chat-thread-preview">' + preview + '</div>' +
-              '</div>';
-          }).join('');
-
-          list.querySelectorAll('.chat-thread-item').forEach(function (el) {
-            el.addEventListener('click', function () {
-              openRcThread(el.dataset.host, el.dataset.vehicle || null);
-            });
-          });
-        }
-
-        function openRcThread(hostUsername, vehicleId) {
-          activeThread = { host_username: hostUsername, vehicle_id: vehicleId || null };
-          document.getElementById('rc-chat-placeholder').style.display = 'none';
-          var chatActive = document.getElementById('rc-chat-active');
-          chatActive.style.display = 'flex';
-
-          document.getElementById('rc-chat-header-name').textContent = hostUsername;
-          document.getElementById('rc-chat-header-vehicle').textContent = '';
-
-          loadRcMessages();
-          startRcPolling();
-          loadRcThreads();
-        }
-
-        // ── Messages ───────────────────────────────────────────────
-        function loadRcMessages() {
-          if (!activeThread) return;
-          var url = '/api/renter/chat-messages?host_username=' + encodeURIComponent(activeThread.host_username);
-          if (activeThread.vehicle_id) url += '&vehicle_id=' + encodeURIComponent(activeThread.vehicle_id);
-
-          fetch(url, { credentials: 'include' })
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(renderRcMessages);
-        }
-
-        function renderRcMessages(messages) {
-          var container = document.getElementById('rc-chat-messages');
-          if (!messages.length) {
-            container.innerHTML = '<div class="chat-no-msgs">No messages yet. Say hello!</div>';
-            return;
-          }
-          var html = messages.map(function (m) {
-            var isMine = m.from_username === renterUsername;
-            var time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-            return '<div class="chat-msg ' + (isMine ? 'chat-msg-mine' : 'chat-msg-theirs') + '">' +
-              '<div class="chat-bubble">' + rcEscHtml(m.body) + '</div>' +
-              '<div class="chat-msg-time">' + time + '</div>' +
-              '</div>';
-          }).join('');
-          container.innerHTML = html;
-          container.scrollTop = container.scrollHeight;
-        }
-
-        // ── Send ───────────────────────────────────────────────────
-        document.getElementById('rc-chat-send-btn').addEventListener('click', sendRcMessage);
-        document.getElementById('rc-chat-input').addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendRcMessage(); }
+        var enc = encodeURIComponent;
+        var renterMediator = createChatMediator({
+          mode: 'renter',
+          ids: {
+            threadList:        'rc-thread-list',
+            chatMessages:      'rc-chat-messages',
+            chatActive:        'rc-chat-active',
+            chatPlaceholder:   'rc-chat-placeholder',
+            chatHeaderName:    'rc-chat-header-name',
+            chatHeaderVehicle: 'rc-chat-header-vehicle',
+            chatInput:         'rc-chat-input',
+            chatSendBtn:       'rc-chat-send-btn',
+            newChatPanel:      'rc-new-chat-panel',
+            newChatBtn:        'rc-new-chat-btn',
+            newChatCancelBtn:  'rc-new-chat-cancel-btn',
+            newChatOpenBtn:    'rc-new-chat-open-btn',
+            newChatSelect:     'rc-vehicle-select',
+          },
+          api: {
+            threads:  '/api/renter/chat-threads',
+            messages: '/api/renter/chat-messages',
+            send:     '/api/renter/chat-send',
+            contacts: '/api/renter/all-hosts-vehicles',
+          },
+          threadKey: 'host_username',
+          buildThreadQuery: function (t) {
+            var q = 'host_username=' + enc(t.host_username);
+            if (t.vehicle_id) q += '&vehicle_id=' + enc(t.vehicle_id);
+            return q;
+          },
+          buildSelectOptions: function (items, ea, eh) {
+            return items.map(function (v) {
+              return '<option value="' + ea(v.host_username + '::' + v.vehicle_id) +
+                '" data-label="' + ea(v.vehicle_label) + '">' +
+                eh(v.host_username) + ' \u2014 ' + eh(v.vehicle_label) + '</option>';
+            }).join('');
+          },
+          panelCollapsible: { triggerId: 'rc-messaging-collapsible' },
         });
-
-        function sendRcMessage() {
-          if (!activeThread) return;
-          var input = document.getElementById('rc-chat-input');
-          var body = input.value.trim();
-          if (!body) return;
-
-          var payload = { to_username: activeThread.host_username, body: body };
-          if (activeThread.vehicle_id) payload.vehicle_id = activeThread.vehicle_id;
-
-          fetch('/api/renter/chat-send', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          })
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-              if (d.success) {
-                input.value = '';
-                loadRcMessages();
-                loadRcThreads();
-              }
-            });
-        }
-
-        // ── Polling ────────────────────────────────────────────────
-        function startRcPolling() {
-          stopRcPolling();
-          pollTimer = setInterval(function () {
-            loadRcMessages();
-            loadRcThreads();
-          }, 5000);
-        }
-        function stopRcPolling() {
-          if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-        }
-
-        // ── New Chat ───────────────────────────────────────────────
-        document.getElementById('rc-new-chat-btn').addEventListener('click', function () {
-          var panel = document.getElementById('rc-new-chat-panel');
-          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-          if (panel.style.display === 'block') loadRcAllHostVehicles();
-        });
-
-        document.getElementById('rc-new-chat-cancel-btn').addEventListener('click', function () {
-          document.getElementById('rc-new-chat-panel').style.display = 'none';
-        });
-
-        document.getElementById('rc-new-chat-open-btn').addEventListener('click', function () {
-          var sel = document.getElementById('rc-vehicle-select');
-          if (!sel.value) return;
-          var parts = sel.value.split('::');
-          var hostUsername = parts[0];
-          var vehicleId = parts[1] || null;
-          var opt = sel.options[sel.selectedIndex];
-          document.getElementById('rc-chat-header-vehicle').textContent = opt ? opt.dataset.label || '' : '';
-          document.getElementById('rc-new-chat-panel').style.display = 'none';
-          openRcThread(hostUsername, vehicleId);
-        });
-
-        function loadRcAllHostVehicles() {
-          var sel = document.getElementById('rc-vehicle-select');
-          sel.innerHTML = '<option value="">Loading...</option>';
-          fetch('/api/renter/all-hosts-vehicles', { credentials: 'include' })
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(function (vehicles) {
-              if (!vehicles.length) {
-                sel.innerHTML = '<option value="">No vehicles available</option>';
-                return;
-              }
-              sel.innerHTML = '<option value="">-- Select a vehicle --</option>' +
-                vehicles.map(function (v) {
-                  return '<option value="' + rcEscAttr(v.host_username + '::' + v.vehicle_id) + '" data-label="' + rcEscAttr(v.vehicle_label) + '">' +
-                    rcEscHtml(v.host_username) + ' — ' + rcEscHtml(v.vehicle_label) + '</option>';
-                }).join('');
-            });
-        }
-
-        function rcEscHtml(s) {
-          return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-        function rcEscAttr(s) {
-          return String(s || '').replace(/"/g, '&quot;');
-        }
+        renterMediator.init();
       })();
     </script>
   </body>

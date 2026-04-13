@@ -2245,23 +2245,13 @@ setInterval(async () => {
       for (const watcher of watchers) {
         const notifications = [];
 
-        // Check 1: Vehicle became available (notify_available)
+        // Check: Vehicle became available (notify_available)
+        // Note: price-drop alerts are handled by notifyWatchers() at the
+        // moment the host saves a new price — not by this polling loop.
         if (watcher.notify_available !== false) {
           notifications.push({
             type: "car_available",
             message: `Good news! ${vehicleLabel} is now available for rental.`,
-            link: "/vehicle-reservation.html",
-          });
-        }
-
-        // Check 2: Price dropped below watcher's target price
-        if (
-          watcher.target_price &&
-          vehicle.rental_rate_per_day <= watcher.target_price
-        ) {
-          notifications.push({
-            type: "price_drop",
-            message: `Price alert! ${vehicleLabel} is now $${vehicle.rental_rate_per_day}/day — at or below your target of $${watcher.target_price}/day.`,
             link: "/vehicle-reservation.html",
           });
         }
@@ -2689,6 +2679,9 @@ class VehicleListingBuilder {
     const now = new Date().toISOString().replace("T", " ").substring(0, 19);
     if (this._isUpdate) {
       this._doc.updated_at = now;
+      // Never overwrite host_username on update — ownership is set at creation only
+      const { host_username, availability, quantity_available, ...updateFields } = this._doc;
+      return { ...updateFields };
     } else {
       this._doc.created_at = now;
     }
@@ -2855,6 +2848,21 @@ async function notifyWatchers(vehicleId, changeType, newValue) {
           <p><a href="${process.env.APP_URL || "http://localhost:3000"}/vehicle-reservation.html">Book it now &rarr;</a></p>
           <p style="color:#999;font-size:12px;">You received this because you watched this vehicle on DriveShare.</p>`;
       }
+
+      // Save in-app notification so the polling loop won't fire a duplicate
+      const notifType = changeType === "price" ? "price_drop" : "car_available";
+      const notifMessage = changeType === "price"
+        ? `Price alert! ${vehicleName} is now $${Number(newValue).toFixed(2)}/day — at or below your target of $${Number(watcher.target_price).toFixed(2)}/day.`
+        : `Good news! ${vehicleName} is now available for rental.`;
+      await db.collection("Notifications").insertOne({
+        username: watcher.username,
+        type: notifType,
+        message: notifMessage,
+        link: "/vehicle-reservation.html",
+        vehicle_id: objId,
+        read: false,
+        createdAt: new Date(),
+      });
 
       await mailer.sendMail({
         from: `"DriveShare" <${process.env.GMAIL_USER}>`,

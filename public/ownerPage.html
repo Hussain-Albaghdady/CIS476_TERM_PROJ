@@ -898,6 +898,7 @@
 
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/chat-mediator.js"></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -1554,13 +1555,6 @@
           loadVehicleHistory(vehicleId, vehicleLabel);
         });
 
-        const viewMessagingBtn = document.getElementById('view-messaging-btn');
-        const messagingContent = document.getElementById('messaging-content');
-        viewMessagingBtn.addEventListener('click', function () {
-          const isVisible = messagingContent.style.display !== 'none';
-          messagingContent.style.display = isVisible ? 'none' : 'block';
-        });
-
         // ── Review toggle ──────────────────────────────
         const viewReviewsBtn     = document.getElementById('view-reviews-btn');
         const reviewSectionBody  = document.getElementById('review-section-body');
@@ -1959,212 +1953,54 @@
       });
 
       // ══════════════════════════════════════════════════════════════
-      //  CHAT ROOM
+      //  CHAT ROOM  (Mediator pattern — see assets/js/chat-mediator.js)
       // ══════════════════════════════════════════════════════════════
       (function () {
-        var hostUsername = null;
-        var activeThread = null; // { renter_username, vehicle_id }
-        var pollTimer    = null;
-        var messagingOpen = false;
-
-        // Fetch the logged-in host's username once
-        fetch('/userdetail', { credentials: 'include' })
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { if (d) hostUsername = d.username; });
-
-        // If page was opened via #messaging hash, treat panel as already open
-        if (window.location.hash === '#messaging') {
-          messagingOpen = true;
-        }
-
-        // Toggle messaging panel
-        document.getElementById('view-messaging-btn').addEventListener('click', function () {
-          var content = document.getElementById('messaging-content');
-          messagingOpen = !messagingOpen;
-          content.style.display = messagingOpen ? 'block' : 'none';
-          if (messagingOpen) {
-            loadThreads();
-          } else {
-            stopPolling();
-          }
+        var enc = encodeURIComponent;
+        var hostMediator = createChatMediator({
+          mode: 'host',
+          ids: {
+            threadList:       'chat-thread-list',
+            chatMessages:     'chat-messages',
+            chatActive:       'chat-active',
+            chatPlaceholder:  'chat-placeholder',
+            chatHeaderName:   'chat-header-name',
+            chatHeaderVehicle:'chat-header-vehicle',
+            chatInput:        'chat-input',
+            chatSendBtn:      'chat-send-btn',
+            newChatPanel:     'new-chat-panel',
+            newChatBtn:       'new-chat-btn',
+            newChatCancelBtn: 'new-chat-cancel-btn',
+            newChatOpenBtn:   'new-chat-open-btn',
+            newChatSelect:    'new-chat-renter-select',
+          },
+          api: {
+            threads:  '/api/host/chat-threads',
+            messages: '/api/host/chat-messages',
+            send:     '/api/host/chat-send',
+            contacts: '/api/host/eligible-renters',
+          },
+          threadKey: 'renter_username',
+          buildThreadQuery: function (t) {
+            var q = 'renter_username=' + enc(t.renter_username);
+            if (t.vehicle_id) q += '&vehicle_id=' + enc(t.vehicle_id);
+            return q;
+          },
+          buildSelectOptions: function (items, ea, eh) {
+            return items.map(function (r) {
+              return '<option value="' + ea(r.renter_username + '::' + r.vehicle_id) +
+                '" data-label="' + ea(r.vehicle_label) + '">' +
+                eh(r.renter_name) + ' \u2014 ' + eh(r.vehicle_label) +
+                ' (' + eh(r.reservation_status) + ')</option>';
+            }).join('');
+          },
+          panelToggle: {
+            triggerId: 'view-messaging-btn',
+            contentId: 'messaging-content',
+            hashId:    'messaging',
+          },
         });
-
-        // ── Thread list ────────────────────────────────────────────
-        function loadThreads() {
-          fetch('/api/host/chat-threads', { credentials: 'include' })
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(renderThreads);
-        }
-
-        function renderThreads(threads) {
-          var list = document.getElementById('chat-thread-list');
-          if (!threads.length) {
-            list.innerHTML = '<div class="chat-empty-state"><i class="bx bx-message-dots"></i><p>No conversations yet.</p></div>';
-            return;
-          }
-          list.innerHTML = threads.map(function (t) {
-            var isActive = activeThread &&
-              activeThread.renter_username === t.renter_username &&
-              (activeThread.vehicle_id || null) === (t.vehicle_id || null);
-            var badge = t.unread_count > 0
-              ? '<span class="chat-unread-badge">' + t.unread_count + '</span>'
-              : '';
-            var vehicleTag = t.vehicle_label
-              ? '<span class="chat-thread-vehicle">' + escHtml(t.vehicle_label) + '</span>'
-              : '';
-            var preview = escHtml((t.last_message || '').substring(0, 60));
-            return '<div class="chat-thread-item' + (isActive ? ' active' : '') + '" ' +
-              'data-renter="' + escAttr(t.renter_username) + '" ' +
-              'data-vehicle="' + escAttr(t.vehicle_id || '') + '">' +
-              '<div class="chat-thread-top"><span class="chat-thread-name">' + escHtml(t.renter_username) + '</span>' + badge + '</div>' +
-              vehicleTag +
-              '<div class="chat-thread-preview">' + preview + '</div>' +
-              '</div>';
-          }).join('');
-
-          list.querySelectorAll('.chat-thread-item').forEach(function (el) {
-            el.addEventListener('click', function () {
-              openThread(el.dataset.renter, el.dataset.vehicle || null);
-            });
-          });
-        }
-
-        function openThread(renterUsername, vehicleId) {
-          activeThread = { renter_username: renterUsername, vehicle_id: vehicleId || null };
-          document.getElementById('chat-placeholder').style.display = 'none';
-          var chatActive = document.getElementById('chat-active');
-          chatActive.style.display = 'flex';
-
-          document.getElementById('chat-header-name').textContent = renterUsername;
-          document.getElementById('chat-header-vehicle').textContent = vehicleId ? '' : '';
-
-          loadMessages();
-          startPolling();
-          loadThreads(); // refresh thread list to update active highlight + clear badge
-        }
-
-        // ── Messages ───────────────────────────────────────────────
-        function loadMessages() {
-          if (!activeThread) return;
-          var url = '/api/host/chat-messages?renter_username=' + encodeURIComponent(activeThread.renter_username);
-          if (activeThread.vehicle_id) url += '&vehicle_id=' + encodeURIComponent(activeThread.vehicle_id);
-
-          fetch(url, { credentials: 'include' })
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(renderMessages);
-        }
-
-        function renderMessages(messages) {
-          var container = document.getElementById('chat-messages');
-          if (!messages.length) {
-            container.innerHTML = '<div class="chat-no-msgs">No messages yet. Say hello!</div>';
-            return;
-          }
-          var html = messages.map(function (m) {
-            var isMine = m.from_username === hostUsername;
-            var time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-            return '<div class="chat-msg ' + (isMine ? 'chat-msg-mine' : 'chat-msg-theirs') + '">' +
-              '<div class="chat-bubble">' + escHtml(m.body) + '</div>' +
-              '<div class="chat-msg-time">' + time + '</div>' +
-              '</div>';
-          }).join('');
-          container.innerHTML = html;
-          container.scrollTop = container.scrollHeight;
-        }
-
-        // ── Send ───────────────────────────────────────────────────
-        document.getElementById('chat-send-btn').addEventListener('click', sendMessage);
-        document.getElementById('chat-input').addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-        });
-
-        function sendMessage() {
-          if (!activeThread) return;
-          var input = document.getElementById('chat-input');
-          var body = input.value.trim();
-          if (!body) return;
-
-          var payload = { to_username: activeThread.renter_username, body: body };
-          if (activeThread.vehicle_id) payload.vehicle_id = activeThread.vehicle_id;
-
-          fetch('/api/host/chat-send', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          })
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-              if (d.success) {
-                input.value = '';
-                loadMessages();
-                loadThreads();
-              }
-            });
-        }
-
-        // ── Polling ────────────────────────────────────────────────
-        function startPolling() {
-          stopPolling();
-          pollTimer = setInterval(function () {
-            loadMessages();
-            loadThreads();
-          }, 5000);
-        }
-        function stopPolling() {
-          if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-        }
-
-        // ── New Chat ───────────────────────────────────────────────
-        document.getElementById('new-chat-btn').addEventListener('click', function () {
-          var panel = document.getElementById('new-chat-panel');
-          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-          if (panel.style.display === 'block') loadEligibleRenters();
-        });
-
-        document.getElementById('new-chat-cancel-btn').addEventListener('click', function () {
-          document.getElementById('new-chat-panel').style.display = 'none';
-        });
-
-        document.getElementById('new-chat-open-btn').addEventListener('click', function () {
-          var sel = document.getElementById('new-chat-renter-select');
-          if (!sel.value) return;
-          var parts = sel.value.split('::');
-          var renter = parts[0];
-          var vehicleId = parts[1] || null;
-
-          // Update vehicle label in thread header
-          var opt = sel.options[sel.selectedIndex];
-          document.getElementById('chat-header-vehicle').textContent = opt ? opt.dataset.label || '' : '';
-
-          document.getElementById('new-chat-panel').style.display = 'none';
-          openThread(renter, vehicleId);
-        });
-
-        function loadEligibleRenters() {
-          var sel = document.getElementById('new-chat-renter-select');
-          sel.innerHTML = '<option value="">Loading...</option>';
-          fetch('/api/host/eligible-renters', { credentials: 'include' })
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(function (renters) {
-              if (!renters.length) {
-                sel.innerHTML = '<option value="">No active renters available</option>';
-                return;
-              }
-              sel.innerHTML = '<option value="">-- Select renter --</option>' +
-                renters.map(function (r) {
-                  return '<option value="' + escAttr(r.renter_username + '::' + r.vehicle_id) + '" data-label="' + escAttr(r.vehicle_label) + '">' +
-                    escHtml(r.renter_name) + ' — ' + escHtml(r.vehicle_label) + ' (' + escHtml(r.reservation_status) + ')</option>';
-                }).join('');
-            });
-        }
-
-        function escHtml(s) {
-          return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        }
-        function escAttr(s) {
-          return String(s || '').replace(/"/g,'&quot;');
-        }
+        hostMediator.init();
       })();
 
       // ══════════════════════════════════════════════════════════════
