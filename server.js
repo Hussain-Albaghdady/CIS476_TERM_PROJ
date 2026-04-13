@@ -249,27 +249,27 @@ async function connectToDB() {
 }
 
 connectToDB();
-// this is the singleton pattern for managing user sessions
+// this is the singleton pattern for managing user sessions it connect to the DB first
 const SessionManagerSingleton = (() => {
-  let instance = null;
+  let instance = null; // Variable to hold the single instance of the SessionManager
   function createInstance() {
     return {
-      activeSessions: new Map(),
-      addSession(username, sessionId) {
-        this.activeSessions.set(username, sessionId);
-        console.log(`[SessionManager] Session started: ${username}`);
+      activeSessions: new Map(), 
+      addSession(username, sessionId) { // Method to add a new user session
+        this.activeSessions.set(username, sessionId);  // Store the session
+        console.log(`[SessionManager] Session started: ${username}`);  // Log session
       },
       removeSession(username) {
         this.activeSessions.delete(username);
         console.log(`[SessionManager] Session ended: ${username}`);
       },
-      isActive(username) {
+      isActive(username) {  // Method to check if a session for a given user is active
         return this.activeSessions.has(username);
       },
     };
   }
   return {
-    getInstance() {
+    getInstance() { // Method to get the singleton instance of the SessionManager
       if (!instance) {
         instance = createInstance();
         console.log("[SessionManager] Singleton instance created.");
