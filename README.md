@@ -31,10 +31,9 @@ Run this once (or whenever package.json changes):
 ---------------------------------------------------
 STEP 3 — Configure Environment Variables
 ---------------------------------------------------
-Create a file named  .env  in the project root
+Create a file named .env in the project root
 (it may already exist). It needs the following:
 
-  MONGODB_URI=<your MongoDB Atlas connection string>
   GMAIL_USER=<your Gmail address>
   GMAIL_PASS=<your Gmail app password>
   SESSION_SECRET=<any long random string>
@@ -50,7 +49,12 @@ Create a file named  .env  in the project root
     1. Enable 2-Step Verification on your Google account
     2. Go to Google Account > Security > App Passwords
     3. Generate a password for "Mail" and paste it above
+    
+Create a file named atlas_uri.js in the project root
+(it may already exist). It needs the following:
 
+  MONGODB_URI=<your MongoDB Atlas connection string>
+  
 ---------------------------------------------------
 STEP 4 — Start the Server
 ---------------------------------------------------
