@@ -29,8 +29,10 @@ Run this once (or whenever package.json changes):
   npm install
 
 ---------------------------------------------------
-STEP 3 — Configure Environment Variables
+STEP 3 — Configure Environment Variables (manual)
 ---------------------------------------------------
+If the files do not exist!
+
 Create a file named .env in the project root
 (it may already exist). It needs the following:
 
@@ -55,6 +57,12 @@ Create a file named atlas_uri.js in the project root
 
   MONGODB_URI=<your MongoDB Atlas connection string>
   
+---------------------------------------------------
+STEP 3 — Configure Environment Variables (existing)
+---------------------------------------------------  
+Copy over the files atlas_uri.js and .env into the
+project root.
+
 ---------------------------------------------------
 STEP 4 — Start the Server
 ---------------------------------------------------
