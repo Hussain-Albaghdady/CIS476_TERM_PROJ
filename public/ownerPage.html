@@ -214,6 +214,7 @@
                           <option value="DTW Airport">DTW Airport</option>
                           <option value="Ann Arbor">Ann Arbor</option>
                           <option value="Grand Rapids">Grand Rapids</option>
+                          <option value="Lansing">Lansing</option>
                         </select>
                       </div>
                     </div>
@@ -228,8 +229,7 @@
 
                   <div class="form-group">
                     <label for="vehicle-image">Vehicle Image</label>
-                    <input type="file" id="vehicle-image" name="image" class="form-control" accept="image/*"
-                      placeholder="Choose an image file">
+                    <input type="file" id="vehicle-image" name="image" class="form-control" accept="image/*">
                     <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
                   </div>
 
@@ -784,6 +784,7 @@
                       <option value="DTW Airport">DTW Airport</option>
                       <option value="Ann Arbor">Ann Arbor</option>
                       <option value="Grand Rapids">Grand Rapids</option>
+                      <option value="Lansing">Lansing</option>
                     </select>
                   </div>
                 </div>
@@ -796,10 +797,13 @@
               </div>
 
               <div class="form-group">
-                <label for="edit-vehicle-image">Vehicle Cover</label>
-                <input type="file" id="edit-vehicle-image" class="form-control" accept="image/*">
-                <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF) - leave empty to keep current
-                  cover</small>
+                <label for="edit-vehicle-image-select">Vehicle Cover</label>
+                <select id="edit-vehicle-image-select" class="form-control">
+                  <option value="">-- Keep current image --</option>
+                </select>
+                <div id="edit-vehicle-image-preview" style="margin-top:8px;display:none;">
+                  <img id="edit-vehicle-image-preview-img" src="" alt="Preview" style="max-height:120px;border-radius:6px;border:1px solid #ddd;">
+                </div>
               </div>
 
               <div class="form-buttons">
@@ -1128,6 +1132,17 @@
               showMessage('add-vehicle-error', 'Failed to add vehicle. Please check the console for details.');
             });
         });
+        document.getElementById('edit-vehicle-image-select').addEventListener('change', function () {
+          const preview = document.getElementById('edit-vehicle-image-preview');
+          const previewImg = document.getElementById('edit-vehicle-image-preview-img');
+          if (this.value) {
+            previewImg.src = this.value;
+            preview.style.display = 'block';
+          } else {
+            preview.style.display = 'none';
+          }
+        });
+
         // Load vehicles for management
         function loadVehicleForManagement() {
           fetch('/api/my-vehicles')
@@ -1227,8 +1242,32 @@
                 document.getElementById('edit-vehicle-mileage').value = vehicle.mileage || '';
                 document.getElementById('edit-vehicle-range').value = vehicle.range || '';
                 document.getElementById('edit-pickup-location').value = vehicle.pickup_location || '';
-                document.getElementById('edit-vehicle-image').value = '';
-                editModal.style.display = 'block';
+                // Populate image dropdown and pre-select the current image
+                const currentImage = vehicle.image_url || vehicle.image || '';
+                fetch('/api/vehicle-images')
+                  .then(r => r.json())
+                  .then(data => {
+                    const sel = document.getElementById('edit-vehicle-image-select');
+                    sel.innerHTML = '<option value="">-- Keep current image --</option>';
+                    (data.images || []).forEach(img => {
+                      const opt = document.createElement('option');
+                      opt.value = img.path;
+                      opt.textContent = img.filename.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+                      if (currentImage && currentImage.endsWith(img.filename)) opt.selected = true;
+                      sel.appendChild(opt);
+                    });
+                    // Show preview of current image
+                    const preview = document.getElementById('edit-vehicle-image-preview');
+                    const previewImg = document.getElementById('edit-vehicle-image-preview-img');
+                    if (currentImage) {
+                      previewImg.src = currentImage;
+                      preview.style.display = 'block';
+                    } else {
+                      preview.style.display = 'none';
+                    }
+                  })
+                  .catch(() => {});
+                editModal.style.display = 'flex';
               }
             });
         }
@@ -1256,9 +1295,9 @@
           formData.append('range', document.getElementById('edit-vehicle-range').value);
           formData.append('pickup_location', document.getElementById('edit-pickup-location').value);
 
-          const imageFile = document.getElementById('edit-vehicle-image').files[0];
-          if (imageFile) {
-            formData.append('image', imageFile);
+          const selectedImage = document.getElementById('edit-vehicle-image-select').value;
+          if (selectedImage) {
+            formData.append('image_url', selectedImage);
           }
 
           fetch(`/api/vehicle/${vehicleId}`, {

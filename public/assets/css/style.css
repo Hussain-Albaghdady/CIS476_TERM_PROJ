@@ -813,7 +813,7 @@ section[id],
   display: flex;
   flex-direction: column;
   justify-content: stretch;
-  min-height: 500px;
+  min-height: 600px;
   border: 1px solid var(--card-border);
   border-radius: 8px;
   box-shadow: var(--card-shadow);
@@ -2449,7 +2449,7 @@ section[id],
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
 }
 
 /* Sidebar */
@@ -2491,10 +2491,14 @@ section[id],
   transition: background 0.15s;
   background: #fff;
 }
-.chat-thread-item:hover { background: #eef1f5; }
+.chat-thread-item:hover {
+  background: #eef1f5;
+}
 /* Override the generic #account .active orange rule for chat threads */
 .chat-thread-item.active,
-#account .chat-thread-item.active { background: #e8f0fe !important; }
+#account .chat-thread-item.active {
+  background: #e8f0fe !important;
+}
 
 .chat-thread-top {
   display: flex;
@@ -2544,8 +2548,13 @@ section[id],
   text-align: center;
   gap: 8px;
 }
-.chat-empty-state i { font-size: 2.2rem; }
-.chat-empty-state p { margin: 0; font-size: 0.85rem; }
+.chat-empty-state i {
+  font-size: 2.2rem;
+}
+.chat-empty-state p {
+  margin: 0;
+  font-size: 0.85rem;
+}
 
 /* Window */
 .chat-window {
@@ -2565,8 +2574,13 @@ section[id],
   color: #ccc;
   gap: 10px;
 }
-.chat-window-placeholder i { font-size: 3rem; }
-.chat-window-placeholder p { font-size: 0.9rem; margin: 0; }
+.chat-window-placeholder i {
+  font-size: 3rem;
+}
+.chat-window-placeholder p {
+  font-size: 0.9rem;
+  margin: 0;
+}
 
 #chat-active {
   flex: 1;
@@ -2614,8 +2628,14 @@ section[id],
   flex-direction: column;
   max-width: 72%;
 }
-.chat-msg-mine  { align-self: flex-end;  align-items: flex-end; }
-.chat-msg-theirs { align-self: flex-start; align-items: flex-start; }
+.chat-msg-mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+.chat-msg-theirs {
+  align-self: flex-start;
+  align-items: flex-start;
+}
 
 .chat-bubble {
   padding: 9px 14px;
@@ -2624,8 +2644,16 @@ section[id],
   line-height: 1.4;
   word-break: break-word;
 }
-.chat-msg-mine   .chat-bubble { background: #e8604c; color: #fff; border-bottom-right-radius: 4px; }
-.chat-msg-theirs .chat-bubble { background: #e9ecef; color: #333; border-bottom-left-radius: 4px; }
+.chat-msg-mine .chat-bubble {
+  background: #e8604c;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg-theirs .chat-bubble {
+  background: #e9ecef;
+  color: #333;
+  border-bottom-left-radius: 4px;
+}
 
 .chat-msg-time {
   font-size: 0.7rem;
@@ -2653,7 +2681,9 @@ section[id],
   outline: none;
   transition: border-color 0.2s;
 }
-.chat-input:focus { border-color: #e8604c; }
+.chat-input:focus {
+  border-color: #e8604c;
+}
 
 .chat-send-btn {
   padding: 8px 14px;
@@ -2672,8 +2702,13 @@ section[id],
   transition: background 0.15s;
   border-radius: 6px;
 }
-.notif-item:hover { background: #f7f8fa; }
-.notif-item.notif-unread { background: #fff8f6; border-left: 3px solid #e8604c; }
+.notif-item:hover {
+  background: #f7f8fa;
+}
+.notif-item.notif-unread {
+  background: #fff8f6;
+  border-left: 3px solid #e8604c;
+}
 
 .notif-icon {
   font-size: 1.5rem;
@@ -2682,15 +2717,35 @@ section[id],
   margin-top: 2px;
 }
 
-.notif-body { flex: 1; }
-.notif-msg { font-size: 0.9rem; color: #333; line-height: 1.4; }
-.notif-time { font-size: 0.75rem; color: #aaa; margin-top: 4px; }
+.notif-body {
+  flex: 1;
+}
+.notif-msg {
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.4;
+}
+.notif-time {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-top: 4px;
+}
 
 /* Responsive: stack chat layout on small screens */
 @media (max-width: 600px) {
-  .chat-layout { flex-direction: column; height: auto; }
-  .chat-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #eee; max-height: 200px; }
-  .chat-messages { min-height: 200px; }
+  .chat-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  .chat-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    max-height: 200px;
+  }
+  .chat-messages {
+    min-height: 200px;
+  }
 }
 
 #account .review-section .info-box {

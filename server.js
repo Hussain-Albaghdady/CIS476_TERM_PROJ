@@ -49,11 +49,7 @@ const storage = multer.diskStorage({
     cb(null, "public/assets/img/vehicles/");
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname),
-    );
+    cb(null, file.originalname);
   },
 });
 // Configure multer for file uploads with storage settings, file size limits, and file type filtering to allow only image uploads. Uploaded files will be stored in the specified directory with unique filenames to prevent conflicts.
@@ -2890,9 +2886,22 @@ class VehicleListingBuilder {
   }
 }
 // ── Vehicle Management (host-only) ───────────────────────────
+// GET    /api/vehicle-images – list existing images in the vehicles folder
 // POST   /api/vehicle      – create a new listing (with optional image upload)
 // DELETE /api/vehicle/:id  – remove a listing by ID
 // PUT    /api/vehicle/:id  – update a listing and notify watchers of price drops
+app.get("/api/vehicle-images", requireLogin, (_req, res) => {
+  const fs = require("fs");
+  const path = require("path");
+  const dir = path.join(__dirname, "public/assets/img/vehicles");
+  fs.readdir(dir, (err, files) => {
+    if (err) return res.status(500).json({ error: "Could not read images folder" });
+    const images = files
+      .filter((f) => /\.(jpe?g|png|gif|webp)$/i.test(f))
+      .map((f) => ({ filename: f, path: "assets/img/vehicles/" + f }));
+    res.json({ images });
+  });
+});
 app.post(
   "/api/vehicle",
   requireLogin,
@@ -3003,7 +3012,7 @@ app.put(
 
       const imagePath = req.file
         ? "assets/img/vehicles/" + req.file.filename
-        : "";
+        : (req.body.image_url || "");
 
       const updateData = new VehicleListingBuilder()
         .setBasicInfo(year, make, model, category)
@@ -3014,6 +3023,11 @@ app.put(
         .setMedia(imagePath)
         .asUpdate()
         .build();
+
+      // Never overwrite host_username on update — it belongs to the original creator
+      delete updateData.host_username;
+      // Only overwrite image_url if a new image was actually provided
+      if (!imagePath) delete updateData.image_url;
 
       const before = await db
         .collection("Vehicles")
