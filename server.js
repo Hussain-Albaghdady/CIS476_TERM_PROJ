@@ -958,7 +958,7 @@ app.get("/", (req, res) => {
 // Model: Session management via express-session and SessionManagerSingleton
 // View: No specific view, but it redirects to Home.html after logout
 // Controller: This endpoint checks for an authenticated session, logs the logout event, removes the session from the SessionManager, destroys the session, clears cookies, and redirects to the homepage.
-app.get("/logout", requireLogin, (req, res) => {
+app.get("/logout", (req, res) => {
   const user = req.session.userData;
   if (user) {
     console.log("User Logged Out", user.fname + " " + user.lname);
