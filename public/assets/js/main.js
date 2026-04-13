@@ -23,12 +23,15 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.appendChild(msgBtn);
 
     fetch("/userdetail", { credentials: "include" })
-      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (res) {
+        return res.ok ? res.json() : null;
+      })
       .then(function (data) {
         if (!data || data.error || data.user_type === "admin") return;
-        msgBtn.href = data.user_type === "host"
-          ? "/ownerPage.html#messaging"
-          : "/account.html#messaging";
+        msgBtn.href =
+          data.user_type === "host"
+            ? "/ownerPage.html#messaging"
+            : "/account.html#messaging";
         msgBtn.style.display = "block";
       })
       .catch(function () {});
@@ -511,9 +514,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <ul>
               <li id="dashboard-page-link">
                 <a href="account.html" id="dashboard-page-link-anchor">Dashboard</a>
-              </li>
-              <li id="my-account-page-link">
-                <a href="my-account.html" id="my-account-page-link-anchor">New Dashboard</a>
               </li>
               <li id="customer-page-link">
                 <a href="vehicle-reservation.html" id="customer-page-link-anchor">Rent Vehicles</a>
